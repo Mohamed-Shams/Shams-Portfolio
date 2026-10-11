@@ -4,3 +4,8 @@ node_modules/
 *.tsbuildinfo
 .next-dev/
 .next-production/
+
+# QA artifacts
+screenshots/
+screenshots.zip
+Mohamed-Shams-Portfolio-Source.zip
