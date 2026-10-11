@@ -1,0 +1,72 @@
+[
+  {
+    "locale": "en",
+    "name": "desktop",
+    "overflow": false,
+    "errors": [],
+    "dir": "ltr"
+  },
+  {
+    "locale": "ar",
+    "name": "desktop",
+    "overflow": false,
+    "errors": [],
+    "dir": "rtl"
+  },
+  {
+    "locale": "en",
+    "name": "laptop",
+    "overflow": false,
+    "errors": [],
+    "dir": "ltr"
+  },
+  {
+    "locale": "ar",
+    "name": "laptop",
+    "overflow": false,
+    "errors": [],
+    "dir": "rtl"
+  },
+  {
+    "locale": "en",
+    "name": "tablet",
+    "overflow": false,
+    "errors": [],
+    "dir": "ltr"
+  },
+  {
+    "locale": "ar",
+    "name": "tablet",
+    "overflow": false,
+    "errors": [],
+    "dir": "rtl"
+  },
+  {
+    "locale": "en",
+    "name": "mobile",
+    "overflow": false,
+    "errors": [],
+    "dir": "ltr"
+  },
+  {
+    "locale": "ar",
+    "name": "mobile",
+    "overflow": false,
+    "errors": [],
+    "dir": "rtl"
+  },
+  {
+    "locale": "en",
+    "name": "small-mobile",
+    "overflow": false,
+    "errors": [],
+    "dir": "ltr"
+  },
+  {
+    "locale": "ar",
+    "name": "small-mobile",
+    "overflow": false,
+    "errors": [],
+    "dir": "rtl"
+  }
+]

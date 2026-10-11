@@ -1,0 +1,1821 @@
+/* Reference audit corrections. Panel geometry is independent of the composite board. */
+:root {
+  --muted: #b4bdc6;
+  --border: #283643;
+}
+.button {
+  border-color: #f6bd70;
+  background: linear-gradient(110deg, #efaa51, #ea983c);
+  box-shadow:
+    inset 0 0 0 3px #ffc57824,
+    0 0 20px #f1a34216;
+}
+.button.outline {
+  border-width: 1px;
+  border-color: #a5aab0;
+  box-shadow: none;
+}
+.hero .industrial {
+  width: 45%;
+  height: 26%;
+  opacity: 0.86;
+  background: url("/assets/plant.webp") left bottom/100% auto no-repeat;
+  mask-image: linear-gradient(0deg, #000 45%, transparent 100%);
+  z-index: -2;
+}
+.refinery {
+  position: absolute;
+  right: 0;
+  top: 28%;
+  width: 20%;
+  height: 64%;
+  background: url("/assets/refinery.webp") right bottom/auto 100% no-repeat;
+  mask-image:
+    linear-gradient(90deg, transparent, #000 35%),
+    linear-gradient(0deg, transparent, #000 15%, #000 80%, transparent);
+  mask-composite: intersect;
+  opacity: 0.9;
+  z-index: -3;
+  pointer-events: none;
+}
+.hero-portrait {
+  mask-image:
+    linear-gradient(90deg, transparent, #000 20%, #000 73%, transparent),
+    linear-gradient(0deg, transparent, #000 7%);
+  mask-composite: intersect;
+}
+.hero .signal-lines {
+  width: 65%;
+  height: 140px;
+  opacity: 0.65;
+  transform: rotate(-3deg);
+  transform-origin: left bottom;
+}
+.scada {
+  display: grid;
+  grid-template-columns: 1fr 80px;
+  gap: 19px;
+  right: 2.5%;
+  top: 70px;
+  width: 340px;
+  height: 265px;
+  padding: 22px;
+  transform: perspective(900px) rotateY(-13deg) rotate(-2deg);
+  border-color: #1688b54a;
+  background: #06111b70;
+}
+.scada .scada-display {
+  display: block;
+  border: 1px solid #1688b58a;
+  border-radius: 5px;
+  padding: 18px 13px 8px;
+  background: linear-gradient(120deg, #0b243443, #06131b);
+  font: 19px Inter;
+  color: #63c2ec;
+}
+.scada svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 12px;
+}
+.scada .scada-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  font: 13px/1.2 "JetBrains Mono";
+  color: #75bada;
+  padding-top: 14px;
+}
+.scada-labels i {
+  position: absolute;
+  right: 0;
+  top: 4px;
+  height: 45px;
+  width: 12px;
+  border: 1px solid #1688b5;
+  border-radius: 8px;
+  opacity: 0.55;
+}
+.signature {
+  width: 310px;
+  transform: none;
+  margin-top: 35px;
+  line-height: 0;
+}
+.signature img {
+  width: 100%;
+  height: auto;
+  mix-blend-mode: screen;
+}
+.tech-symbol {
+  width: 43px;
+  min-width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  border-radius: 7px;
+  background: #12365535;
+}
+.tech-symbol small {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--surface);
+  font: 9px Inter;
+}
+.tech-amber {
+  color: #f5ad35;
+}
+.tech-violet {
+  color: #b58ad3;
+  background: #66367c40;
+}
+.tech-teal {
+  color: #22c1c6;
+  background: #144a4e40;
+}
+.tech-blue {
+  color: #259ee1;
+}
+.cert-brand {
+  border: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  overflow: hidden;
+}
+.cert-brand img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.education summary {
+  cursor: pointer;
+  color: var(--amber);
+  font-size: 13px;
+}
+@media (min-width: 851px) {
+  .section {
+    max-width: 1120px;
+    margin: 44px auto;
+    padding: 30px 34px;
+    border: 0;
+    border-radius: 12px;
+    background:
+      radial-gradient(ellipse at 100% 90%, #10202b22, transparent 60%), #080d12;
+  }
+  .section h2 {
+    font-size: 44px;
+    letter-spacing: -1px;
+  }
+  .section .eyebrow {
+    font-size: 13px;
+    letter-spacing: 2px;
+    margin-bottom: 7px;
+  }
+  .section > p,
+  .section-heading p,
+  .tech-panel > p {
+    font-size: 19px;
+    line-height: 1.55;
+    margin-top: 9px;
+  }
+  .section-heading {
+    margin-bottom: 28px;
+  }
+  .text-link {
+    font-size: 15px;
+  }
+  .section .tags span {
+    font-size: 13px;
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+  .about {
+    padding: 76px 76px 64px;
+    grid-template-columns: 1.62fr 1fr;
+    column-gap: 48px;
+    row-gap: 34px;
+    align-items: start;
+  }
+  .about h2 {
+    font-size: 54px;
+    line-height: 1.12;
+    margin-bottom: 38px;
+    letter-spacing: -1.5px;
+  }
+  .about-copy p {
+    max-width: none;
+    font-size: 22px;
+    line-height: 1.6;
+  }
+  .about-image {
+    height: 565px;
+    min-height: 0;
+    margin: 0;
+    grid-row: span 2;
+  }
+  .about-image img {
+    object-position: 50% 0;
+    object-fit: cover;
+  }
+  .about-image:before {
+    inset: 65px -42px -45px 42px;
+    background: #19212a;
+    z-index: 0;
+  }
+  .about-image img {
+    z-index: 1;
+  }
+  .statement {
+    right: -32px;
+    bottom: -230px;
+    width: 310px;
+    padding: 35px 32px;
+    font-size: 29px;
+    line-height: 1.45;
+    z-index: 2;
+    min-height: 205px;
+    background: linear-gradient(120deg, #161d25f7, #0a0e13);
+    border-color: #3d352b;
+    border-radius: 14px;
+  }
+  .statement:before {
+    content: "";
+    position: absolute;
+    left: -4px;
+    top: -4px;
+    width: 18px;
+    height: 18px;
+    border-left: 2px solid var(--amber);
+    border-top: 2px solid var(--amber);
+  }
+  .stats {
+    padding-top: 33px;
+    gap: 12px;
+    margin-top: 4px;
+  }
+  .stats strong {
+    font-size: 52px;
+    letter-spacing: -2px;
+  }
+  .stats span {
+    font-size: 17px;
+    line-height: 1.5;
+  }
+  .stats p {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .stats > div + div {
+    padding-inline-start: 17px;
+  }
+  .projects-grid {
+    gap: 26px;
+  }
+  .card-image {
+    height: auto;
+    aspect-ratio: 160/76;
+  }
+  .project-card:nth-child(n + 4) .card-image {
+    aspect-ratio: 160/54;
+  }
+  .project-card {
+    border-radius: 10px;
+    background: linear-gradient(120deg, #111a23, #0b1219);
+  }
+  .card-copy {
+    padding: 14px;
+  }
+  .card-copy h3 {
+    font-size: 23px;
+    line-height: 1.17;
+    min-height: 54px;
+    max-width: 85%;
+  }
+  .card-copy p {
+    font-size: 16px;
+    margin: 8px 0 12px;
+    line-height: 1.4;
+  }
+  .circle-arrow {
+    width: 37px;
+    height: 37px;
+    top: 15px;
+    right: 13px;
+  }
+  .circle-arrow svg {
+    width: 19px;
+  }
+  .image-label {
+    font-size: 9px;
+    opacity: 0.85;
+  }
+  #skills {
+    padding: 0;
+    background: none;
+  }
+  .tech-panel {
+    border: 0;
+    padding: 34px 46px 40px;
+    border-radius: 12px;
+    background:
+      radial-gradient(ellipse at bottom right, #15232c35, transparent 80%),
+      #0a1117;
+  }
+  .filters {
+    gap: 9px;
+    margin: 26px 0 23px;
+  }
+  .filters button {
+    font-size: 14px;
+    padding: 8px 20px;
+  }
+  .skills-grid {
+    gap: 16px;
+  }
+  .skill-tile {
+    min-height: 126px;
+    padding: 20px 15px;
+    gap: 15px;
+    border-radius: 10px;
+  }
+  .skill-tile h3 {
+    font-size: 17px;
+    line-height: 1.4;
+  }
+  .skill-tile small {
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 6px;
+  }
+  .journey {
+    padding: 28px 42px;
+  }
+  .timeline {
+    grid-template-columns: 170px 1fr;
+    margin-top: 30px;
+    padding: 0 0 0 43px;
+    gap: 42px;
+  }
+  .employer {
+    font-size: 53px;
+  }
+  .employer small {
+    font-size: 13px;
+  }
+  .career {
+    position: relative;
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 20px;
+    padding: 8px 0 0 28px;
+    border-inline-start: 1px solid #293640;
+  }
+  .career:before {
+    content: "⌁";
+    display: grid;
+    place-items: center;
+    position: absolute;
+    top: 0;
+    left: -17px;
+    width: 33px;
+    height: 33px;
+    background: var(--amber);
+    color: #15212d;
+    border-radius: 50%;
+    font-size: 23px;
+    line-height: 1;
+  }
+  .career:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: -5px;
+    width: 9px;
+    height: 9px;
+    background: #293640;
+    border-radius: 50%;
+  }
+  .career-title {
+    display: block;
+    margin: 0;
+  }
+  .career-title h3 {
+    font-size: 19px;
+    line-height: 1.4;
+  }
+  .career-title span {
+    font-size: 16px;
+  }
+  .career-title time {
+    position: absolute;
+    top: 9px;
+    right: 0;
+    font-size: 13px;
+  }
+  .career ul {
+    padding-top: 37px;
+  }
+  .career li {
+    font-size: 13px;
+    line-height: 1.4;
+    display: block;
+    padding-block: 3px;
+  }
+  .career li span {
+    font-size: 11px;
+    margin-inline-start: 5px;
+  }
+  .career li:before {
+    top: 6px;
+  }
+  .education {
+    margin: 21px 0 0 50px;
+    padding-top: 12px;
+  }
+  .education p {
+    font-size: 14px;
+  }
+  .cert-grid {
+    margin-top: 20px;
+    gap: 15px;
+  }
+  .cert-card {
+    min-height: 139px;
+    padding: 17px 14px;
+    gap: 17px;
+    border-radius: 12px;
+  }
+  .cert-brand {
+    width: 86px;
+    height: 94px;
+  }
+  .cert-card h3 {
+    font-size: 17px;
+    line-height: 1.4;
+  }
+  .cert-card p,
+  .cert-card time,
+  .cert-card small {
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .training {
+    margin-top: 15px;
+  }
+  .training summary {
+    font-size: 14px;
+  }
+  .contact {
+    padding: 38px 54px;
+    min-height: 490px;
+  }
+  .contact-copy {
+    max-width: 790px;
+  }
+  .contact h2 {
+    font-size: 43px;
+    letter-spacing: -1.3px;
+  }
+  .contact h3 {
+    font-size: 32px;
+    margin: 13px 0 24px;
+  }
+  .contact p {
+    max-width: 625px;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  .contact-copy > a:not(.button) {
+    font-size: 18px;
+    margin: 13px 0;
+  }
+  .contact-copy > a:not(.button) svg {
+    padding: 3px;
+    width: 27px;
+    height: 27px;
+    background: #ec973c;
+    border-radius: 5px;
+    color: white;
+  }
+  .contact-copy > a:nth-of-type(2) svg {
+    background: #117cac;
+  }
+  .contact .button {
+    font-size: 17px;
+    padding: 12px 27px;
+  }
+  .globe-art {
+    width: 580px;
+    height: 580px;
+    right: -195px;
+    top: -32px;
+    opacity: 0.9;
+  }
+  .case {
+    padding: 32px;
+    max-width: 1120px;
+  }
+  .back-link {
+    font-size: 15px;
+    margin-bottom: 38px;
+  }
+  .case-heading h1 {
+    font-size: 42px;
+  }
+  .case-heading p {
+    font-size: 15px;
+  }
+  .case-heading .eyebrow {
+    display: none;
+  }
+  .case-heading {
+    margin-bottom: 35px;
+  }
+  .case-grid {
+    grid-template-columns: 1.25fr 1fr;
+    gap: 30px;
+  }
+  .case-photo {
+    height: auto;
+    aspect-ratio: 260/170;
+  }
+  .case-text h2 {
+    font-size: 24px;
+    letter-spacing: -0.3px;
+  }
+  .case-text p,
+  .case-text li {
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  .case-text li {
+    margin-bottom: 6px;
+  }
+  .case-tools > div {
+    flex: 1;
+    width: auto;
+    min-width: 70px;
+    font-size: 12px;
+  }
+  .thumbnails button {
+    height: 110px;
+  }
+  .caption {
+    font-size: 11px;
+  }
+  .next-project {
+    margin-top: 30px;
+  }
+  [dir="rtl"] .career:before {
+    left: auto;
+    right: -17px;
+  }
+  [dir="rtl"] .career:after {
+    left: auto;
+    right: -5px;
+  }
+  [dir="rtl"] .career {
+    padding: 8px 28px 0 0;
+  }
+  [dir="rtl"] .career-title time {
+    right: auto;
+    left: 0;
+  }
+  [dir="rtl"] .contact .globe-art {
+    left: -195px;
+    right: auto;
+  }
+}
+@media (min-width: 851px) and (max-width: 1150px) {
+  .section {
+    margin-inline: 28px;
+  }
+  /* 1024-class: smaller viewport than the 1151+ hero rules assume */
+  .hero h1 {
+    font-size: 58px;
+  }
+  .hero h2 {
+    font-size: 30px;
+  }
+  .hero .roles {
+    font-size: 14px;
+  }
+  .hero-description {
+    font-size: 15px;
+  }
+  [dir="rtl"] .hero h1 {
+    font-size: 44px;
+  }
+  [dir="rtl"] .hero h2 {
+    font-size: 30px;
+  }
+  .scada {
+    top: 78px;
+  }
+  .about {
+    padding: 55px;
+    column-gap: 35px;
+  }
+  .about h2 {
+    font-size: 44px;
+  }
+  .about-copy p {
+    font-size: 18px;
+  }
+  .about-image {
+    height: 490px;
+  }
+  .statement {
+    width: 245px;
+    font-size: 25px;
+    bottom: -170px;
+    min-height: 175px;
+  }
+  .stats strong {
+    font-size: 43px;
+  }
+  .stats span {
+    font-size: 14px;
+  }
+  .skill-tile {
+    gap: 10px;
+    padding: 15px 10px;
+  }
+  .skill-tile h3 {
+    font-size: 14px;
+  }
+  .skill-tile small {
+    font-size: 10px;
+  }
+  .filters button {
+    padding: 8px 13px;
+    font-size: 12px;
+  }
+  .career {
+    grid-template-columns: 150px 1fr;
+  }
+  .timeline {
+    grid-template-columns: 130px 1fr;
+    gap: 30px;
+  }
+  .cert-brand {
+    width: 65px;
+    height: 75px;
+  }
+  .cert-card h3 {
+    font-size: 14px;
+  }
+  .cert-card p,
+  .cert-card time {
+    font-size: 11px;
+  }
+  .contact h2 {
+    font-size: 35px;
+  }
+}
+@media (min-width: 601px) and (max-width: 850px) {
+  .scada {
+    width: 190px;
+    height: 180px;
+    grid-template-columns: 1fr 48px;
+    padding: 12px;
+    gap: 9px;
+  }
+  .scada .scada-display {
+    padding: 10px 7px;
+    font-size: 13px;
+  }
+  .scada .scada-labels {
+    font-size: 8px;
+    gap: 9px;
+  }
+  .hero .refinery {
+    width: 24%;
+  }
+  .section {
+    margin-block: 15px;
+  }
+  .card-copy h3 {
+    font-size: 18px;
+  }
+  .skill-tile h3 {
+    font-size: 12px;
+  }
+  .skill-tile small {
+    font-size: 10px;
+  }
+  .tech-symbol {
+    min-width: 30px;
+    width: 30px;
+  }
+  .tech-symbol svg {
+    width: 24px;
+  }
+  .signature {
+    width: 230px;
+  }
+  .contact h3 {
+    font-size: 23px;
+  }
+}
+@media (max-width: 600px) {
+  .header {
+    height: 76px;
+    padding-inline: 26px;
+    background: #070c10;
+  }
+  .brand b {
+    font-size: 32px;
+  }
+  .language {
+    background: transparent;
+    gap: 0;
+    flex-direction: row-reverse;
+  }
+  .language a {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  .menu {
+    margin-left: 3px;
+  }
+  .menu svg {
+    width: 26px;
+    height: 26px;
+  }
+  .nav {
+    top: 76px;
+  }
+  .hero,
+  [dir="rtl"] .hero {
+    padding-top: 280px;
+    min-height: calc(100svh - 76px);
+  }
+  .hero-portrait {
+    height: 455px;
+    width: 100%;
+    top: -4px;
+    mask-image: linear-gradient(0deg, transparent, #000 32%);
+    mask-composite: add;
+  }
+  .hero-portrait img {
+    object-position: 50% 20%;
+  }
+  .hero .industrial {
+    display: none;
+  }
+  .refinery {
+    top: 49px;
+    right: -8px;
+    width: 29%;
+    height: 255px;
+    z-index: -2;
+    opacity: 0.75;
+    background-size: auto 100%;
+    mask-image:
+      linear-gradient(90deg, transparent, #000 30%),
+      linear-gradient(0deg, transparent, #000 20%, #000 85%, transparent);
+    mask-composite: intersect;
+  }
+  .hero-shade,
+  [dir="rtl"] .hero-shade {
+    background: linear-gradient(0deg, #080d12 0%, #080d12 28%, transparent 64%);
+    z-index: -2;
+  }
+  .hero-copy,
+  [dir="rtl"] .hero-copy {
+    padding: 0 27px 25px;
+  }
+  .hero .eyebrow,
+  [dir="rtl"] .hero .eyebrow {
+    font-size: 11px;
+    margin-bottom: 4px;
+    line-height: 1.5;
+  }
+  .hero h1 {
+    font-size: 35px;
+  }
+  [dir="rtl"] .hero h1 {
+    font-size: clamp(30px, 8.7vw, 34px);
+    line-height: 1.3;
+    margin-bottom: 13px;
+  }
+  [dir="rtl"] .hero h2 {
+    font-size: clamp(24px, 7.15vw, 28px);
+    line-height: 1.24;
+    letter-spacing: -0.6px;
+  }
+  [dir="rtl"] .hero .roles {
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 17px auto 11px;
+  }
+  [dir="rtl"] .hero-description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #d0d3d5;
+  }
+  [dir="rtl"] .hero .actions {
+    margin-top: 18px;
+    gap: 12px;
+  }
+  .hero .button,
+  [dir="rtl"] .hero .button {
+    min-height: 49px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+  .hero .actions > .button:first-child svg {
+    display: none;
+  }
+  .signature {
+    width: 235px;
+    margin-top: 20px;
+  }
+  .about-image {
+    min-height: 0;
+    height: 340px;
+  }
+  .stats strong {
+    font-size: 34px;
+  }
+  .stats span {
+    font-size: 11px;
+  }
+  .tech-symbol {
+    width: 30px;
+    min-width: 30px;
+    height: 32px;
+  }
+  .tech-symbol svg {
+    width: 24px;
+    height: 24px;
+  }
+  .cert-brand {
+    height: 48px;
+    width: 48px;
+  }
+  .cert-brand img {
+    object-fit: contain;
+  }
+  .cert-card {
+    min-height: 180px;
+  }
+  .contact .globe-art {
+    right: -85px;
+    bottom: -70px;
+    top: auto;
+    width: 360px;
+    height: 360px;
+    opacity: 0.85;
+  }
+  [dir="rtl"] .contact .globe-art {
+    left: -85px;
+    right: auto;
+  }
+  .education summary {
+    font-size: 11px;
+  }
+}
+/* Second pass: remove crop seams and restore mobile overlay visibility. */
+.hero .industrial {
+  mask-image:
+    linear-gradient(0deg, #000 45%, transparent 100%),
+    linear-gradient(90deg, #000 65%, transparent 100%);
+  mask-composite: intersect;
+}
+.refinery {
+  background-size: cover;
+  mask-image:
+    linear-gradient(90deg, transparent, #000 65%),
+    linear-gradient(0deg, transparent, #000 15%, #000 80%, transparent);
+  mask-composite: intersect;
+}
+.signature img {
+  mix-blend-mode: lighten;
+}
+/* ===== Hero cinematic refinement (Hero + About focus pass) ===== */
+
+/* Unified atmosphere: one vignette + warm/cool cast over the layered hero
+   instead of disconnected image edges. Sits above all -z layers, below copy. */
+.hero:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% 100%, transparent 40%, #080d12b8 100%),
+    radial-gradient(60% 55% at 50% 42%, #d2902c14, transparent 70%);
+  mix-blend-mode: normal;
+}
+.hero > * {
+  position: relative;
+}
+.hero > .hero-portrait,
+.hero > .industrial,
+.hero > .refinery,
+.hero > .hero-shade,
+.hero > .scada,
+.hero > .signal-lines,
+.hero > .micro,
+.hero > .scroll {
+  position: absolute;
+}
+.hero-copy {
+  z-index: 3;
+}
+
+/* Portrait: cinematic blend — lower contrast, lifted blacks to breathe with
+   the scene, modest warm grade so skin stays natural on the amber cast. */
+.hero .hero-portrait img {
+  filter: contrast(1.04) brightness(0.97) saturate(0.94);
+}
+.hero .hero-portrait:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(85% 70% at 50% 32%, transparent 52%, #080d12aa 88%, #080d12 100%),
+    linear-gradient(0deg, #080d12cc, transparent 30%);
+  pointer-events: none;
+}
+[dir="rtl"] .hero .hero-portrait:after {
+  content: none;
+}
+
+/* --- Arabic hero: mirror the composition so text never crosses the face.
+   In LTR the portrait sits right and copy flows left. In RTL (tablet up)
+   the copy must flow from the right edge while the portrait anchors LEFT. --- */
+@media (min-width: 601px) {
+  [dir="rtl"] .hero .hero-portrait {
+    right: auto;
+    left: 0;
+  }
+  [dir="rtl"] .hero .hero-portrait img {
+    object-position: 40% 30%;
+  }
+  [dir="rtl"] .hero .hero-shade {
+    /* shade the LEFT side (portrait side) so the right-side copy stays readable */
+    background:
+      linear-gradient(270deg, #080d12 0%, #080d12ef 19%, #080d1270 43%, transparent 65%),
+      linear-gradient(0deg, #080d12 0%, transparent 14%);
+  }
+  [dir="rtl"] .hero .industrial {
+    left: auto;
+    right: 0;
+    background-position: right bottom;
+    background-size: 100% auto;
+    mask-image:
+      linear-gradient(0deg, #000 45%, transparent 100%),
+      linear-gradient(270deg, #000 65%, transparent 100%);
+    mask-composite: intersect;
+  }
+  [dir="rtl"] .hero .hero-portrait {
+    mask-image:
+      linear-gradient(270deg, transparent, #000 20%, #000 73%, transparent),
+      linear-gradient(0deg, transparent, #000 7%);
+    mask-composite: intersect;
+  }
+  [dir="rtl"] .hero .refinery {
+    right: auto;
+    left: 0;
+    background-position: left bottom;
+    background-size: cover;
+    mask-image:
+      linear-gradient(270deg, transparent, #000 65%),
+      linear-gradient(0deg, transparent, #000 15%, #000 80%, transparent);
+    mask-composite: intersect;
+  }
+  [dir="rtl"] .hero-copy {
+    margin-inline-start: 0;
+    margin-inline-end: auto;
+    text-align: right;
+    padding-left: 0;
+    padding-right: 5.5%;
+  }
+  [dir="rtl"] .hero h1,
+  [dir="rtl"] .hero h2 {
+    position: relative;
+    z-index: 2;
+  }
+  [dir="rtl"] .micro {
+    right: auto;
+    left: 15%;
+  }  [dir="rtl"] .scada {
+    right: auto;
+    left: 2.5%;
+  }
+  [dir="rtl"] .scroll {
+    right: auto;
+    left: 3%;
+  }
+  [dir="rtl"] .signal-lines {
+    left: auto;
+    right: 0;
+    transform: scaleX(-1);
+  }
+}
+@media (min-width: 1151px) {
+  .about {
+    padding-top: 90px;
+  }
+  .about h2 {
+    margin-bottom: 50px;
+  }
+  .about-copy p {
+    font-size: 23px;
+  }
+  .about .signature {
+    margin-top: 50px;
+  }
+  .statement {
+    bottom: -185px;
+  }
+  .contact h2 {
+    font-size: 46px;
+  }
+  .globe-art {
+    right: -155px;
+  }
+  [dir="rtl"] .contact .globe-art {
+    left: -155px;
+  }
+}
+@media (max-width: 600px) {
+  .scada {
+    display: none;
+  }
+  .refinery {
+    background-size: cover;
+  }
+  .hero .signal-lines {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  [dir="rtl"] .hero .button.outline {
+    flex-direction: row-reverse;
+  }
+}
+.scada,.micro{direction:ltr}
+@media(min-width:601px) and (max-width:850px){.hero .button{font-size:11px;padding-inline:12px;gap:8px;white-space:nowrap;min-height:48px}}
+
+/* ===== Visual foundation pass: hierarchy, separation, feedback ===== */
+
+/* Signature eyebrow rule ties sections together */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow:before {
+  content: "";
+  width: 26px;
+  height: 2px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, var(--amber), #f1a34233);
+  border-radius: 2px;
+}
+[dir="rtl"] .eyebrow:before {
+  background: linear-gradient(270deg, var(--amber), #f1a34233);
+}
+
+/* Consistent card family radii + depth */
+.project-card,
+.cert-card,
+.skill-tile {
+  border-radius: 12px;
+}
+.cert-card {
+  box-shadow: inset 0 1px 0 #ffffff08;
+}
+
+/* Stronger, quieter card hover states (no big animation) */
+.skill-tile {
+  transition: border-color 0.25s, background 0.25s, transform 0.25s;
+}
+.skill-tile:hover {
+  border-color: #3b5670;
+  background: linear-gradient(130deg, #182230, #0e1720);
+  transform: translateY(-2px);
+}
+.cert-card {
+  transition: border-color 0.25s, transform 0.25s;
+}
+.cert-card:hover {
+  border-color: #f1a34250;
+  transform: translateY(-2px);
+}
+.project-card:hover {
+  box-shadow: 0 14px 34px -16px #000c, 0 0 0 1px #f1a34220;
+}
+.circle-arrow {
+  transition: border-color 0.25s, background 0.25s;
+}
+.project-card:hover .circle-arrow {
+  border-color: #f1a34280;
+  background: #232f3b;
+  color: var(--amber);
+}
+
+/* Buttons: crisper hover without layout jump */
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 0 0 3px #ffc57824,
+    0 6px 18px -6px #f1a34255;
+}
+.button.outline:hover {
+  border-color: #d8dce0;
+  background: #141e27;
+  box-shadow: 0 6px 18px -10px #000d;
+}
+.filters button {
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.filters button:hover:not(.active) {
+  border-color: #3b5670;
+  color: var(--white);
+}
+.text-link:hover,
+.back-link:hover,
+.career a:hover {
+  color: #ffc678;
+}
+
+/* Section separation: hairline accent between page sections (desktop panel layout) */
+@media (min-width: 851px) {
+  .journey {
+    border-top: 1px solid #17212a;
+  }
+  .contact {
+    border-top: 1px solid #17212a;
+  }
+  #certifications {
+    padding-top: 48px;
+  }
+}
+
+/* Mobile: kill sub-10px text everywhere for readability */
+@media (max-width: 600px) {
+  .tags span {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+  .card-copy p {
+    font-size: 11px;
+    min-height: 0;
+  }
+  .image-label {
+    font-size: 8px;
+    padding: 2px 6px;
+  }
+  .stats p {
+    font-size: 11px;
+  }
+  .stats span {
+    font-size: 11px;
+  }
+  footer {
+    font-size: 10px;
+  }
+  .filters button {
+    font-size: 11px;
+  }
+  .skill-tile h3 {
+    font-size: 11px;
+  }
+  .skill-tile small {
+    font-size: 9px;
+  }
+  .cert-card h3 {
+    font-size: 11px;
+  }
+  .cert-card p,
+  .cert-card time,
+  .cert-card small {
+    font-size: 10px;
+  }
+  .career li span {
+    font-size: 10px;
+  }
+  .text-link {
+    font-size: 11px !important;
+  }
+  .section-heading p {
+    font-size: 12px;
+  }
+  .contact p {
+    font-size: 13px;
+  }
+  .employer small {
+    font-size: 10px;
+  }
+}
+
+/* Projects grid: give the bottom-row wide cards a matching treatment */
+.tag-row-divider {
+  display: none;
+}
+
+/* Arabic mobile: hero pad must match the mirrored stacked layout */
+@media (max-width: 600px) {
+  [dir="rtl"] .hero {
+    padding-top: 280px;
+    min-height: calc(100svh - 76px);
+    display: flex;
+    flex-direction: column;
+  }
+  [dir="rtl"] .hero h1 {
+    margin-bottom: 11px;
+  }
+  [dir="rtl"] .hero .eyebrow {
+    justify-content: center;
+    text-align: center;
+    font-size: 12px;
+    margin-bottom: 10px;
+    line-height: 1.7;
+  }
+}
+
+/* ===== Hero + About focus pass: composition, hierarchy, polish ===== */
+
+/* Refined hero copy rhythm (desktop) */
+@media (min-width: 851px) {
+  .hero .eyebrow {
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    margin-bottom: 16px;
+  }
+  .hero h2 {
+    line-height: 1.2;
+    max-width: 520px;
+  }
+  .hero .roles {
+    margin-top: 22px;
+  }
+  .hero .hero-description {
+    margin-top: 14px;
+    max-width: 520px;
+    color: #cdd3d9;
+  }
+  .hero .actions {
+    margin-top: 36px;
+    gap: 16px;
+  }
+
+  /* Primary button: confident, tactile; secondary stays quiet */
+  .hero .button {
+    min-height: 56px;
+    padding: 12px 30px;
+    font-size: 15.5px;
+    gap: 14px;
+    border-radius: 11px;
+    letter-spacing: 0.1px;
+  }
+  .hero .button.outline {
+    min-height: 56px;
+    border-radius: 11px;
+  }
+  .hero .button svg {
+    transition: transform 0.25s;
+  }
+  .hero .button:hover svg {
+    transform: translateX(3px);
+  }
+  [dir="rtl"] .hero .button:hover svg {
+    transform: translateX(-3px);
+  }
+
+  /* SCADA panel: cleaner anchor, clearer edges, quieter shadow */
+  .scada {
+    top: 96px;
+    right: 3%;
+    border-radius: 10px;
+    box-shadow:
+      inset 0 0 35px #1688b509,
+      0 24px 60px -30px #02070bd8;
+    backdrop-filter: blur(2px);
+  }
+  [dir="rtl"] .scada {
+    left: 3%;
+  }
+  .scada .scada-labels {
+    gap: 14px;
+    letter-spacing: 1.5px;
+  }
+
+  /* Micro label: lighter presence, aligned with the scene bottom */
+  .micro {
+    bottom: 52px;
+  }
+  [dir="rtl"] .hero-copy {
+    padding-right: 5%;
+  }
+  .hero-copy {
+    padding-left: 5%;
+  }
+}
+
+/* About: editorial polish — layered surface, refined stats, aligned rhythm */
+@media (min-width: 851px) {
+  .about {
+    background:
+      radial-gradient(ellipse at 0% 0%, #10202b22, transparent 55%),
+      linear-gradient(120deg, #0c1319f0, #080d12);
+    box-shadow: 0 0 0 1px #17212a80;
+  }
+  .about h2 {
+    line-height: 1.14;
+  }
+  .stats {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: 40px;
+    gap: 0;
+  }
+  .stats > div {
+    padding-block: 6px 26px;
+  }
+  .stats > div + div {
+    padding-inline-start: 26px;
+  }
+  .stats strong {
+    font-size: 56px;
+    background: linear-gradient(120deg, #f6b95d, #e9903a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .stats span {
+    letter-spacing: 0.2px;
+  }
+  .stats > div + div {
+    border-inline-start: 1px solid #233543;
+  }
+}
+
+/* ===== Motion pass: lightweight, reduced-motion safe ===== */
+
+/* Scroll progress hairline under the header */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 60;
+  pointer-events: none;
+  background: transparent;
+}
+.scroll-progress > div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber), #f6b95d);
+  width: 0;
+  will-change: width;
+}
+
+/* ---- Section reveals (one-shot, GPU-friendly) ---- */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.55s ease,
+    transform 0.55s ease;
+  will-change: opacity, transform;
+}
+.reveal.d1 { transition-delay: 0.08s; }
+.reveal.d2 { transition-delay: 0.16s; }
+.reveal.d3 { transition-delay: 0.24s; }
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- Hero atmospheric drift + glow (transform/opacity only) ---- */
+.hero .industrial,
+.hero .refinery {
+  will-change: transform;
+}
+
+/* ---- Hero staggered entrance (CSS-driven; killed under reduced motion
+       by the global reduce rules in globals.css) ---- */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+@media (min-width: 851px), (max-width: 600px) {
+  .hero-copy > * {
+    opacity: 0;
+    animation: rise-in 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  .hero-copy > :nth-child(1) { animation-delay: 0.05s; }
+  .hero-copy > :nth-child(2) { animation-delay: 0.14s; }
+  .hero-copy > :nth-child(3) { animation-delay: 0.23s; }
+  .hero-copy > :nth-child(4) { animation-delay: 0.32s; }
+  .hero-copy > :nth-child(5) { animation-delay: 0.41s; }
+  .hero-copy > :nth-child(6) { animation-delay: 0.5s; }
+}
+@keyframes drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(-1.1%, -0.8%, 0) scale(1.03); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+@media (min-width: 851px) {
+  .hero .industrial {
+    animation: drift 26s ease-in-out infinite;
+  }
+  .hero .refinery {
+    animation: drift 34s ease-in-out infinite reverse;
+  }
+  [dir="rtl"] .hero .refinery {
+    animation: drift 34s ease-in-out infinite;
+  }
+}
+
+/* ---- Header: sticky blur + animated nav underline ---- */
+.header {
+  position: sticky;
+  top: 0;
+  backdrop-filter: blur(10px);
+  background: #080d12e6;
+}
+.nav a {
+  position: relative;
+}
+.nav a:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: 8px;
+  height: 1.5px;
+  background: var(--amber);
+  transition: right 0.25s ease;
+}
+.nav a:hover:after,
+.nav a:focus-visible:after {
+  right: 0;
+}
+/* first-child keeps permanent amber indicator (existing active style) */
+
+/* ---- Mobile menu opening/closing animation ---- */
+@media (max-width: 600px) {
+  .nav {
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.28s ease, transform 0.28s ease;
+    pointer-events: none;
+  }
+  .nav.open {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+/* ---- SCADA trace draw on load + gentle node pulse ---- */
+.scada-trace {
+  stroke-dasharray: 260;
+  stroke-dashoffset: 260;
+  animation: trace-draw 2.4s ease-out 0.6s forwards;
+}
+@keyframes trace-draw {
+  to { stroke-dashoffset: 0; }
+}
+.scada circle {
+  animation: node-pulse 3.2s ease-in-out infinite;
+}
+.scada circle:nth-of-type(2n) {
+  animation-delay: 1.1s;
+}
+@keyframes node-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* ---- Signal lines: slow data flow along the hero signal-lines svG paths.
+       Implemented via dash movement — cheap, one composite layer. ---- */
+.signal-lines path {
+  stroke-dasharray: 6 10;
+  animation: signal-flow 9s linear infinite;
+}
+@keyframes signal-flow {
+  to { stroke-dashoffset: -160; }
+}
+
+/* ---- Flow diagram: signal dots travel the connector segments ---- */
+.flow-dot {
+  opacity: 0;
+}
+.flow-wrap.in .flow-dot {
+  opacity: 1;
+}
+.dot-a { animation: dot-a 4.2s linear infinite; }
+.dot-b { animation: dot-b 4.2s linear infinite 1.05s; }
+.dot-c { animation: dot-c 4.2s linear infinite 2.1s; }
+.dot-d { animation: dot-d 4.2s linear infinite 3.15s; }
+@keyframes dot-a { 0% { cx: 170; cy: 48; opacity: 0; } 12% { opacity: 1; } 38% { cx: 206; cy: 48; opacity: 1; } 44%, 100% { opacity: 0; cx: 206; cy: 48; } }
+@keyframes dot-b { 0% { cx: 358; cy: 48; opacity: 0; } 12% { opacity: 1; } 38% { cx: 392; cy: 48; opacity: 1; } 44%, 100% { opacity: 0; cx: 392; cy: 48; } }
+@keyframes dot-c { 0% { cx: 604; cy: 48; opacity: 0; } 12% { opacity: 1; } 38% { cx: 640; cy: 48; opacity: 1; } 44%, 100% { opacity: 0; cx: 640; cy: 48; } }
+@keyframes dot-d { 0% { cx: 811; cy: 48; opacity: 0; } 12% { opacity: 1; } 38% { cx: 847; cy: 48; opacity: 1; } 44%, 100% { opacity: 0; cx: 847; cy: 48; } }
+
+/* Progressive highlight of the Ignition node once the diagram enters */
+.flow-wrap .flow-diagram g {
+  transition: opacity 0.6s;
+}
+
+/* ---- Timeline: amber progress line draws with scroll ---- */
+.journey .career {
+  position: relative;
+}
+.journey .career:before {
+  /* keep the amber node visible above the growing rail */
+  z-index: 2;
+}
+
+/* ---- Certifications: icon emphasis on hover ---- */
+.cert-card:hover .cert-brand {
+  transform: scale(1.06);
+}
+.cert-brand {
+  transition: transform 0.3s ease;
+}
+
+/* ---- Globe: slow ambient breathing + node pulses ---- */
+@keyframes globe-breathe {
+  0%, 100% { opacity: 0.82; transform: scale(1); }
+  50% { opacity: 0.95; transform: scale(1.012); }
+}
+.globe-art {
+  animation: globe-breathe 14s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* ---- Reduced motion: stop everything decorative ---- */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .scroll-progress {
+    display: none;
+  }
+  .hero .industrial,
+  .hero .refinery {
+    animation: none;
+  }
+  .scada-trace {
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+  .scada circle,
+  .signal-lines path,
+  .flow-dot,
+  .globe-art {
+    animation: none !important;
+  }
+  .hero-copy > * {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+  .flow-dot {
+    opacity: 0 !important;
+  }
+  .nav a:after {
+    display: none;
+  }
+}
+
+/* Touch devices: no hover-dependent continuous effects */
+@media (hover: none) {
+  .project-card .card-image img {
+    transform: none !important;
+  }
+}
+
+/* ===== Projects / Case study / Skills / Experience pass ===== */
+
+/* Accessible keyboard focus everywhere it matters */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+.project-card:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+/* Featured project: wider card, premium framing */
+@media (min-width: 851px) {
+  .projects-grid:not(.expanded) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .project-card.featured {
+    grid-column: span 2;
+    grid-row: span 2;
+    display: flex;
+    flex-direction: column;
+  }
+  .project-card.featured .card-image {
+    aspect-ratio: auto;
+    flex: 1;
+    min-height: 300px;
+  }
+  .project-card.featured .card-copy h3 {
+    font-size: 27px;
+  }
+  .featured-flag {
+    position: absolute;
+    top: 14px;
+    inset-inline-start: 14px;
+    z-index: 2;
+    padding: 6px 12px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #0d1013;
+    background: linear-gradient(110deg, #f6b95d, #e9903a);
+    border-radius: 99px;
+    box-shadow: 0 4px 14px -4px #f1a34266;
+  }
+  .project-card.featured .image-label {
+    font-size: 10px;
+  }
+
+  /* Clearer card separation + refined hover landscape */
+  .project-card {
+    border-color: #223140;
+  }
+  .project-card:hover {
+    border-color: #f1a34280;
+  }
+  .card-image img {
+    transition: transform 0.45s ease;
+  }
+  .project-card:hover .card-image img {
+    transform: scale(1.06);
+  }
+  .card-copy p {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-copy p:before {
+    content: "";
+    width: 16px;
+    height: 1px;
+    background: #3b5670;
+    flex-shrink: 0;
+  }
+
+  /* Premium arrow: circle fills amber, glyph slides */
+  .circle-arrow svg {
+    transition: transform 0.3s;
+  }
+  .project-card:hover .circle-arrow {
+    background: var(--amber);
+    border-color: var(--amber);
+    color: #0d1013;
+  }
+  .project-card:hover .circle-arrow svg {
+    transform: translateX(3px);
+  }
+  [dir="rtl"] .project-card:hover .circle-arrow svg {
+    transform: translateX(-3px) rotate(180deg);
+  }
+
+  /* Flow diagram presentation */
+  .flow-wrap {
+    margin: 26px 0 6px;
+    padding: 22px 26px 16px;
+    background: linear-gradient(120deg, #0c1924cc, #0a141d);
+    border: 1px solid #1d2c3a;
+    border-radius: 12px;
+  }
+  .flow-diagram {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .flow-note {
+    display: block;
+    margin-top: 10px;
+    font-size: 11.5px;
+    letter-spacing: 0.3px;
+    color: #7f8b96;
+  }
+  .skills-grid {
+    margin-top: 22px;
+  }
+
+  /* Case study: bigger hero, cleaner separation */
+  .case-photo {
+    aspect-ratio: 230/132;
+    border-radius: 14px;
+    box-shadow: 0 30px 70px -40px #000d;
+  }
+  .case-tools {
+    gap: 10px;
+    padding: 18px 20px;
+    background: linear-gradient(120deg, #0e161ecc, #0a1219);
+    border: 1px solid #22314066;
+    border-radius: 12px;
+  }
+  .case-tools > div {
+    background: #131e29;
+    border: 1px solid #2a3a4a;
+    border-radius: 8px;
+    padding: 13px 8px;
+  }
+  .case-text h2 {
+    position: relative;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+  }
+  .case-text h2:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 34px;
+    height: 2px;
+    background: var(--amber);
+  }
+  [dir="rtl"] .case-text h2:after {
+    left: auto;
+    right: 0;
+  }
+  .next-project {
+    text-align: end;
+  }
+  .next-project .text-link {
+    font-size: 16px;
+  }
+
+  /* Experience: richer employer block + expressive timeline markers */
+  .employer {
+    padding: 18px 0 14px;
+    border-bottom: 2px solid #f1a34233;
+    margin-bottom: -4px;
+  }
+  .career:before {
+    box-shadow: 0 0 0 5px #f1a34222, 0 0 24px #f1a34255;
+  }
+  .career li {
+    padding-block: 5px;
+    transition: color 0.2s;
+  }
+  .career li:hover:before {
+    text-shadow: 0 0 10px #f1a342;
+  }
+  .career li span {
+    font-family: "JetBrains Mono", monospace;
+    letter-spacing: 0.3px;
+  }
+}
+@media (min-width: 601px) and (max-width: 850px) {
+  .flow-wrap {
+    padding: 14px 12px 10px;
+  }
+  .flow-note {
+    font-size: 10px;
+  }
+}
+@media (max-width: 600px) {
+  .flow-wrap {
+    margin: 18px 0 4px;
+    padding: 12px 6px 8px;
+  }
+  .flow-note {
+    font-size: 9.5px;
+  }
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+  .featured-flag {
+    font-size: 9px;
+    padding: 4px 9px;
+  }
+  .card-copy h3 {
+    font-size: 16px;
+  }
+  .case-photo {
+    border-radius: 10px;
+  }
+  .case-tools {
+    padding: 12px;
+  }
+}

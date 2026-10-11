@@ -1,0 +1,12 @@
+from PIL import Image, ImageDraw
+r=Image.open(r'C:/Users/MOHAME~1.SHA/AppData/Local/Temp/codex-clipboard-afefdfd1-c026-4304-b010-8af6378ab913.png').convert('RGB')
+a=Image.open('screenshots/en-desktop-hero.png').convert('RGB')
+m=Image.open('screenshots/ar-mobile-hero.png').convert('RGB')
+canvas=Image.new('RGB',(1600,1030),'#151f29');d=ImageDraw.Draw(canvas)
+d.text((20,15),'REFERENCE / DESKTOP HERO',fill='#f1a342');d.text((820,15),'IMPLEMENTATION / DESKTOP HERO',fill='#f1a342')
+canvas.paste(r.crop((16,12,793,439)).resize((777,427)),(20,45));canvas.paste(a.crop((0,0,1440,800)).resize((777,427)),(820,45))
+d.text((20,510),'REFERENCE / ARABIC MOBILE',fill='#f1a342');d.text((420,510),'IMPLEMENTATION / ARABIC MOBILE',fill='#f1a342')
+canvas.paste(r.crop((820,29,1041,485)).resize((221,456)),(20,550));canvas.paste(m.resize((221,478)),(420,550))
+d.text((820,555),'COMPARISON NOTES',fill='#f1a342')
+for i,s in enumerate(['Composite reference panels normalized for visual inspection.','Original supplied portrait retained; layered background differs.','Industrial crops retain reference subjects but lack source resolution.','Responsive text and spacing adapt to real browser viewport.','No numerical fidelity score claimed.']):d.text((820,595+i*28),s,fill='#f4f5f6')
+canvas.save('screenshots/reference-comparison.jpg',quality=93)

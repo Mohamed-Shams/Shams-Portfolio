@@ -1,0 +1,6 @@
+node_modules/
+.next/
+.env*
+*.tsbuildinfo
+.next-dev/
+.next-production/

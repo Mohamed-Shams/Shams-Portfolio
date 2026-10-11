@@ -1,0 +1,2 @@
+const{chromium}=require('@playwright/test');(async()=>{const b=await chromium.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});const p=await b.newPage({reducedMotion:"reduce"});p.on('console',m=>{if(m.type()==='error'||m.type()==='warning')console.log(m.type(),m.text())});p.on('pageerror',e=>console.log(e.message));await p.goto('http://localhost:3000/en',{waitUntil:'networkidle'});await b.close()})();
+
