@@ -526,8 +526,18 @@ export default function Portfolio() {
                 ...skills.filter((s) => s[0] === "Industrial IoT"),
               ]
                 .filter((s) => category === "All" || s[3] === category)
-                .map((s, i) => (
-                  <div className="skill-tile" key={s[0]}>
+                .map((s) => (
+                  /* The umbrella capability is already sorted last; letting it span
+                     two columns makes 15 tools fill a 2- or 4-column grid exactly
+                     instead of leaving a dangling cell. */
+                  <div
+                    className={
+                      s[0] === "Industrial IoT"
+                        ? "skill-tile umbrella"
+                        : "skill-tile"
+                    }
+                    key={s[0]}
+                  >
                     <TechSymbol name={s[0]} />
                     <div>
                       <h3>{s[0]}</h3>

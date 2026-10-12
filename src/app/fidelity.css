@@ -191,16 +191,28 @@
 .tech-blue {
   color: #259ee1;
 }
-.cert-brand {
-  border: 0 !important;
-  background: transparent !important;
-  border-radius: 0 !important;
+/* One plate for all five marks. The brand variants in globals.css gave each logo
+   its own colour/shape, and the later "tile behind mark" rule could not win
+   against them, so the marks sat on bare card background. Listing the variants
+   here (rather than using !important) keeps the override honest and lets the
+   plate reset be re-tuned per breakpoint further down. */
+.cert-brand,
+.cert-brand.ignition,
+.cert-brand.aws,
+.cert-brand.dataiku,
+.cert-brand.siemens {
+  border: 1px solid #263745;
+  background: #131c25;
+  border-radius: 12px;
   overflow: hidden;
 }
+/* Match the marks by height, not width: at a fixed width the 0.95-ratio marks
+   rendered 21% taller than the 0.79-ratio ones, so no two plates looked alike. */
 .cert-brand img {
   display: block;
-  width: 100%;
+  width: auto;
   height: 100%;
+  max-width: 100%;
   object-fit: contain;
 }
 .education summary {
@@ -476,9 +488,12 @@
     gap: 17px;
     border-radius: 12px;
   }
+  /* 56px plate, 10px inset: the supplied marks are 33–40px wide, so they are
+     sampled down instead of blown up ~2.2x. */
   .cert-brand {
-    width: 86px;
-    height: 94px;
+    width: 56px;
+    height: 56px;
+    padding: 10px;
   }
   .cert-card h3 {
     font-size: 17px;
@@ -690,8 +705,9 @@
     gap: 30px;
   }
   .cert-brand {
-    width: 65px;
-    height: 75px;
+    width: 52px;
+    height: 52px;
+    padding: 9px;
   }
   .cert-card h3 {
     font-size: 14px;
@@ -883,8 +899,9 @@
     height: 24px;
   }
   .cert-brand {
-    height: 48px;
-    width: 48px;
+    height: 46px;
+    width: 46px;
+    padding: 7px;
   }
   .cert-brand img {
     object-fit: contain;
@@ -1886,5 +1903,345 @@ summary:focus-visible {
   }
   .case-tools {
     padding: 12px;
+  }
+}
+
+/* ══ Stage 2 refinement: about · skills · experience · certifications ══════════
+   Scoped to those four sections only. The hero and the project grid are not
+   touched, and the eyebrow scale is deliberately left alone so the sections
+   approved in stage 1 stay identical. Loaded last, so these win over the audit
+   layers above without new !important flags. */
+
+/* 1 · One content gutter ────────────────────────────────────────────────────
+   Projects (approved) and certifications already sit 34px inside their panels,
+   but about was inset 76px, experience 42px and the skills panel had no inset
+   at all, so the page's left edge stepped in and out while scrolling. */
+@media (min-width: 851px) {
+  .about {
+    padding: 76px 34px 64px;
+  }
+  .journey {
+    padding: 28px 34px;
+  }
+  #skills .tech-panel {
+    margin-inline: 34px;
+    padding-inline: 34px;
+  }
+}
+@media (min-width: 851px) and (max-width: 1150px) {
+  .about {
+    padding: 55px 34px;
+  }
+}
+
+/* 2 · About ─────────────────────────────────────────────────────────────────
+   The numerals never rendered as designed: `.stats span` (written for the
+   caption under each figure) also matched the value span inside <strong>, so a
+   56px amber gradient numeral was painted as 17px muted grey — 11px on phones.
+   Scoping the value span back to its parent restores the intended figure. */
+.stats strong span {
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+@media (min-width: 851px) {
+  .stats strong span {
+    color: transparent;
+    background-image: inherit;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
+@media (max-width: 850px) {
+  .stats strong span {
+    color: inherit;
+  }
+}
+/* The offset slab behind the portrait read as a stray grey rectangle against a
+   near-black page (and landed on the page centre in Arabic). A concentric
+   hairline ring keeps the framed-print motif and is direction-neutral. */
+.about-image:before {
+  inset: -22px;
+  background: transparent;
+  border: 1px solid #23333f;
+  border-radius: 18px;
+}
+/* The statement hangs off the portrait's outer edge; the physical offsets below
+   put it on the inner edge in RTL, so mirror them from 601px up. (Below 600px it
+   is already pinned to both sides and needs nothing.) */
+@media (min-width: 851px) {
+  [dir="rtl"] .statement {
+    right: auto;
+    left: -32px;
+  }
+}
+@media (min-width: 601px) and (max-width: 850px) {
+  [dir="rtl"] .statement {
+    right: auto;
+    left: -22px;
+  }
+}
+@media (min-width: 601px) {
+  [dir="rtl"] .statement:before {
+    left: auto;
+    right: -4px;
+    border-left: 0;
+    border-right: 2px solid var(--amber);
+  }
+  [dir="rtl"] .statement:after {
+    right: auto;
+    left: -5px;
+    border-right: 0;
+    border-left: 2px solid var(--amber);
+  }
+}
+/* Footnote under the figures was 10px on tablets. */
+@media (max-width: 850px) {
+  .stats p {
+    font-size: 11px;
+  }
+}
+@media (max-width: 420px) {
+  .stats span {
+    font-size: 11px;
+  }
+}
+
+/* 3 · Skills ────────────────────────────────────────────────────────────────
+   Fifteen tools leave a dangling cell in a 2- or 4-column grid; the umbrella
+   capability is already last, so letting it span two columns fills the row
+   exactly. Three columns divide 15 evenly, so the span is switched off there. */
+.skill-tile.umbrella {
+  grid-column: span 2;
+  background: linear-gradient(130deg, #1a2431, #0e1720);
+  border-color: #33475c;
+}
+.skill-tile.umbrella:hover {
+  background: linear-gradient(130deg, #1e2a39, #101b26);
+  border-color: #3b5670;
+}
+@media (min-width: 601px) and (max-width: 1150px) {
+  .skill-tile.umbrella {
+    grid-column: auto;
+    background: linear-gradient(130deg, #151e28, #0d151d);
+    border-color: #2a3846;
+  }
+  .skill-tile.umbrella:hover {
+    background: linear-gradient(130deg, #182230, #0e1720);
+  }
+}
+/* Top-align the tile content and reserve two title lines. Centre-aligning a
+   one-line name against a two-line name moved the first line of each title to a
+   different height within the same row (up to 21px apart). */
+.skill-tile {
+  align-items: flex-start;
+}
+.skill-tile h3 {
+  line-height: 1.4;
+  min-height: 2.8em;
+}
+@media (min-width: 851px) and (max-width: 1150px) {
+  .skill-tile small {
+    font-size: 11.5px;
+  }
+}
+@media (max-width: 850px) {
+  .skill-tile h3 {
+    font-size: 13px;
+  }
+  .skill-tile small {
+    font-size: 11px;
+  }
+  .flow-note {
+    font-size: 11px;
+  }
+}
+@media (max-width: 600px) {
+  .skill-tile h3 {
+    font-size: 12.5px;
+  }
+  .skill-tile small {
+    font-size: 11px;
+  }
+}
+
+/* 4 · The integration path ───────────────────────────────────────────────────
+   `.flow-diagram` labels are SVG user units, so shrinking the drawing to fit a
+   phone scaled 12px type down to ~3.5px (and 6–9px through tablets). Under
+   1151px the same five steps are rendered as real text at a real size; the SVG
+   still renders — slightly larger now — on wide screens. Only one of the two is
+   ever displayed, so assistive tech sees a single description. */
+.flow-steps {
+  display: none;
+}
+@media (min-width: 1151px) {
+  .flow-diagram text {
+    font-size: 14px;
+  }
+}
+@media (max-width: 1150px) {
+  .flow-diagram {
+    display: none;
+  }
+  .flow-steps {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .flow-chip {
+    border: 1px solid #2a8bb8;
+    background: #12365526;
+    color: #7cbbdd;
+    font: 500 13px "JetBrains Mono", monospace;
+    letter-spacing: 0.2px;
+    padding: 9px 14px;
+    border-radius: 8px;
+  }
+  .flow-step.accent .flow-chip {
+    border-color: #f1a342;
+    background: #f1a34214;
+    color: #f5ad35;
+  }
+  .flow-link {
+    display: block;
+    width: 26px;
+    border-top: 1px dashed #2a8bb8;
+  }
+}
+@media (max-width: 600px) {
+  .flow-steps {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .flow-step {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .flow-chip {
+    text-align: center;
+  }
+  .flow-link {
+    width: 0;
+    height: 16px;
+    border-top: 0;
+    border-inline-start: 1px dashed #2a8bb8;
+    margin-inline-start: 50%;
+  }
+}
+
+/* 5 · Certifications ────────────────────────────────────────────────────────
+   Titles wrap to one, two or three lines, so cards were 139px and 148px inside
+   the same grid. One row height keeps the frame even without padding the copy. */
+.cert-grid {
+  grid-auto-rows: 1fr;
+}
+/* Hierarchy: the issuer and date were 10px next to a 17px title. */
+@media (min-width: 851px) {
+  .cert-card h3 {
+    font-size: 16px;
+  }
+  .cert-card p {
+    font-size: 13px;
+    color: #9dc4d9;
+  }
+  .cert-card time {
+    font-size: 12px;
+    font-family: "JetBrains Mono", monospace;
+    letter-spacing: 0.2px;
+  }
+  .cert-card small {
+    font-size: 12px;
+  }
+}
+@media (min-width: 851px) and (max-width: 1150px) {
+  .cert-card h3 {
+    font-size: 14px;
+  }
+  .cert-card p {
+    font-size: 12px;
+  }
+}
+@media (max-width: 850px) {
+  .cert-card h3 {
+    font-size: 13px;
+  }
+  .cert-card p {
+    font-size: 11.5px;
+  }
+  .cert-card time,
+  .cert-card small {
+    font-size: 11px;
+  }
+  /* 601–850 inherited the 68px desktop plate, which upscaled the 40px marks. */
+  .cert-brand {
+    width: 48px;
+    height: 48px;
+    padding: 6px;
+  }
+}
+@media (max-width: 600px) {
+  .cert-card {
+    min-height: 0;
+    padding: 13px 12px;
+  }
+  .cert-card h3 {
+    font-size: 12.5px;
+  }
+  .cert-card p,
+  .cert-card time,
+  .cert-card small {
+    font-size: 11px;
+  }
+}
+
+/* 6 · Experience ────────────────────────────────────────────────────────────
+   The education block sat 50px in from the timeline it belongs to — and, being
+   a physical offset, landed on the outer edge in Arabic. Give it the timeline's
+   own 8px inset with logical properties so both directions match. */
+.education {
+  margin-inline: 8px;
+}
+/* The employer wordmark was pinned to fixed 170/130/120px columns, so its
+   underline and the "by solutions" line never sat square under the word (and
+   drifted off-centre in RTL). Let the column fit the word and centre both. */
+.employer {
+  text-align: center;
+}
+@media (min-width: 601px) {
+  .timeline {
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .education {
+    font-size: 12px;
+  }
+}
+/* Project dates and the employer line were 9–10px on phones. */
+@media (max-width: 850px) {
+  .career li span {
+    font-size: 11px;
+  }
+  .employer small {
+    font-size: 11.5px;
+  }
+}
+@media (max-width: 600px) {
+  .career-title time {
+    font-size: 11px;
+  }
+  .career li span {
+    font-size: 11px;
   }
 }
