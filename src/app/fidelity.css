@@ -15,26 +15,35 @@
   border-color: #a5aab0;
   box-shadow: none;
 }
+/* Industrial depth layer: anchored bottom-left, dimmed with a tonal gradient
+   so the photograph merges into the page instead of ending on an edge. */
 .hero .industrial {
-  width: 45%;
-  height: 26%;
-  opacity: 0.86;
-  background: url("/assets/plant.webp") left bottom/100% auto no-repeat;
-  mask-image: linear-gradient(0deg, #000 45%, transparent 100%);
+  width: 46%;
+  height: 27%;
+  opacity: 0.85;
+  background:
+    linear-gradient(0deg, #080d12b8 0%, #080d1200 60%),
+    url("/assets/plant.webp") left bottom/100% auto no-repeat;
+  mask-image: linear-gradient(0deg, #000 38%, #0000 97%);
+  filter: saturate(0.96);
   z-index: -2;
 }
+/* The refinery crop is the smallest source in the hero, so it is kept small and
+   faint: it reads as distant atmosphere rather than a magnified fragment. */
 .refinery {
   position: absolute;
   right: 0;
-  top: 28%;
-  width: 20%;
-  height: 64%;
-  background: url("/assets/refinery.webp") right bottom/auto 100% no-repeat;
+  top: 42%;
+  width: 15%;
+  height: 42%;
+  background:
+    linear-gradient(0deg, #080d12cc 0%, #080d1200 70%),
+    url("/assets/refinery.webp") right bottom/auto 100% no-repeat;
   mask-image:
-    linear-gradient(90deg, transparent, #000 35%),
-    linear-gradient(0deg, transparent, #000 15%, #000 80%, transparent);
+    linear-gradient(90deg, #0000, #000 70%),
+    linear-gradient(0deg, #0000, #000 22%, #000 74%, #0000);
   mask-composite: intersect;
-  opacity: 0.9;
+  opacity: 0.62;
   z-index: -3;
   pointer-events: none;
 }
@@ -45,11 +54,87 @@
   mask-composite: intersect;
 }
 .hero .signal-lines {
-  width: 65%;
-  height: 140px;
-  opacity: 0.65;
+  width: 62%;
+  height: 132px;
+  opacity: 0.42;
   transform: rotate(-3deg);
   transform-origin: left bottom;
+  mask-image: linear-gradient(90deg, #0000, #000 18%, #000 62%, #0000);
+}
+
+/* SCADA faceplate: one framed instrument panel instead of disconnected parts. */
+.scada {
+  display: grid;
+  grid-template-columns: 1fr 76px;
+  gap: 17px;
+  right: 2.5%;
+  top: 70px;
+  width: 340px;
+  height: 265px;
+  padding: 20px;
+  transform: perspective(1000px) rotateY(-9deg) rotate(-1.6deg);
+  border-color: #1688b55c;
+  background: linear-gradient(150deg, #08182599, #050d1473);
+  box-shadow:
+    inset 0 1px 0 #ffffff0d,
+    inset 0 0 44px #1688b50f,
+    0 30px 70px -44px #000d;
+}
+.scada .scada-display {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #1688b55e;
+  border-radius: 6px;
+  padding: 14px 13px 8px;
+  background: linear-gradient(120deg, #0b24343d, #06131bc7);
+  font: 600 12px/1 Inter;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #8ed3f2;
+}
+.scada .scada-display > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.scada .scada-display > span:before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 0 3px #f1a3421f;
+}
+.scada svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: auto;
+}
+.scada .scada-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  position: relative;
+  font: 12.5px/1.2 "JetBrains Mono";
+  color: #75bada;
+  padding: 4px 0 4px 2px;
+}
+.scada .scada-labels span:first-child {
+  color: var(--amber);
+}
+.scada-labels i {
+  position: absolute;
+  inset-inline-start: -1px;
+  top: 0;
+  bottom: 0;
+  height: auto;
+  width: 12px;
+  border: 1px solid #1688b566;
+  border-inline-start-color: var(--amber);
+  border-radius: 8px;
+  opacity: 0.75;
 }
 .scada {
   display: grid;
@@ -63,40 +148,6 @@
   transform: perspective(900px) rotateY(-13deg) rotate(-2deg);
   border-color: #1688b54a;
   background: #06111b70;
-}
-.scada .scada-display {
-  display: block;
-  border: 1px solid #1688b58a;
-  border-radius: 5px;
-  padding: 18px 13px 8px;
-  background: linear-gradient(120deg, #0b243443, #06131b);
-  font: 19px Inter;
-  color: #63c2ec;
-}
-.scada svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin-top: 12px;
-}
-.scada .scada-labels {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  position: relative;
-  font: 13px/1.2 "JetBrains Mono";
-  color: #75bada;
-  padding-top: 14px;
-}
-.scada-labels i {
-  position: absolute;
-  right: 0;
-  top: 4px;
-  height: 45px;
-  width: 12px;
-  border: 1px solid #1688b5;
-  border-radius: 8px;
-  opacity: 0.55;
 }
 .signature {
   width: 310px;
@@ -273,46 +324,21 @@
   .stats > div + div {
     padding-inline-start: 17px;
   }
-  .projects-grid {
-    gap: 26px;
-  }
-  .card-image {
-    height: auto;
-    aspect-ratio: 160/76;
-  }
-  .project-card:nth-child(n + 4) .card-image {
-    aspect-ratio: 160/54;
-  }
-  .project-card {
-    border-radius: 10px;
-    background: linear-gradient(120deg, #111a23, #0b1219);
-  }
-  .card-copy {
-    padding: 14px;
-  }
+  /* Narrow desktop: keep the bento, tighten the type a touch */
   .card-copy h3 {
-    font-size: 23px;
-    line-height: 1.17;
-    min-height: 54px;
-    max-width: 85%;
+    font-size: 18px;
+  }
+  .project-card.featured .card-copy h3 {
+    font-size: 26px;
   }
   .card-copy p {
-    font-size: 16px;
-    margin: 8px 0 12px;
-    line-height: 1.4;
+    font-size: 12px;
   }
-  .circle-arrow {
-    width: 37px;
-    height: 37px;
-    top: 15px;
-    right: 13px;
-  }
-  .circle-arrow svg {
-    width: 19px;
+  .project-card.featured .card-copy > p:not(.card-note) {
+    font-size: 12px;
   }
   .image-label {
     font-size: 9px;
-    opacity: 0.85;
   }
   #skills {
     padding: 0;
@@ -910,8 +936,9 @@
   z-index: 1;
   pointer-events: none;
   background:
-    radial-gradient(120% 90% at 50% 100%, transparent 40%, #080d12b8 100%),
-    radial-gradient(60% 55% at 50% 42%, #d2902c14, transparent 70%);
+    radial-gradient(118% 88% at 46% 104%, transparent 38%, #080d12c2 100%),
+    linear-gradient(90deg, #080d1200 54%, #080d1252 100%),
+    radial-gradient(60% 55% at 50% 42%, #d2902c12, transparent 70%);
   mix-blend-mode: normal;
 }
 .hero > * {
@@ -1617,29 +1644,56 @@ summary:focus-visible {
   outline-offset: 3px;
 }
 
-/* Featured project: wider card, premium framing */
+/* ── Desktop project bento ───────────────────────────────────────────────────
+   Six cards, three columns, three rows: the CV-confirmed flagship takes a
+   2x2 cell and the five remaining projects fill the rest, so the initial grid
+   has no empty cells. "View all" drops the spans for a uniform 3-column wrap.
+   Every card keeps the same component and the same compact DOM. */
 @media (min-width: 851px) {
-  .projects-grid:not(.expanded) {
-    grid-template-columns: repeat(4, 1fr);
+  .projects-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
   }
   .project-card.featured {
     grid-column: span 2;
     grid-row: span 2;
-    display: flex;
-    flex-direction: column;
   }
+  /* Flagship image takes the leftover height instead of leaving dead space in
+     the copy block; its aspect then stays close to the source illustration. */
   .project-card.featured .card-image {
     aspect-ratio: auto;
-    flex: 1;
+    flex: 1 1 auto;
     min-height: 300px;
   }
+  .project-card.featured .card-copy {
+    flex: none;
+    padding: 24px 28px 26px;
+  }
+  .project-card.featured .circle-arrow {
+    inset-inline-end: 24px;
+    top: 24px;
+    width: 40px;
+    height: 40px;
+  }
   .project-card.featured .card-copy h3 {
-    font-size: 27px;
+    font-size: 30px;
+    line-height: 1.15;
+    letter-spacing: -0.4px;
+    max-width: 74%;
+    min-height: 0;
+  }
+  .project-card.featured .card-copy > p:not(.card-note) {
+    font-size: 13.5px;
+    margin-top: 10px;
+  }
+  .card-note {
+    display: block;
+    max-width: 92%;
   }
   .featured-flag {
     position: absolute;
-    top: 14px;
-    inset-inline-start: 14px;
+    top: 16px;
+    inset-inline-start: 16px;
     z-index: 2;
     padding: 6px 12px;
     font-size: 11px;
@@ -1653,9 +1707,11 @@ summary:focus-visible {
   }
   .project-card.featured .image-label {
     font-size: 10px;
+    inset-inline-start: auto;
+    inset-inline-end: 16px;
   }
 
-  /* Clearer card separation + refined hover landscape */
+  /* Consistent card family: quiet border, soft depth, restrained hover */
   .project-card {
     border-color: #223140;
   }
@@ -1666,14 +1722,14 @@ summary:focus-visible {
     transition: transform 0.45s ease;
   }
   .project-card:hover .card-image img {
-    transform: scale(1.06);
+    transform: scale(1.045);
   }
   .card-copy p {
     display: inline-flex;
     align-items: center;
     gap: 8px;
   }
-  .card-copy p:before {
+  .card-copy p:not(.card-note):before {
     content: "";
     width: 16px;
     height: 1px;
@@ -1792,6 +1848,19 @@ summary:focus-visible {
   }
   .flow-note {
     font-size: 10px;
+  }
+  /* Two even columns: six cards fill three tidy rows, so no span is used here
+     and the flagship is marked by its ribbon and larger title instead. */
+  .projects-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .project-card.featured .card-copy h3 {
+    font-size: 20px;
+    max-width: 100%;
+  }
+  .card-note {
+    display: none;
   }
 }
 @media (max-width: 600px) {

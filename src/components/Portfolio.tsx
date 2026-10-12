@@ -28,6 +28,21 @@ import {
 import { GlobeArt, Scada, TechSymbol, FlowDiagram } from "./TechnicalVisuals";
 import { useReveal, useCountUp } from "./motion";
 const cv = "/assets/MohamedAhmedShams_CV.pdf";
+
+/* The CV-confirmed flagship leads the grid; the remaining projects keep their
+   existing order so the first six still fill the initial grid and the seventh
+   stays behind "View all". */
+const FLAGSHIP_SLUG = "dohler-cloudy-line";
+const orderedProjects = [
+  ...projects.filter((p) => p.slug === FLAGSHIP_SLUG),
+  ...projects.filter((p) => p.slug !== FLAGSHIP_SLUG),
+];
+const visibleProjects = (all: boolean) =>
+  orderedProjects.slice(0, all ? 7 : 6);
+
+/* Card art is a display-resolution re-render of the same supplied illustration
+   (see docs/STAGE1-VISUAL-AUDIT.md); no subjects were replaced. */
+const cardArt = (image: string) => `/assets/card/card-${image}.webp`;
 export function Header() {
   const locale = useLocale();
   const ar = locale === "ar";
@@ -127,6 +142,22 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return <div className="eyebrow">{children}</div>;
 }
 
+/* One-shot hero entrance: opacity/transform only, so nothing shifts layout.
+   `useReducedMotion` short-circuits it to the final state. */
+const heroEase: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
+const heroItem = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: heroEase } },
+};
+const heroStagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.085, delayChildren: 0.05 } },
+};
+const heroActions = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+};
+
 /* Reveal wrapper: one-shot section fade/slide driven by IntersectionObserver. */
 function Reveal({
   children,
@@ -224,12 +255,14 @@ export default function Portfolio() {
           <Scada />
           <motion.div
             className="hero-copy"
-            initial={false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: reduced ? 0 : 0.6 }}
+            variants={heroStagger}
+            initial={reduced ? false : "hidden"}
+            animate="show"
           >
-            <Eyebrow>{t("Systems Engineer", "مهندس أنظمة")}</Eyebrow>
-            <h1>
+            <motion.div className="eyebrow" variants={heroItem}>
+              {t("Systems Engineer", "مهندس أنظمة")}
+            </motion.div>
+            <motion.h1 variants={heroItem}>
               {ar ? (
                 <>محمد أحمد شمس</>
               ) : (
@@ -238,34 +271,39 @@ export default function Portfolio() {
                   Ahmed Shams
                 </>
               )}
-            </h1>
-            <h2>
+            </motion.h1>
+            <motion.h2 variants={heroItem}>
               {t("Engineering Intelligent", "أطوّر أنظمة صناعية ذكية")}
               <br />
               {t("Industrial Systems.", "تربط الواقع بالتكنولوجيا.")}
-            </h2>
-            <p className="roles">
+            </motion.h2>
+            <motion.p className="roles" variants={heroItem}>
               {t(
                 "SCADA Developer | Industrial IoT Engineer | Systems Engineer",
                 "مهندس أنظمة | مطوّر SCADA | متخصص إنترنت الأشياء الصناعي",
               )}
-            </p>
-            <p className="hero-description">
+            </motion.p>
+            <motion.p className="hero-description" variants={heroItem}>
               {t(
                 "I design, develop, and integrate intelligent industrial platforms — connecting real-world operations with reliable software, data, and modern digital technologies.",
                 "أصمم وأطور وأكامل منصات صناعية ذكية تربط العمليات الفعلية بالمستشعرات والبيانات وأحدث التقنيات الرقمية.",
               )}
-            </p>
-            <div className="actions">
-              <a className="button" href="#projects">
+            </motion.p>
+            <motion.div className="actions" variants={heroActions}>
+              <motion.a className="button" href="#projects" variants={heroItem}>
                 {t("Explore My Work", "استكشف أعمالي")}
                 <ArrowRight size={17} />
-              </a>
-              <a className="button outline" href={cv} download>
+              </motion.a>
+              <motion.a
+                className="button outline"
+                href={cv}
+                download
+                variants={heroItem}
+              >
                 {t("Download CV", "تحميل السيرة الذاتية")}
                 <Download size={17} />
-              </a>
-            </div>
+              </motion.a>
+            </motion.div>
           </motion.div>
           <div className="micro">
             REAL OPERATIONS
@@ -381,45 +419,50 @@ export default function Portfolio() {
             </button>
           </div>
           <div className={"projects-grid" + (all ? " expanded" : "")}>
-            {projects.slice(0, all ? 7 : 6).map((p, i) => (
-              <Link
-                className={
-                  "project-card" +
-                  (!all && i === 1 ? " featured" : "")
-                }
-                key={p.slug}
-                href={`/${locale}/projects/${p.slug}`}
-              >
-                <div className="card-image">
-                  <Image
-                    src={`/assets/${p.image === "juice" ? "juice-card" : p.image}.webp`}
-                    alt=""
-                    fill
-                    sizes="(max-width:700px) 90vw, 33vw"
-                  />
-                  {!all && i === 1 && (
-                    <span className="featured-flag">
-                      {t("Flagship project", "المشروع الأبرز")}
+            {visibleProjects(all).map((p, i) => {
+              const flagship = !all && i === 0;
+              return (
+                <Link
+                  className={"project-card" + (flagship ? " featured" : "")}
+                  key={p.slug}
+                  href={`/${locale}/projects/${p.slug}`}
+                >
+                  <div className="card-image">
+                    <Image
+                      src={cardArt(p.image)}
+                      alt=""
+                      fill
+                      sizes={
+                        flagship
+                          ? "(max-width: 850px) 92vw, 749px"
+                          : "(max-width: 600px) 92vw, (max-width: 850px) 46vw, 363px"
+                      }
+                    />
+                    {flagship && (
+                      <span className="featured-flag">
+                        {t("Flagship project", "المشروع الأبرز")}
+                      </span>
+                    )}
+                    <span className="image-label">
+                      {t("Illustrative image", "صورة توضيحية")}
                     </span>
-                  )}
-                  <span className="image-label">
-                    {t("Illustrative image", "صورة توضيحية")}
-                  </span>
-                </div>
-                <div className="card-copy">
-                  <h3>{tx(p.title)}</h3>
-                  <span className="circle-arrow">
-                    <ArrowRight size={17} />
-                  </span>
-                  <p>{tx(p.sector)}</p>
-                  <div className="tags">
-                    {p.tags.slice(0, 3).map((tag) => (
-                      <span key={tag}>{tag}</span>
-                    ))}
                   </div>
-                </div>
-              </Link>
-            ))}
+                  <div className="card-copy">
+                    <h3>{tx(p.title)}</h3>
+                    <span className="circle-arrow">
+                      <ArrowRight size={flagship ? 19 : 17} />
+                    </span>
+                    <p>{tx(p.sector)}</p>
+                    {flagship && <p className="card-note">{tx(p.overview)}</p>}
+                    <div className="tags">
+                      {(flagship ? p.tags : p.tags.slice(0, 3)).map((tag) => (
+                        <span key={tag}>{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
         <section id="skills" className="section">
