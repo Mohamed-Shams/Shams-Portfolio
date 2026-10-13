@@ -213,6 +213,32 @@ export function Scada() {
             height="108"
             fill="url(#scada-grid)"
           />
+          {/* Y-axis ticks + an explicitly illustrative read-out label, so the
+              panel can never read as live plant telemetry. */}
+          <g stroke="#3d7091" strokeWidth="1">
+            <path d="M26 33h3M26 61h3M26 89h3M26 117h3" />
+          </g>
+          <text
+            x="30"
+            y="13"
+            fontSize="6"
+            fontFamily="JetBrains Mono, monospace"
+            letterSpacing="1"
+            fill="#619cb8"
+          >
+            TREND · 24 H · SIMULATED
+          </text>
+          <text
+            x="171"
+            y="133"
+            textAnchor="end"
+            fontSize="5.5"
+            fontFamily="JetBrains Mono, monospace"
+            letterSpacing="1"
+            fill="#528aa4"
+          >
+            ACQ / HR
+          </text>
           <g stroke="#1688b5" fill="none" strokeWidth=".7">
             <rect x="3" y="32" width="18" height="88" />
             <path d="M6 40h12M6 46h7M6 53h10M6 76h12M6 90h9M6 106h11M29 125H173M29 18v107" />
