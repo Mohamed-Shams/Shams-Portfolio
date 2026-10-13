@@ -281,6 +281,9 @@ export default function Portfolio() {
   const locale = useLocale() as "en" | "ar";
   const ar = locale === "ar";
   const t = (en: string, arabic: string) => (ar ? arabic : en);
+  const heroRoles = ar
+    ? ["مهندس أنظمة", "مطوّر SCADA", "متخصص إنترنت الأشياء الصناعي"]
+    : ["SCADA Developer", "Industrial IoT Engineer", "Systems Engineer"];
   const tx = (v: Localized) => v[locale];
   const [category, setCategory] = useState("All");
   const [all, setAll] = useState(false);
@@ -332,11 +335,15 @@ export default function Portfolio() {
               <br />
               {t("Industrial Systems.", "تربط الواقع بالتكنولوجيا.")}
             </motion.h2>
-            <motion.p className="roles" variants={heroItem}>
-              {t(
-                "SCADA Developer | Industrial IoT Engineer | Systems Engineer",
-                "مهندس أنظمة | مطوّر SCADA | متخصص إنترنت الأشياء الصناعي",
-              )}
+            <motion.p className="roles" variants={heroItem} aria-label={heroRoles.join(" | ")}>
+              {heroRoles.map((role, i) => (
+                <span className="role" key={role}>
+                  <bdi>{role}</bdi>
+                  {i < heroRoles.length - 1 && (
+                    <span className="role-divider" aria-hidden="true">|</span>
+                  )}
+                </span>
+              ))}
             </motion.p>
             <motion.p className="hero-description" variants={heroItem}>
               {t(

@@ -15,9 +15,14 @@ const check = (name, ok, detail) => {
   }
 };
 const scrollThrough = async (page) => {
-  // CSS scroll-behavior: smooth makes consecutive programmatic scrollTo calls
-  // lag behind, so step with "instant" and then wait until the one-shot
-  // observers have fired for every opt-in element before asserting.
+  // Wait for hydration to attach RevealManager's IntersectionObserver. A
+  // networkidle navigation can settle before the client's effect runs.
+  await page.waitForFunction(
+    () => document.documentElement.classList.contains("reveal-ready"),
+    null,
+    { timeout: 10000 },
+  );
+  // Move rapidly through the page without CSS smooth scrolling.
   await page.evaluate(async () => {
     const h = document.documentElement.scrollHeight;
     for (let y = 0; y <= h; y += 400) {
@@ -25,13 +30,32 @@ const scrollThrough = async (page) => {
       await new Promise((r) => setTimeout(r, 70));
     }
   });
+  // A 400px/70ms automated jump can skip a short target while the browser is
+  // busy painting. Revisit *only* missed targets through real scrolling and
+  // require their actual IntersectionObserver-driven `.in` state. This never
+  // sets the class itself, so an unreachable/defective target still fails.
+  const targets = page.locator("[data-reveal]");
+  const count = await targets.count();
+  for (let i = 0; i < count; i++) {
+    const el = targets.nth(i);
+    if (await el.evaluate((node) => node.classList.contains("in"))) continue;
+    await el.scrollIntoViewIfNeeded();
+    await page
+      .waitForFunction(
+        (index) => document.querySelectorAll("[data-reveal]")[index]?.classList.contains("in"),
+        i,
+        { timeout: 4000 },
+      )
+      .catch(() => {});
+  }
   await page
     .waitForFunction(
       () =>
         [...document.querySelectorAll("[data-reveal]")].every((e) =>
           e.classList.contains("in"),
         ),
-      { timeout: 10000 },
+      null,
+      { timeout: 5000 },
     )
     .catch(() => {});
   await page.waitForTimeout(1100);
