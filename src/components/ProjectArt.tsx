@@ -570,9 +570,9 @@ function sceneCity() {
           />
         );
       })}
-      {/* hub */}
-      <rect x={356} y={462} width={250} height={56} rx={10} fill={C.panel} stroke={C.amber} />
-      <text x={481} y={496} textAnchor="middle" fontFamily={MONO} fontSize={16} fill={C.amberL}>
+      {/* hub — kept above the floating gallery controls (bottom ~491) */}
+      <rect x={356} y={424} width={250} height={56} rx={10} fill={C.panel} stroke={C.amber} />
+      <text x={481} y={458} textAnchor="middle" fontFamily={MONO} fontSize={16} fill={C.amberL}>
         IGNITION ALL-IN-ONE
       </text>
       {[
@@ -582,7 +582,7 @@ function sceneCity() {
       ].map(([cx, cy], i) => (
         <path
           key={i}
-          d={`M${cx} ${cy} C ${cx} ${cy + 120}, ${481} ${400}, 481 462`}
+          d={`M${cx} ${cy} C ${cx} ${cy + 110}, ${481} ${370}, 481 424`}
           fill="none"
           stroke={C.blueB}
           strokeWidth={1.2}
@@ -699,7 +699,7 @@ function sceneWater() {
       {/* main pipe */}
       <line x1={70} y1={336} x2={890} y2={336} stroke="#17394f" strokeWidth={16} />
       <line x1={70} y1={336} x2={890} y2={336} stroke={C.blue} strokeWidth={2} strokeDasharray="14 10" />
-      {[230, 510, 790].map((x) => (
+      {[150, 370, 640].map((x) => (
         <path key={x} d={`M${x} 326 l14 10 -14 10z`} fill={C.amber} />
       ))}
       {[230, 510, 790].map((x) => (
@@ -707,14 +707,14 @@ function sceneWater() {
           <path d={`M${x - 14} 322 l14 14 -14 14 z M${x + 14} 322 l-14 14 14 14 z`} fill={C.panel2} stroke={C.amber} strokeWidth={2} />
         </g>
       ))}
-      {/* RTU */}
-      <rect x={846} y={250} width={80} height={78} rx={7} fill={C.panel2} stroke={C.blue} />
-      <line x1={886} y1={250} x2={886} y2={222} stroke={C.blueL} strokeWidth={3} />
-      <circle cx={886} cy={216} r={6} fill={C.amber} />
-      <circle cx={866} cy={272} r={5} fill={C.blueB} />
-      <rect x={878} y={266} width={38} height={9} rx={4} fill="#1c3d54" />
-      <rect x={860} y={290} width={56} height={9} rx={4} fill="#1c3d54" />
-      <text x={886} y={348} textAnchor="middle" fontFamily={MONO} fontSize={14} fill={C.muted}>
+      {/* RTU — raised so its label clears the main pipe */}
+      <rect x={846} y={234} width={80} height={78} rx={7} fill={C.panel2} stroke={C.blue} />
+      <line x1={886} y1={234} x2={886} y2={206} stroke={C.blueL} strokeWidth={3} />
+      <circle cx={886} cy={200} r={6} fill={C.amber} />
+      <circle cx={866} cy={256} r={5} fill={C.blueB} />
+      <rect x={878} y={250} width={38} height={9} rx={4} fill="#1c3d54" />
+      <rect x={860} y={274} width={56} height={9} rx={4} fill="#1c3d54" />
+      <text x={886} y={324} textAnchor="middle" fontFamily={MONO} fontSize={14} fill={C.muted}>
         SOFREL RTU
       </text>
       {["MADINAH", "YANBU", "TABUK"].map((r, i) =>
