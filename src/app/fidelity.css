@@ -1468,24 +1468,7 @@
   will-change: transform;
 }
 
-/* ---- Hero staggered entrance (CSS-driven; killed under reduced motion
-       by the global reduce rules in globals.css) ---- */
-@keyframes rise-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: none; }
-}
-@media (min-width: 851px), (max-width: 600px) {
-  .hero-copy > * {
-    opacity: 0;
-    animation: rise-in 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
-  }
-  .hero-copy > :nth-child(1) { animation-delay: 0.05s; }
-  .hero-copy > :nth-child(2) { animation-delay: 0.14s; }
-  .hero-copy > :nth-child(3) { animation-delay: 0.23s; }
-  .hero-copy > :nth-child(4) { animation-delay: 0.32s; }
-  .hero-copy > :nth-child(5) { animation-delay: 0.41s; }
-  .hero-copy > :nth-child(6) { animation-delay: 0.5s; }
-}
+/* Hero copy entrance is owned by Framer Motion in Portfolio.tsx. */
 @keyframes drift {
   0%   { transform: translate3d(0, 0, 0) scale(1); }
   50%  { transform: translate3d(-1.1%, -0.8%, 0) scale(1.03); }
@@ -3129,4 +3112,69 @@ footer a:hover {
       radial-gradient(85% 70% at 50% 32%, transparent 57%, #080d1289 90%, #080d12 100%),
       linear-gradient(0deg, #080d12b8, transparent 26%);
   }
+}
+
+/* V4 introductory signature: decorative, pointer-transparent and quick. */
+.portfolio-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 45%, #2d2019 0%, #11151a 37%, #080d12 78%);
+}
+.portfolio-intro-rings {
+  position: absolute;
+  width: min(72vw, 610px);
+  aspect-ratio: 1;
+  border: 1px solid #f1a34222;
+  border-radius: 50%;
+  box-shadow: 0 0 0 64px #f1a34208, 0 0 0 128px #f1a34206, 0 0 0 192px #f1a34204;
+}
+.portfolio-intro-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  padding-inline: 20px;
+}
+.portfolio-intro-mark {
+  font: 500 clamp(65px, 11vw, 116px)/1 "Space Grotesk", sans-serif;
+  letter-spacing: -0.09em;
+  padding-inline-end: 0.09em;
+  color: var(--amber);
+  text-shadow: 0 0 55px #f1a34235;
+}
+.portfolio-intro-content strong {
+  font: 600 clamp(17px, 3vw, 23px)/1.4 "Space Grotesk", Alexandria, sans-serif;
+  color: #f4f5f6;
+}
+.portfolio-intro-content span {
+  font: 400 12px/1.7 Inter, Alexandria, sans-serif;
+  color: #b4bdc6;
+}
+.portfolio-intro-line {
+  width: 160px;
+  height: 2px;
+  margin-top: 20px;
+  background: #f1a34226;
+  overflow: hidden;
+}
+.portfolio-intro-line i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--amber), #f7d6a7);
+  transform-origin: left;
+  animation: portfolio-intro-progress 0.9s ease-out both;
+}
+@keyframes portfolio-intro-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.hero-instrument .scada { pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-intro { display: none; }
+  .portfolio-intro-line i { animation: none; }
 }

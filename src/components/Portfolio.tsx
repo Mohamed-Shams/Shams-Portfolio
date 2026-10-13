@@ -35,6 +35,7 @@ import {
   FlowDiagram,
 } from "./TechnicalVisuals";
 import { ProjectArt } from "./ProjectArt";
+import { PortfolioIntro } from "./PortfolioIntro";
 import { useCountUp, RevealManager } from "./motion";
 const cv = "/assets/MohamedAhmedShams_CV.pdf";
 
@@ -176,12 +177,12 @@ function Eyebrow({
    `useReducedMotion` short-circuits it to the final state. */
 const heroEase: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
 const heroItem = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0, y: 22 },
   show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: heroEase } },
 };
 const heroStagger = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.085, delayChildren: 0.05 } },
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.12 } },
 };
 const heroActions = {
   hidden: {},
@@ -292,11 +293,12 @@ export default function Portfolio() {
         {t("Skip to content", "انتقل إلى المحتوى")}
       </a>
       <Header />
+      <PortfolioIntro locale={locale} />
       <ScrollProgress />
       <RevealManager />
       <main id="main">
         <section className="hero" id="home">
-          <div className="hero-portrait">
+          <motion.div className="hero-portrait" initial={reduced ? false : { opacity: 0, x: ar ? -20 : 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, ease: heroEase }}>
             <Image
               src="/assets/portrait.webp"
               alt={t("Mohamed Ahmed Shams", "محمد أحمد شمس")}
@@ -304,11 +306,11 @@ export default function Portfolio() {
               priority
               sizes="(max-width: 700px) 100vw, 75vw"
             />
-          </div>
+          </motion.div>
           <div className="industrial" aria-hidden="true" />
           <div className="refinery" aria-hidden="true" />
           <div className="hero-shade" />
-          <Scada />
+          <div className="hero-instrument"><Scada /></div>
           <motion.div
             className="hero-copy"
             variants={heroStagger}
