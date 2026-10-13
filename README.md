@@ -23,7 +23,18 @@ npm start
 
 Vercel: import this directory as a Next.js project, use `npm run build`, retain automatic Next.js settings. Netlify: use its Next.js runtime integration and `npm run build`; do not deploy this repository as plain static HTML. Set `NEXT_PUBLIC_SITE_URL` to your final HTTPS origin before building so social metadata uses the correct domain. The fallback is the existing portfolio URL verified in the supplied CV.
 
-Self-host on a Node server with `npm start` behind an HTTPS reverse proxy. Production output uses `.next-production`; development uses `.next-dev` to avoid Windows file-lock collisions. Standalone server deployments must copy `public` and `.next-production/static` into the corresponding standalone directory. Do not expose development mode publicly.
+Self-host on a Node server with `npm start` behind an HTTPS reverse proxy. Production output uses `.next`; development uses `.next-dev` to avoid Windows file-lock collisions. This standard production output path is required by the OpenNext Cloudflare adapter. Standalone server deployments must copy `public` and `.next/static` into the corresponding standalone directory. Do not expose development mode publicly.
+
+### Cloudflare Workers deployment
+
+The repository includes a pinned OpenNext adapter, Wrangler configuration, and Worker build scripts. These prevent Wrangler from trying to migrate the project dynamically on every deployment.
+
+The existing Cloudflare Workers Builds settings work without changing the dashboard:
+
+- **Build command:** `npm run build` (creates `.next`)
+- **Deploy command:** `npx wrangler deploy` (its `wrangler.jsonc` build step runs `npm run build:worker`, creating `.open-next` from the existing Next.js output)
+
+For local validation, run `npm run build:cloudflare` to build Next.js and the Cloudflare adapter together, or `npm run preview:cloudflare` to launch a local Workers preview. `npm run deploy` is also supported for direct deployment with Cloudflare credentials. Do not change the dashboard's build command to `npm run build:worker` without first creating the Next.js build output.
 
 ## Content and assets
 
