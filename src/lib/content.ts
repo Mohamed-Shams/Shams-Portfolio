@@ -1,6 +1,35 @@
 export type Localized = { en: string; ar: string };
 export const l = (en: string, ar: string): Localized => ({ en, ar });
-export const projects = [
+
+/* One gallery artwork entry. `kind` selects the renderer in
+   src/components/ProjectArt.tsx: `scene` is a project-specific site
+   illustration, `flow` draws the project's verified architecture steps, and
+   `ops` is a stylised operations view built from the project's own tags.
+   All artwork is original vector illustration — no project photographs are
+   claimed. */
+export type GalleryKind = "scene" | "flow" | "ops";
+export type GalleryItem = { kind: GalleryKind; caption: Localized };
+export type Architecture = {
+  nodes: [Localized, Localized, Localized, Localized];
+  note: Localized;
+};
+export type ScaleTile = { value: string; label: Localized };
+
+export type Project = {
+  slug: string;
+  title: Localized;
+  sector: Localized;
+  image: string;
+  date: string;
+  tags: string[];
+  overview: Localized;
+  responsibilities: Localized[];
+  gallery: GalleryItem[];
+  architecture: Architecture;
+  scale: ScaleTile[];
+};
+
+export const projects: Project[] = [
   {
     slug: "ncec-air-quality",
     title: l(
@@ -29,6 +58,46 @@ export const projects = [
         "التحقق من القيم المعروضة وسلوك النظام ودعم استكشاف الأعطال والاختبارات والتوثيق.",
       ),
     ],
+    gallery: [
+      {
+        kind: "scene",
+        caption: l(
+          "Monitoring station with analyzers and telemetry mast",
+          "محطة مراقبة بأجهزة التحليل وساق القياس عن بُعد",
+        ),
+      },
+      {
+        kind: "flow",
+        caption: l(
+          "Station data path: analyzers → Stream IIOT → MSSQL → dashboards",
+          "مسار بيانات المحطة: المحللات ← Stream IIOT ← MSSQL ← اللوحات",
+        ),
+      },
+      {
+        kind: "ops",
+        caption: l(
+          "Configuration, validation and support focus areas",
+          "مجالات التركيز: التهيئة والتحقق والدعم",
+        ),
+      },
+    ],
+    architecture: {
+      nodes: [
+        l("AQMS monitoring stations", "محطات مراقبة AQMS"),
+        l("Stream IIOT platform", "منصة Stream IIOT"),
+        l("MSSQL queries & schema", "استعلامات ومخطط MSSQL"),
+        l("Validated dashboards", "لوحات مُتحقَّق منها"),
+      ],
+      note: l(
+        "Derived from this project's stated responsibilities: station configuration, database support and platform validation.",
+        "مشتق من مسؤوليات المشروع المعلنة: تهيئة المحطات ودعم قواعد البيانات والتحقق من المنصة.",
+      ),
+    },
+    scale: [
+      { value: "AQMS", label: l("Monitoring scope", "نطاق المراقبة") },
+      { value: "Stream IIOT", label: l("IIoT platform", "منصة IIoT") },
+      { value: "MSSQL", label: l("Data layer", "طبقة البيانات") },
+    ] as ScaleTile[],
   },
   {
     slug: "dohler-cloudy-line",
@@ -63,6 +132,49 @@ export const projects = [
         "دعم التشغيل التجريبي وتدريب المشغلين والتكامل مع الأنظمة الرقمية للمصنع.",
       ),
     ],
+    gallery: [
+      {
+        kind: "scene",
+        caption: l(
+          "Concentrate line: tanks, pumps and process skids",
+          "خط المركز: الخزائن والمضخات ووحدات العملية",
+        ),
+      },
+      {
+        kind: "flow",
+        caption: l(
+          "Control path: 7+ PLC packages → Ignition → MSSQL historian → HMIs & alarms",
+          "مسار التحكم: أكثر من 7 موردي PLC ← Ignition ← سجل MSSQL ← الواجهات والإنذارات",
+        ),
+      },
+      {
+        kind: "ops",
+        caption: l(
+          "Live view of sensors, valves, VSDs and alarms",
+          "عرض لحظي للحساسات والصمامات ومغيرات السرعة والإنذارات",
+        ),
+      },
+    ],
+    architecture: {
+      nodes: [
+        l("7+ PLC package suppliers", "موردو أكثر من 7 حزم PLC"),
+        l("Ignition Perspective", "Ignition Perspective"),
+        l("MSSQL historian", "سجل MSSQL"),
+        l("HMIs & alarms", "الواجهات والإنذارات"),
+      ],
+      note: l(
+        "Data path as described in this project's responsibilities: PLC integration, responsive Perspective HMIs, MSSQL historians and alarms.",
+        "مسار البيانات كما ورد في مسؤوليات المشروع: تكامل PLC وواجهات Perspective متجاوبة وسجلات MSSQL والإنذارات.",
+      ),
+    },
+    scale: [
+      { value: "65 Brix", label: l("Concentrate strength", "تركيز المركز") },
+      { value: "7+", label: l("PLC package suppliers", "موردو حزم PLC") },
+      {
+        value: "1st",
+        label: l("Of its kind in the Middle East", "من نوعه في الشرق الأوسط"),
+      },
+    ] as ScaleTile[],
   },
   {
     slug: "ground-water",
@@ -93,6 +205,52 @@ export const projects = [
         "المساهمة في إدارة الأصول ولوحات التحليل.",
       ),
     ],
+    gallery: [
+      {
+        kind: "scene",
+        caption: l(
+          "Well field reporting through gateways to the platform",
+          "حقل آبار يرسل بياناته عبر البوابات إلى المنصة",
+        ),
+      },
+      {
+        kind: "flow",
+        caption: l(
+          "Multi-gateway path: wells → Ignition gateways → Oracle & InfluxDB → dashboards",
+          "مسار متعدد البوابات: الآبار ← بوابات Ignition ← Oracle وInfluxDB ← اللوحات",
+        ),
+      },
+      {
+        kind: "ops",
+        caption: l(
+          "Real-time consumption analysis across the well estate",
+          "تحليل لحظي لاستهلاك المياه عبر شبكة الآبار",
+        ),
+      },
+    ],
+    architecture: {
+      nodes: [
+        l("7,000+ underground wells", "أكثر من 7,000 بئر جوفي"),
+        l("Multi-gateway Ignition", "Ignition متعدد البوابات"),
+        l("Oracle + InfluxDB", "Oracle + InfluxDB"),
+        l("REST API & dashboards", "REST API واللوحات"),
+      ],
+      note: l(
+        "Architecture as described in this project's responsibilities: multi-gateway redundancy, Oracle schema, InfluxDB historian, REST and dashboards.",
+        "البنية كما وردت في مسؤوليات المشروع: تكرار متعدد البوابات ومخطط Oracle وسجل InfluxDB وREST واللوحات.",
+      ),
+    },
+    scale: [
+      {
+        value: "7,000+",
+        label: l("Underground wells", "بئر جوفية"),
+      },
+      {
+        value: "Multi-gateway",
+        label: l("Redundant architecture", "بنية مكررة"),
+      },
+      { value: "InfluxDB", label: l("Time-series historian", "سجل زمني") },
+    ] as ScaleTile[],
   },
   {
     slug: "modon-poc",
@@ -125,6 +283,52 @@ export const projects = [
         "دعم تسجيل الأصول ولوحات البيانات.",
       ),
     ],
+    gallery: [
+      {
+        kind: "scene",
+        caption: l(
+          "Industrial city infrastructure instrumented with smart sensors",
+          "بنية تحتية في مدينة صناعية مجهزة بحساسات ذكية",
+        ),
+      },
+      {
+        kind: "flow",
+        caption: l(
+          "Platform path: 10,000+ sensors → Ignition All-in-One → MSSQL → APIs & dashboards",
+          "مسار المنصة: أكثر من 10,000 حساس ← Ignition All-in-One ← MSSQL ← الواجهات واللوحات",
+        ),
+      },
+      {
+        kind: "ops",
+        caption: l(
+          "Sensor estate and asset dashboards at a glance",
+          "لمحة عن الحساسات والأصول ولوحات البيانات",
+        ),
+      },
+    ],
+    architecture: {
+      nodes: [
+        l("10,000+ smart sensors", "أكثر من 10,000 حساس ذكي"),
+        l("Ignition All-in-One", "Ignition All-in-One"),
+        l("MSSQL schemas", "مخططات MSSQL"),
+        l("APIs & dashboards", "واجهات برمجية ولوحات"),
+      ],
+      note: l(
+        "Platform path as described in this project's responsibilities: All-in-One architecture, MSSQL schemas, third-party APIs and dashboards.",
+        "مسار المنصة كما ورد في مسؤوليات المشروع: بنية موحدة ومخططات MSSQL وواجهات خارجية ولوحات بيانات.",
+      ),
+    },
+    scale: [
+      {
+        value: "10,000+",
+        label: l("Smart sensors", "حساسات ذكية"),
+      },
+      { value: "POC", label: l("Proof of concept", "إثبات مفهوم") },
+      {
+        value: "All-in-One",
+        label: l("Platform architecture", "بنية المنصة"),
+      },
+    ] as ScaleTile[],
   },
   {
     slug: "drilling-equipment",
@@ -155,6 +359,49 @@ export const projects = [
         "دعم REST API وActive Directory والصلاحيات المبنية على الأدوار.",
       ),
     ],
+    gallery: [
+      {
+        kind: "scene",
+        caption: l(
+          "Drilling rig with tracked equipment assets",
+          "رافعة حفر مع أصول معدات مُتتبَّعة",
+        ),
+      },
+      {
+        kind: "flow",
+        caption: l(
+          "Platform path: field assets → distributed Ignition → Oracle & InfluxDB → dashboards",
+          "مسار المنصة: الأصول الميدانية ← Ignition موزعة ← Oracle وInfluxDB ← اللوحات",
+        ),
+      },
+      {
+        kind: "ops",
+        caption: l(
+          "Asset governance and registration workflows",
+          "حوكمة الأصول وإجراءات تسجيلها",
+        ),
+      },
+    ],
+    architecture: {
+      nodes: [
+        l("1,300 equipment assets", "1,300 أصل معدات"),
+        l("Distributed Ignition", "Ignition موزعة"),
+        l("Oracle + InfluxDB", "Oracle + InfluxDB"),
+        l("Asset dashboards", "لوحات الأصول"),
+      ],
+      note: l(
+        "Platform path as described in this project's responsibilities: distributed architecture with failover, Oracle schema, InfluxDB historian and dashboards.",
+        "مسار المنصة كما ورد في مسؤوليات المشروع: بنية موزعة مع تجاوز الأعطال ومخطط Oracle وسجل InfluxDB واللوحات.",
+      ),
+    },
+    scale: [
+      { value: "1,300", label: l("Equipment assets", "أصل معدات") },
+      {
+        value: "Failover",
+        label: l("Distributed architecture", "بنية موزعة"),
+      },
+      { value: "InfluxDB", label: l("Process historian", "سجل العملية") },
+    ] as ScaleTile[],
   },
   {
     slug: "water-network",
@@ -184,6 +431,58 @@ export const projects = [
         "إعداد وثائق FAT والاختبار والتشغيل التجريبي وتنفيذ أعمال الاختبارات والتشغيل.",
       ),
     ],
+    gallery: [
+      {
+        kind: "scene",
+        caption: l(
+          "Field sites with RTUs and dataloggers in the northwest cluster",
+          "مواقع ميدانية بوحدات RTU ومسجلات بيانات في التجمع الشمالي الغربي",
+        ),
+      },
+      {
+        kind: "flow",
+        caption: l(
+          "Delivery path: field sites → SOFREL RTU → signals & alarms → FAT / T&C records",
+          "مسار التنفيذ: المواقع الميدانية ← وحدة SOFREL ← الإشارات والإنذارات ← سجلات FAT والتشغيل",
+        ),
+      },
+      {
+        kind: "ops",
+        caption: l(
+          "Coverage across Madinah, Yanbu and Tabuk",
+          "تغطية المدينة وينبع وتبوك",
+        ),
+      },
+    ],
+    architecture: {
+      nodes: [
+        l(
+          "Field sites · Madinah, Yanbu, Tabuk",
+          "مواقع ميدانية · المدينة، ينبع، تبوك",
+        ),
+        l("SOFREL RTU & datalogger", "وحدة SOFREL ومسجل البيانات"),
+        l("Signals, alarms & comms", "الإشارات والإنذارات والاتصالات"),
+        l("FAT / T&C documentation", "وثائق FAT والتشغيل"),
+      ],
+      note: l(
+        "Delivery path as described in this project's responsibilities: RTU works, signal validation and FAT / T&C documentation.",
+        "مسار التنفيذ كما ورد في مسؤوليات المشروع: أعمال RTU والتحقق من الإشارات ووثائق FAT والتشغيل.",
+      ),
+    },
+    scale: [
+      {
+        value: "3",
+        label: l("Clusters: Madinah, Yanbu, Tabuk", "تجمعات: المدينة، ينبع، تبوك"),
+      },
+      {
+        value: "SOFREL",
+        label: l("RTU & dataloggers", "وحدات RTU ومسجلات"),
+      },
+      {
+        value: "FAT / T&C",
+        label: l("Testing & commissioning", "الاختبار والتشغيل"),
+      },
+    ] as ScaleTile[],
   },
   {
     slug: "modon-testing",
@@ -206,6 +505,55 @@ export const projects = [
         "تنفيذ اختبارات عبر المتصفحات وتوافق الأجهزة واختبارات الانحدار.",
       ),
     ],
+    gallery: [
+      {
+        kind: "scene",
+        caption: l(
+          "QA lab: web and mobile journeys under test",
+          "مختبر ضمان الجودة: رحلات الويب والهاتف قيد الاختبار",
+        ),
+      },
+      {
+        kind: "flow",
+        caption: l(
+          "Testing pipeline: journeys → Azure DevOps cases → regression → acceptance",
+          "مسار الاختبار: الرحلات ← حالات Azure DevOps ← الانحدار ← معايير القبول",
+        ),
+      },
+      {
+        kind: "ops",
+        caption: l(
+          "Cross-browser, device and regression coverage",
+          "تغطية المتصفحات والأجهزة واختبارات الانحدار",
+        ),
+      },
+    ],
+    architecture: {
+      nodes: [
+        l("Web & mobile journeys", "رحلات الويب والهاتف"),
+        l("Azure DevOps test cases", "حالات الاختبار في Azure DevOps"),
+        l("Regression & compatibility", "الانحدار والتوافق"),
+        l("Acceptance criteria", "معايير القبول"),
+      ],
+      note: l(
+        "Testing pipeline as described in this project's responsibilities: criteria-based test cases, cross-browser, device and regression testing.",
+        "مسار الاختبار كما ورد في مسؤوليات المشروع: حالات اختبار وفق معايير القبول واختبارات المتصفحات والأجهزة والانحدار.",
+      ),
+    },
+    scale: [
+      {
+        value: "Web + Mobile",
+        label: l("Journeys tested", "رحلات مختبرة"),
+      },
+      {
+        value: "Azure DevOps",
+        label: l("Test management", "إدارة الاختبارات"),
+      },
+      {
+        value: "Regression",
+        label: l("Cross-browser & device", "عبر المتصفحات والأجهزة"),
+      },
+    ] as ScaleTile[],
   },
 ];
 export const skills = [
@@ -378,3 +726,73 @@ export const training = [
     "Apr 2025",
   ],
 ];
+
+/* One-line, bilingual description per project technology tag. Used by the
+   case-study technology section; wording describes what the technology is,
+   not what any specific project did with it. */
+export const techNotes: Record<string, Localized> = {
+  "Stream IIOT": l(
+    "Industrial IoT platform for station data configuration and visualization.",
+    "منصة إنترنت الأشياء الصناعي لتهيئة بيانات المحطات وعرضها.",
+  ),
+  MSSQL: l(
+    "Microsoft SQL Server — relational store for historians and station queries.",
+    "مايكروسوفت SQL Server — قاعدة علائقية للسجلات واستعلامات المحطات.",
+  ),
+  Ignition: l(
+    "Inductive Automation's SCADA platform for IIoT, HMI and dashboards.",
+    "منصة SCADA من Inductive Automation لإنترنت الأشياء الصناعي والواجهات واللوحات.",
+  ),
+  SCADA: l(
+    "Supervisory control and data acquisition for plant-wide monitoring and control.",
+    "التحكم والإشراف والجمع اللحظي لمراقبة المصنع والتحكم فيه.",
+  ),
+  HMI: l(
+    "Operator interfaces for monitoring and commanding the process.",
+    "واجهات المشغل لمراقبة العملية والتحكم بها.",
+  ),
+  PostgreSQL: l(
+    "Open-source relational database used for application data.",
+    "قاعدة بيانات علائقية مفتوحة المصدر لبيانات التطبيقات.",
+  ),
+  Oracle: l(
+    "Oracle Database for relational asset and schema storage.",
+    "قاعدة Oracle لتخزين الأصول والمخططات العلائقية.",
+  ),
+  InfluxDB: l(
+    "Time-series database used as the process historian.",
+    "قاعدة سلاسل زمنية تُستخدم كسجل لبيانات العملية.",
+  ),
+  IIoT: l(
+    "Industrial Internet of Things — connected sensors, gateways and analytics.",
+    "إنترنت الأشياء الصناعي — حساسات وبوابات وتحليلات متصلة.",
+  ),
+  "10K+ Sensors": l(
+    "Smart-sensor estate monitored in the proof of concept.",
+    "مجموعة الحساسات الذكية المراقبة في إثبات المفهوم.",
+  ),
+  "SOFREL RTU": l(
+    "Remote terminal units for field measurement, datalogging and supervision.",
+    "وحدات تحكم عن بُعد للقياس وتسجيل البيانات والإشراف الميداني.",
+  ),
+  Testing: l(
+    "Structured functional, signal and acceptance testing.",
+    "اختبارات وظيفية وإشارات وقبول منظمة.",
+  ),
+  Commissioning: l(
+    "Site integration, commissioning and handover.",
+    "تكامل الموقع والتشغيل التجريبي والتسليم.",
+  ),
+  "Azure DevOps": l(
+    "Microsoft's planning and test-management service for cases and runs.",
+    "خدمة تخطيط وإدارة الاختبارات من مايكروسوفت لحالات الاختبار والتنفيذ.",
+  ),
+  "REST APIs": l(
+    "HTTP-based interfaces for integrating external systems.",
+    "واجهات HTTP لتكامل الأنظمة الخارجية.",
+  ),
+  QA: l(
+    "Manual quality assurance against acceptance criteria.",
+    "ضمان جودة يدوية وفق معايير القبول.",
+  ),
+};
