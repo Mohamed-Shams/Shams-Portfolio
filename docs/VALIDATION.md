@@ -19,5 +19,5 @@ Final reference comparison also corrected desktop hero type scale and header spa
 - Responsive sweep: 1440/1280/1024/768/390/360 × EN/AR — no horizontal overflow, nothing left unrevealed, zero page errors. `validate.cjs`: 10/10 combos clean.
 - axe-core WCAG 2 A/AA and 2.1 AA scan (after reveals settle): zero violations in both locales.
 - Stage 1 and Stage 2 verifiers still pass with unchanged numbers: no approved layout geometry moved (Stage 3 animates opacity/transform only).
-- Screenshots: gitignored `screenshots/stage3-before/` (HEAD build) and `screenshots/stage3-after/` (Stage 3 build), 52 shots + contact sheet each. The tracked root screenshots were restored to their committed state after a partial earlier session left blank pre-reveal frames among them.
+- Screenshots: gitignored `screenshots/stage3-before/` (HEAD build) and `screenshots/stage3-after/` (Stage 3 build), 52 shots + contact sheet each. `validate.cjs` — the generator of the tracked root screenshots — now settles every reveal before shooting, and the tracked set has been regenerated from the final build (its earlier captures came out blank for below-fold sections).
 
