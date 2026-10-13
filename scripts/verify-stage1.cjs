@@ -127,7 +127,9 @@ function check(ok, message) {
       );
 
       // "View all" must reveal the seventh project.
-      await page.evaluate(() => window.scrollTo(0, 0));
+      // Avoid competing with the site's smooth-scroll CSS while Playwright
+      // scrolls the heading button into view for a real pointer click.
+      await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
       await page.click("#projects .text-link");
       await page.waitForTimeout(350);
       const after = await page.$$eval(".project-card", (n) => n.length);
