@@ -5,6 +5,30 @@ const fs = require("fs");
     executablePath: "C:/Program Files/Google/Chrome/Application/chrome.exe",
     headless: true,
   });
+  /* Stage 3 reveal system: below-the-fold content is transparent until it
+     enters the viewport. Walk each page (instant steps) so every one-shot
+     reveal fires and lazily loaded art decodes before any screenshot or
+     geometry read; otherwise section captures come out blank. */
+  const settle = async (page) => {
+    await page.evaluate(async () => {
+      const h = document.documentElement.scrollHeight;
+      for (let y = 0; y <= h; y += 400) {
+        window.scrollTo({ top: y, left: 0, behavior: "instant" });
+        await new Promise((r) => setTimeout(r, 70));
+      }
+    });
+    await page
+      .waitForFunction(
+        () =>
+          [...document.querySelectorAll("[data-reveal]")].every((e) =>
+            e.classList.contains("in"),
+          ),
+        { timeout: 10000 },
+      )
+      .catch(() => {});
+    await page.waitForTimeout(1200);
+    await page.evaluate(() => window.scrollTo(0, 0));
+  };
   const report = [];
   for (const [name, width, height] of [
     ["desktop", 1440, 900],
@@ -24,6 +48,7 @@ const fs = require("fs");
         waitUntil: "networkidle",
       });
       await page.evaluate(() => document.fonts.ready);
+      await settle(page);
       await page.screenshot({
         path: `screenshots/${locale}-${name}.png`,
         fullPage: true,
@@ -67,6 +92,8 @@ const fs = require("fs");
         await page.goto(
           `http://localhost:3000/${locale}/projects/dohler-cloudy-line`,
         );
+        await page.evaluate(() => document.fonts.ready);
+        await settle(page);
         await page.screenshot({
           path: `screenshots/${locale}-case-study.png`,
           fullPage: true,

@@ -12,8 +12,13 @@ import {
   Workflow,
   Cloud,
   ChartNoAxesCombined,
+  ChartLine,
   Braces,
+  Factory,
 } from "lucide-react";
+/* One glyph per tool. Two pairs used to share an icon (both SQL/InfluxDB tiles
+   drew the same cylinder, Industrial IoT and AWS the same cloud), which made the
+   grid read as three repeated shapes rather than fifteen distinct tools. */
 export function TechSymbol({ name }: { name: string }) {
   const Icon = name.startsWith("Ignition")
     ? Activity
@@ -23,23 +28,27 @@ export function TechSymbol({ name }: { name: string }) {
         ? CircuitBoard
         : name.startsWith("SCADA")
           ? MonitorCog
-          : name === "OPC UA"
-            ? Network
-            : name === "MQTT"
-              ? Rss
-              : name === "REST APIs"
-                ? Waypoints
-                : name === "Python"
-                  ? Braces
-                  : name.startsWith("JavaScript")
-                    ? Code2
-                    : name.includes("SQL") || name === "InfluxDB"
-                      ? Database
-                      : name.startsWith("Docker")
-                        ? Container
-                        : name === "Dataiku"
-                          ? ChartNoAxesCombined
-                          : Cloud;
+          : name === "Industrial IoT"
+            ? Factory
+            : name === "OPC UA"
+              ? Network
+              : name === "MQTT"
+                ? Rss
+                : name === "REST APIs"
+                  ? Waypoints
+                  : name === "Python"
+                    ? Braces
+                    : name.startsWith("JavaScript")
+                      ? Code2
+                      : name === "InfluxDB"
+                        ? ChartLine
+                        : name.includes("SQL")
+                          ? Database
+                          : name.startsWith("Docker")
+                            ? Container
+                            : name === "Dataiku"
+                              ? ChartNoAxesCombined
+                              : Cloud;
   const color =
     name.startsWith("Ignition") ||
     name.startsWith("JavaScript") ||
@@ -54,7 +63,6 @@ export function TechSymbol({ name }: { name: string }) {
   return (
     <span className={`tech-symbol tech-${color}`} aria-hidden="true">
       <Icon size={30} />
-      {name === "Python" && <small>Py</small>}
     </span>
   );
 }
@@ -104,29 +112,47 @@ export function FlowDiagram({
       />
     </g>
   );
+  /* The SVG labels are viewBox units: below the wide desktop the drawing is
+     scaled down until the 12-unit type renders at 5–9px. The same five steps are
+     therefore also rendered as real text, and the two swap at 1151px so exactly
+     one of them is ever displayed (and exposed to assistive tech). */
+  const steps = [labels.from, labels.via, labels.to, labels.db, labels.dash];
   return (
-    <svg
-      className="flow-diagram"
-      viewBox="0 0 1080 96"
-      role="img"
-      aria-label={
-        (labels.from + " → " + labels.via + " → " + labels.to + " → " + labels.db + " → " + labels.dash)
-      }
-    >
-      {node(6, 28, 150, labels.from, false)}
-      {arrow(164, 210, 48, "a")}
-      {node(214, 28, 130, labels.via, false)}
-      {arrow(352, 396, 48, "b")}
-      {node(400, 22, 190, labels.to, true)}
-      {arrow(598, 644, 48, "c")}
-      {node(648, 28, 149, labels.db, false)}
-      {arrow(805, 851, 48, "d")}
-      {node(855, 28, 150, labels.dash, false)}
-      <circle className="flow-dot dot-a" r="3" fill="#f1a342" />
-      <circle className="flow-dot dot-b" r="3" fill="#278bb2" />
-      <circle className="flow-dot dot-c" r="3" fill="#f1a342" />
-      <circle className="flow-dot dot-d" r="3" fill="#278bb2" />
-    </svg>
+    <>
+      <ol className="flow-steps">
+        {steps.map((label, i) => (
+          <li
+            key={label}
+            className={"flow-step" + (i === 2 ? " accent" : "")}
+          >
+            {i > 0 && <span className="flow-link" aria-hidden="true" />}
+            <span className="flow-chip">{label}</span>
+          </li>
+        ))}
+      </ol>
+      <svg
+        className="flow-diagram"
+        viewBox="0 0 1080 96"
+        role="img"
+        aria-label={
+          (labels.from + " → " + labels.via + " → " + labels.to + " → " + labels.db + " → " + labels.dash)
+        }
+      >
+        {node(6, 28, 150, labels.from, false)}
+        {arrow(164, 210, 48, "a")}
+        {node(214, 28, 130, labels.via, false)}
+        {arrow(352, 396, 48, "b")}
+        {node(400, 22, 190, labels.to, true)}
+        {arrow(598, 644, 48, "c")}
+        {node(648, 28, 149, labels.db, false)}
+        {arrow(805, 851, 48, "d")}
+        {node(855, 28, 150, labels.dash, false)}
+        <circle className="flow-dot dot-a" r="3" fill="#f1a342" />
+        <circle className="flow-dot dot-b" r="3" fill="#278bb2" />
+        <circle className="flow-dot dot-c" r="3" fill="#f1a342" />
+        <circle className="flow-dot dot-d" r="3" fill="#278bb2" />
+      </svg>
+    </>
   );
 }
 export function Scada() {
@@ -322,6 +348,12 @@ export function GlobeArt() {
                 />
               ))}
             <circle
+              className={i % 11 === 0 ? "globe-node" : undefined}
+              style={
+                i % 11 === 0
+                  ? { animationDelay: `${((i % 44) / 11) * 1.4}s` }
+                  : undefined
+              }
               cx={p.x}
               cy={p.y}
               r={i % 11 === 0 ? 2.2 : 1}
@@ -345,29 +377,49 @@ export function GlobeArt() {
             fillOpacity=".2"
           />
         ))}
-        <path
-          d="M125 345Q255 75 414 167M70 195Q264 400 410 325M91 358Q265 233 418 360"
-          stroke="#c78134"
-          strokeWidth=".7"
-          opacity=".65"
+        {/* The three signal arcs draw themselves once the contact section has
+            revealed (`.contact.in`), then stay. One-shot, offset only. */}
+        {[
+          { d: "M125 345Q255 75 414 167", delay: "0.2s" },
+          { d: "M70 195Q264 400 410 325", delay: "0.5s" },
+          { d: "M91 358Q265 233 418 360", delay: "0.8s" },
+        ].map((arc) => (
+          <path
+            key={arc.d}
+            className="globe-signal"
+            style={{ animationDelay: arc.delay }}
+            d={arc.d}
+            stroke="#c78134"
+            strokeWidth=".7"
+            opacity=".65"
+          />
+        ))}
+      </g>
+      {/* Slow dashed orbit ring around the globe (rotates, 90s/turn). */}
+      <g className="globe-orbit">
+        <ellipse
+          cx="240"
+          cy="240"
+          rx="256"
+          ry="78"
+          transform="rotate(-24 240 240)"
+          stroke="#1688b5"
+          strokeWidth=".5"
+          strokeDasharray="3 7"
+          opacity=".35"
         />
       </g>
-      <ellipse
-        cx="240"
-        cy="240"
-        rx="246"
-        ry="95"
-        transform="rotate(-44 240 240)"
-        stroke="#1688b5"
-        strokeWidth=".5"
-        opacity=".4"
-      />
       <g transform="translate(281 173)">
-        <path
-          d="M0 31C-12 13-17 7-17 0a17 17 0 0134 0c0 8-6 15-17 31Z"
-          fill="#f1a342"
-        />
-        <circle cy="-1" r="6" fill="#101820" />
+        {/* The inner group carries the float so the CSS transform never
+            clobbers the outer translate attribute. */}
+        <g className="globe-pin">
+          <circle r="26" fill="#f1a342" opacity=".1" />
+          <path
+            d="M0 31C-12 13-17 7-17 0a17 17 0 0134 0c0 8-6 15-17 31Z"
+            fill="#f1a342"
+          />
+          <circle cy="-1" r="6" fill="#101820" />
+        </g>
       </g>
     </svg>
   );
