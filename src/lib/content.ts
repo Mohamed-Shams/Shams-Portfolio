@@ -9,6 +9,29 @@ export const l = (en: string, ar: string): Localized => ({ en, ar });
    claimed. */
 export type GalleryKind = "scene" | "flow" | "ops";
 export type GalleryItem = { kind: GalleryKind; caption: Localized };
+export type ProjectGalleryItem =
+  | GalleryItem
+  | { kind: "cover"; caption: Localized };
+export type ProjectCover = {
+  src: string;
+  alt: Localized;
+  caption: Localized;
+  objectPosition: string;
+  illustrative: boolean;
+  source: {
+    provider: "Unsplash";
+    creator: string;
+    creatorUrl: string;
+    sourcePage: string;
+    license: "Unsplash License";
+    licenseUrl: "https://unsplash.com/license";
+    rightsNote: Localized;
+  };
+};
+export type ProjectMedia = {
+  cover: ProjectCover;
+  galleryPhotos?: ProjectCover[];
+};
 export type Architecture = {
   nodes: [Localized, Localized, Localized, Localized];
   note: Localized;
@@ -19,7 +42,6 @@ export type Project = {
   slug: string;
   title: Localized;
   sector: Localized;
-  image: string;
   date: string;
   tags: string[];
   overview: Localized;
@@ -29,6 +51,216 @@ export type Project = {
   scale: ScaleTile[];
 };
 
+/* Shared project media manifest. The cover is the single source of truth for
+   homepage cards, case-study hero media and the first gallery thumbnail.
+   These are licensed illustrative photographs, not photographs of the named
+   client projects; the UI labels them accordingly and provenance is retained
+   here and in docs/PROJECT-ASSET-SOURCES.md. */
+export const projectMedia: Record<string, ProjectMedia> = {
+  "dohler-cloudy-line": {
+    cover: {
+      src: "/assets/projects/dohler-cloudy-line/cover.webp",
+      alt: l(
+        "Stainless-steel process tanks, piping and control panels inside a beverage production facility",
+        "خزانات معالجة من الستانلس ستيل وأنابيب ولوحات تحكم داخل منشأة لإنتاج المشروبات",
+      ),
+      caption: l(
+        "Industrial process tanks and control equipment",
+        "خزانات ومعدات تحكم لعملية صناعية",
+      ),
+      objectPosition: "50% 50%",
+      illustrative: true,
+      source: {
+        provider: "Unsplash",
+        creator: "Marcelo Guarnieri",
+        creatorUrl: "https://unsplash.com/@marceloooo",
+        sourcePage:
+          "https://unsplash.com/photos/stainless-steel-industrial-machine-inside-room-AdchdCGeVyY",
+        license: "Unsplash License",
+        licenseUrl: "https://unsplash.com/license",
+        rightsNote: l(
+          "Licensed illustrative photography; not a photograph of the Döhler project.",
+          "صورة توضيحية مرخصة؛ وليست صورة فعلية لمشروع دولر.",
+        ),
+      },
+    },
+  },
+  "ncec-air-quality": {
+    cover: {
+      src: "/assets/projects/ncec-air-quality/cover.webp",
+      alt: l(
+        "Digital air-quality monitor displaying carbon dioxide, PM2.5, PM10, humidity and temperature readings",
+        "جهاز رقمي لمراقبة جودة الهواء يعرض قراءات ثاني أكسيد الكربون وPM2.5 وPM10 والرطوبة ودرجة الحرارة",
+      ),
+      caption: l(
+        "Air-quality monitoring instrumentation",
+        "أجهزة مراقبة جودة الهواء",
+      ),
+      objectPosition: "50% 50%",
+      illustrative: true,
+      source: {
+        provider: "Unsplash",
+        creator: "Tim Witzdam",
+        creatorUrl: "https://unsplash.com/@timwitzdam",
+        sourcePage:
+          "https://unsplash.com/photos/air-quality-monitor-shows-levels-of-pollutants-bJ_nhWE7Gxg",
+        license: "Unsplash License",
+        licenseUrl: "https://unsplash.com/license",
+        rightsNote: l(
+          "Licensed illustrative photography; not a photograph of an NCEC station.",
+          "صورة توضيحية مرخصة؛ وليست صورة فعلية لمحطة تابعة لـ NCEC.",
+        ),
+      },
+    },
+  },
+  "ground-water": {
+    cover: {
+      src: "/assets/projects/ground-water/cover.webp",
+      alt: l(
+        "Field water-pump installation serving a rural agricultural well site",
+        "تركيب مضخة مياه ميدانية في موقع بئر زراعي ريفي",
+      ),
+      caption: l(
+        "Field well and water-pump installation",
+        "تركيب بئر ومضخة مياه ميدانية",
+      ),
+      objectPosition: "50% 52%",
+      illustrative: true,
+      source: {
+        provider: "Unsplash",
+        creator: "Mirza Zubair",
+        creatorUrl: "https://unsplash.com/@mirza009",
+        sourcePage:
+          "https://unsplash.com/photos/water-pump-in-a-rural-field-with-trees-ugPNWn80mG4",
+        license: "Unsplash License",
+        licenseUrl: "https://unsplash.com/license",
+        rightsNote: l(
+          "Licensed illustrative photography; not a photograph of the MEWA project.",
+          "صورة توضيحية مرخصة؛ وليست صورة فعلية لمشروع الوزارة.",
+        ),
+      },
+    },
+  },
+  "modon-poc": {
+    cover: {
+      src: "/assets/projects/modon-poc/cover.webp",
+      alt: l(
+        "Aerial view of dense industrial infrastructure, piping and rooftop utility equipment",
+        "منظر جوي لبنية تحتية صناعية كثيفة تضم الأنابيب ومعدات الخدمات أعلى المنشأة",
+      ),
+      caption: l(
+        "Industrial-city infrastructure and connected utilities",
+        "بنية تحتية وخدمات مترابطة في مدينة صناعية",
+      ),
+      objectPosition: "50% 50%",
+      illustrative: true,
+      source: {
+        provider: "Unsplash",
+        creator: "CHUTTERSNAP",
+        creatorUrl: "https://unsplash.com/@chuttersnap",
+        sourcePage:
+          "https://unsplash.com/photos/aerial-view-of-industrial-factory-_EFvjSgbw1c",
+        license: "Unsplash License",
+        licenseUrl: "https://unsplash.com/license",
+        rightsNote: l(
+          "Licensed illustrative photography; not a photograph of a MODON project site.",
+          "صورة توضيحية مرخصة؛ وليست صورة فعلية لموقع مشروع تابع لمدن.",
+        ),
+      },
+    },
+  },
+  "drilling-equipment": {
+    cover: {
+      src: "/assets/projects/drilling-equipment/cover.webp",
+      alt: l(
+        "Land drilling rig standing in a field beneath an overcast sky",
+        "جهاز حفر بري قائم في حقل تحت سماء غائمة",
+      ),
+      caption: l(
+        "Land drilling rig and field equipment",
+        "جهاز حفر بري ومعدات ميدانية",
+      ),
+      objectPosition: "50% 50%",
+      illustrative: true,
+      source: {
+        provider: "Unsplash",
+        creator: "Natalia Grela",
+        creatorUrl: "https://unsplash.com/@natgrela",
+        sourcePage:
+          "https://unsplash.com/photos/a-drilling-rig-in-the-middle-of-a-field-laDsdizvnIs",
+        license: "Unsplash License",
+        licenseUrl: "https://unsplash.com/license",
+        rightsNote: l(
+          "Licensed illustrative photography; not a photograph of the tracked project equipment.",
+          "صورة توضيحية مرخصة؛ وليست صورة فعلية لمعدات المشروع التي جرى تتبعها.",
+        ),
+      },
+    },
+  },
+  "water-network": {
+    cover: {
+      src: "/assets/projects/water-network/cover.webp",
+      alt: l(
+        "Industrial water piping, pumps and isolation valves in a utility installation",
+        "أنابيب ومضخات وصمامات عزل للمياه داخل منشأة خدمات",
+      ),
+      caption: l(
+        "Water-network piping, pumps and valves",
+        "أنابيب ومضخات وصمامات شبكة مياه",
+      ),
+      objectPosition: "50% 50%",
+      illustrative: true,
+      source: {
+        provider: "Unsplash",
+        creator: "Darshan Sarang",
+        creatorUrl: "https://unsplash.com/@mahakaal2999",
+        sourcePage:
+          "https://unsplash.com/photos/industrial-pipes-and-valves-IgkjnDnaAtE",
+        license: "Unsplash License",
+        licenseUrl: "https://unsplash.com/license",
+        rightsNote: l(
+          "Licensed illustrative photography; not a photograph of an NWC DMA / DMZ field site.",
+          "صورة توضيحية مرخصة؛ وليست صورة فعلية لموقع DMA / DMZ تابع لشركة المياه الوطنية.",
+        ),
+      },
+    },
+  },
+  "modon-testing": {
+    cover: {
+      src: "/assets/projects/modon-testing/cover.webp",
+      alt: l(
+        "Control-room consoles and monitoring stations in an industrial operations environment",
+        "وحدات تحكم ومحطات مراقبة داخل بيئة تشغيل صناعية",
+      ),
+      caption: l(
+        "Industrial control-room interface environment",
+        "بيئة واجهات غرفة تحكم صناعية",
+      ),
+      objectPosition: "50% 50%",
+      illustrative: true,
+      source: {
+        provider: "Unsplash",
+        creator: "Igor Saikin",
+        creatorUrl: "https://unsplash.com/@alteredpoint",
+        sourcePage:
+          "https://unsplash.com/photos/control-room-with-monitors-and-chairs-NSlqiFRyafY",
+        license: "Unsplash License",
+        licenseUrl: "https://unsplash.com/license",
+        rightsNote: l(
+          "Licensed illustrative photography; not a screenshot or photograph of the MODON application under test.",
+          "صورة توضيحية مرخصة؛ وليست لقطة شاشة أو صورة فعلية لتطبيق مدن محل الاختبار.",
+        ),
+      },
+    },
+  },
+};
+
+export const getProjectMedia = (slug: string): ProjectMedia => projectMedia[slug];
+export const getProjectGallery = (project: Project): ProjectGalleryItem[] => [
+  { kind: "cover", caption: getProjectMedia(project.slug).cover.caption },
+  ...project.gallery,
+];
+
 export const projects: Project[] = [
   {
     slug: "ncec-air-quality",
@@ -37,7 +269,6 @@ export const projects: Project[] = [
       "نظام مراقبة جودة الهواء NCEC",
     ),
     sector: l("Environment | Saudi Arabia", "البيئة | السعودية"),
-    image: "air",
     date: "04/2026 – Present",
     tags: ["Stream IIOT", "MSSQL"],
     overview: l(
@@ -103,7 +334,6 @@ export const projects: Project[] = [
     slug: "dohler-cloudy-line",
     title: l("Döhler Factory Cloudy Line", "خط كلاودي بمصنع دولر"),
     sector: l("Food & Beverage | Egypt", "الأغذية والمشروبات | مصر"),
-    image: "juice",
     date: "10/2024 – 02/2026",
     tags: ["Ignition", "SCADA", "HMI", "PostgreSQL"],
     overview: l(
@@ -180,7 +410,6 @@ export const projects: Project[] = [
     slug: "ground-water",
     title: l("Ground Water Monitoring Platform", "منصة مراقبة المياه الجوفية"),
     sector: l("Water | Saudi Arabia", "المياه | السعودية"),
-    image: "wells",
     date: "09/2024 – 12/2025",
     tags: ["Ignition", "Oracle", "InfluxDB"],
     overview: l(
@@ -262,7 +491,6 @@ export const projects: Project[] = [
       "Smart Infrastructure | Saudi Arabia",
       "البنية التحتية الذكية | السعودية",
     ),
-    image: "city",
     date: "06/2024 – 11/2024",
     tags: ["Ignition", "IIoT", "10K+ Sensors"],
     overview: l(
@@ -334,7 +562,6 @@ export const projects: Project[] = [
     slug: "drilling-equipment",
     title: l("Drilling Equipment Tracking Platform", "منصة تتبع معدات الحفر"),
     sector: l("Asset Management | Saudi Arabia", "إدارة الأصول | السعودية"),
-    image: "drilling",
     date: "09/2024 – 12/2025",
     tags: ["Ignition", "Oracle", "InfluxDB"],
     overview: l(
@@ -410,7 +637,6 @@ export const projects: Project[] = [
       "تحسين شبكات المياه DMAs / DMZs",
     ),
     sector: l("Water | Saudi Arabia", "المياه | السعودية"),
-    image: "water",
     date: "03/2026 – 07/2026",
     tags: ["SOFREL RTU", "Testing", "Commissioning"],
     overview: l(
@@ -488,7 +714,6 @@ export const projects: Project[] = [
     slug: "modon-testing",
     title: l("MODON Web & Mobile App Testing", "اختبار منصة مدن وتطبيق الهاتف"),
     sector: l("Quality Assurance | Saudi Arabia", "ضمان الجودة | السعودية"),
-    image: "city",
     date: "11/2025 – 02/2026",
     tags: ["Azure DevOps", "REST APIs", "QA"],
     overview: l(

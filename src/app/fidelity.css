@@ -176,7 +176,8 @@
 .signature img {
   width: 100%;
   height: auto;
-  mix-blend-mode: screen;
+  display: block;
+  opacity: 0.94;
 }
 .tech-symbol {
   width: 43px;
@@ -957,9 +958,7 @@
     linear-gradient(0deg, transparent, #000 15%, #000 80%, transparent);
   mask-composite: intersect;
 }
-.signature img {
-  mix-blend-mode: lighten;
-}
+.signature img { mix-blend-mode: normal; }
 /* ===== Hero cinematic refinement (Hero + About focus pass) ===== */
 
 /* Unified atmosphere: one vignette + warm/cool cast over the layered hero
@@ -2550,7 +2549,7 @@ details[open] > p,
 details[open] .cert-grid {
   animation: details-in 0.35s ease;
 }
-.projects-grid.expanded > :nth-child(7) {
+.projects-grid[data-expanded="true"] > :nth-child(7) {
   animation: details-in 0.4s ease;
 }
 
@@ -2670,6 +2669,10 @@ footer a:hover {
   display: block;
   animation: case-plate-in 0.45s ease both;
 }
+.case-stage > .case-cover-image {
+  display: block;
+  animation: case-plate-in 0.45s ease both;
+}
 @keyframes case-plate-in {
   from {
     opacity: 0;
@@ -2743,7 +2746,7 @@ footer a:hover {
 /* Thumbnails: equal grid cells (the old 30% flex width would shrink them). */
 .thumbnails {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-top: 14px;
 }
@@ -2761,6 +2764,9 @@ footer a:hover {
 .thumb-art .project-art {
   width: 100%;
   height: 100%;
+  display: block;
+}
+.thumb-art .thumb-cover-image {
   display: block;
 }
 .thumb-index {
@@ -3075,7 +3081,8 @@ footer a:hover {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .case-stage > .project-art {
+  .case-stage > .project-art,
+  .case-stage > .case-cover-image {
     animation: none;
   }
 }

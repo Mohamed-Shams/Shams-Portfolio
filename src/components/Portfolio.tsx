@@ -23,6 +23,8 @@ import {
   credentials,
   training,
   techNotes,
+  getProjectGallery,
+  getProjectMedia,
   Localized,
 } from "@/lib/content";
 import {
@@ -46,10 +48,6 @@ const orderedProjects = [
 ];
 const visibleProjects = (all: boolean) =>
   orderedProjects.slice(0, all ? 7 : 6);
-
-/* Card art is a display-resolution re-render of the same supplied illustration
-   (see docs/STAGE1-VISUAL-AUDIT.md); no subjects were replaced. */
-const cardArt = (image: string) => `/assets/card/card-${image}.webp`;
 
 /* Issuer marks: AWS, Dataiku and Siemens now use the CC0 vector artwork in
    /assets/brand (sharp at any size); Ignition and AVEVA have no
@@ -413,10 +411,11 @@ export default function Portfolio() {
             </p>
             <div className="signature" data-reveal="up" data-reveal-delay="3">
               <Image
-                src="/assets/signature.webp"
-                alt="Mohamed Shams"
+                src="/assets/signature.svg"
+                alt={t("Mohamed Shams signature", "توقيع محمد شمس")}
                 width={276}
                 height={66}
+                unoptimized
               />
             </div>
           </div>
@@ -481,11 +480,13 @@ export default function Portfolio() {
             </button>
           </div>
           <div
-            className={"projects-grid" + (all ? " expanded" : "")}
+            className="projects-grid"
+            data-expanded={all ? "true" : undefined}
             data-reveal="up"
           >
             {visibleProjects(all).map((p, i) => {
               const flagship = !all && i === 0;
+              const media = getProjectMedia(p.slug);
               return (
                 <Link
                   className={"project-card" + (flagship ? " featured" : "")}
@@ -494,9 +495,12 @@ export default function Portfolio() {
                 >
                   <div className="card-image">
                     <Image
-                      src={cardArt(p.image)}
-                      alt=""
+                      className="project-cover-image"
+                      src={media.cover.src}
+                      alt={tx(media.cover.alt)}
                       fill
+                      quality={88}
+                      style={{ objectPosition: media.cover.objectPosition }}
                       sizes={
                         flagship
                           ? "(max-width: 850px) 92vw, 749px"
@@ -508,9 +512,11 @@ export default function Portfolio() {
                         {t("Flagship project", "المشروع الأبرز")}
                       </span>
                     )}
-                    <span className="image-label">
-                      {t("Illustrative image", "صورة توضيحية")}
-                    </span>
+                    {media.cover.illustrative && (
+                      <span className="image-label">
+                        {t("Licensed illustrative photo", "صورة توضيحية مرخصة")}
+                      </span>
+                    )}
                   </div>
                   <div className="card-copy">
                     <h3>{tx(p.title)}</h3>
@@ -776,9 +782,11 @@ export function CaseStudy({ slug }: { slug: string }) {
   const ar = locale === "ar";
   const p = projects.find((p) => p.slug === slug)!;
   const t = (a: string, b: string) => (ar ? b : a);
-  const total = p.gallery.length;
+  const media = getProjectMedia(p.slug);
+  const gallery = getProjectGallery(p);
+  const total = gallery.length;
   const [idx, setIdx] = useState(0);
-  const item = p.gallery[idx];
+  const item = gallery[idx];
   const next = projects[(projects.indexOf(p) + 1) % projects.length];
   const go = (delta: number) => setIdx((i) => (i + delta + total) % total);
   const onKey = (e: React.KeyboardEvent) => {
@@ -815,9 +823,9 @@ export function CaseStudy({ slug }: { slug: string }) {
           </p>
         </div>
 
-        {/* Gallery — three original vector plates per project (site scene,
-            verified architecture path, operations view). Arrow keys work when
-            the stage has focus; the counter is announced politely. */}
+        {/* Gallery — shared cover photograph first, followed by the three
+            original vector plates (site scene, architecture path, operations
+            view). Arrow keys work when the stage has focus. */}
         <figure className="case-hero" data-reveal="up">
           <div
             className="case-stage"
@@ -826,14 +834,28 @@ export function CaseStudy({ slug }: { slug: string }) {
             onKeyDown={onKey}
             aria-label={t("Project gallery", "معرض المشروع")}
           >
-            <ProjectArt
-              key={item.kind}
-              project={p}
-              kind={item.kind}
-              title={p.title[locale]}
-              label={item.caption[locale]}
-              locale={locale}
-            />
+            {item.kind === "cover" ? (
+              <Image
+                key="cover"
+                className="case-cover-image project-cover-image"
+                src={media.cover.src}
+                alt={media.cover.alt[locale]}
+                fill
+                priority
+                quality={88}
+                sizes="(max-width: 850px) 94vw, 1180px"
+                style={{ objectPosition: media.cover.objectPosition }}
+              />
+            ) : (
+              <ProjectArt
+                key={item.kind}
+                project={p}
+                kind={item.kind}
+                title={p.title[locale]}
+                label={item.caption[locale]}
+                locale={locale}
+              />
+            )}
             <div className="case-controls">
               <button
                 type="button"
@@ -843,7 +865,7 @@ export function CaseStudy({ slug }: { slug: string }) {
               >
                 {ar ? <ArrowRight size={18} /> : <ArrowLeft size={18} />}
               </button>
-              <span className="case-counter" aria-live="polite">
+              <span className="case-counter" aria-live="polite" dir="ltr">
                 {idx + 1} / {total}
               </span>
               <button
@@ -859,10 +881,12 @@ export function CaseStudy({ slug }: { slug: string }) {
           <figcaption className="case-caption">
             <span className="case-caption-text">{item.caption[locale]}</span>
             <span className="case-illustrative">
-              {t(
-                "Original illustrative artwork — not a project photograph.",
-                "عمل فني توضيحي أصلي — وليس صورة فعلية للمشروع.",
-              )}
+              {item.kind === "cover"
+                ? media.cover.source.rightsNote[locale]
+                : t(
+                    "Original illustrative artwork — not a project photograph.",
+                    "عمل فني توضيحي أصلي — وليس صورة فعلية للمشروع.",
+                  )}
             </span>
           </figcaption>
           <div
@@ -870,7 +894,7 @@ export function CaseStudy({ slug }: { slug: string }) {
             role="group"
             aria-label={t("Gallery thumbnails", "مصغّرات المعرض")}
           >
-            {p.gallery.map((g, i) => (
+            {gallery.map((g, i) => (
               <button
                 key={g.kind}
                 type="button"
@@ -881,14 +905,26 @@ export function CaseStudy({ slug }: { slug: string }) {
                 onClick={() => setIdx(i)}
               >
                 <span className="thumb-art" aria-hidden="true">
-                  <ProjectArt
-                    project={p}
-                    kind={g.kind}
-                    title={p.title[locale]}
-                    label=""
-                    locale={locale}
-                    slice
-                  />
+                  {g.kind === "cover" ? (
+                    <Image
+                      className="thumb-cover-image project-cover-image"
+                      src={media.cover.src}
+                      alt=""
+                      fill
+                      quality={75}
+                      sizes="(max-width: 600px) 22vw, 270px"
+                      style={{ objectPosition: media.cover.objectPosition }}
+                    />
+                  ) : (
+                    <ProjectArt
+                      project={p}
+                      kind={g.kind}
+                      title={p.title[locale]}
+                      label=""
+                      locale={locale}
+                      slice
+                    />
+                  )}
                 </span>
                 <span className="thumb-index" aria-hidden="true">{i + 1}</span>
               </button>

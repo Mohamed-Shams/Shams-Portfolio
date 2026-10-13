@@ -83,11 +83,11 @@ const settle = async (page) => {
           await page.keyboard.press("ArrowLeft");
           const c3 = (await counter.textContent()).trim();
           const ok =
-            c0 === "1 / 3" &&
-            c1 === "2 / 3" &&
+            c0 === "1 / 4" &&
+            c1 === "2 / 4" &&
             pressed === "true" &&
-            c2 === "3 / 3" &&
-            c3 === "2 / 3";
+            c2 === "3 / 4" &&
+            c3 === "2 / 4";
           if (!ok) {
             console.error(
               `FAIL gallery ${locale}/${slug}: ${c0} -> ${c1} (${pressed}) -> ${c2} -> ${c3}`,

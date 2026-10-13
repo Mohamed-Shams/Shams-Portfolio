@@ -796,7 +796,12 @@ function sceneQa() {
   );
 }
 
-function Scene({ p, rnd }: { p: Project; rnd: () => number }) {
+function Scene({ p }: { p: Project }) {
+  /* Keep the generator local to this render. Passing a mutable generator
+     through component props lets React dev/StrictMode reuse and advance the
+     same closure across render probes, which can produce SSR hydration
+     mismatches even though the seed itself is deterministic. */
+  const rnd = makeRnd(p.slug + "scene");
   switch (p.slug) {
     case "ncec-air-quality":
       return sceneAir(rnd);
@@ -1039,7 +1044,6 @@ export function ProjectArt({
   slice?: boolean;
 }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
-  const rnd = makeRnd(project.slug + kind);
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
@@ -1055,7 +1059,7 @@ export function ProjectArt({
         ) : kind === "ops" ? (
           <OpsView p={project} title={title} locale={locale} />
         ) : (
-          <Scene p={project} rnd={rnd} />
+          <Scene p={project} />
         )}
       </Frame>
     </svg>
