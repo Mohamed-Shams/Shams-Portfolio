@@ -31,7 +31,12 @@ const waitForImages = async (locator) => {
     const image = images.nth(i);
     await image.scrollIntoViewIfNeeded();
     await image.evaluate(async (img) => {
-      if (img.decode) await img.decode().catch(() => {});
+      await img.decode();
+      const rect = img.getBoundingClientRect();
+      if (!img.complete || !img.naturalWidth || !img.naturalHeight || !rect.width || !rect.height ||
+          getComputedStyle(img).visibility === "hidden" || getComputedStyle(img).opacity === "0") {
+        throw new Error(`Invalid image: ${img.currentSrc}`);
+      }
     });
   }
 };

@@ -13,6 +13,26 @@ const SLUGS = [
   "modon-testing",
 ];
 const failures = [];
+const inspectImage = async (locator, label) => {
+  try {
+    await locator.scrollIntoViewIfNeeded();
+    const result = await locator.evaluate(async (img) => {
+      let decoded = false;
+      let error = "";
+      try { await img.decode(); decoded = true; } catch (e) { error = String(e); }
+      const rect = img.getBoundingClientRect();
+      const style = getComputedStyle(img);
+      return { decoded, error, complete: img.complete, naturalWidth: img.naturalWidth,
+        naturalHeight: img.naturalHeight, width: rect.width, height: rect.height,
+        opacity: style.opacity, visibility: style.visibility, display: style.display,
+        currentSrc: img.currentSrc, src: img.src, srcset: img.srcset };
+    });
+    check(result.decoded && result.complete && result.naturalWidth > 0 && result.naturalHeight > 0 &&
+      result.width > 0 && result.height > 0 && result.opacity !== "0" &&
+      result.visibility === "visible" && result.display !== "none",
+      `${label}: image invalid ${JSON.stringify(result)}`);
+  } catch (error) { check(false, `${label}: ${String(error)}`); }
+};
 const check = (value, message) => {
   if (!value) failures.push(message);
 };
@@ -38,6 +58,8 @@ const canonicalSource = (url) => {
       const page = await browser.newPage({ viewport: { width, height } });
       const errors = [];
       const failedResponses = [];
+      const failedRequests = [];
+      page.on("requestfailed", (request) => failedRequests.push(`${request.url()}: ${request.failure()?.errorText}`));
       page.on("pageerror", (e) => errors.push(String(e)));
       page.on("console", (message) => {
         if (message.type() === "error") errors.push(message.text());
@@ -78,6 +100,7 @@ const canonicalSource = (url) => {
         const image = card.locator(".project-cover-image");
         check((await image.count()) === 1, `${locale}@${width}/${slug}: homepage cover missing`);
         if (await image.count()) {
+          await inspectImage(image, `${locale}@${width}/${slug}: homepage`);
           const current = canonicalSource(await image.evaluate((img) => img.currentSrc || img.src));
           check(current === expected, `${locale}@${width}/${slug}: homepage source ${current}`);
         }
@@ -85,6 +108,7 @@ const canonicalSource = (url) => {
 
       const signature = page.locator("#about .signature img");
       await signature.scrollIntoViewIfNeeded();
+      await inspectImage(signature, `${locale}@${width}: signature`);
       await page.waitForTimeout(200);
       const signatureSrc = canonicalSource(await signature.evaluate((img) => img.currentSrc || img.src));
       check(signatureSrc === "/assets/signature.svg", `${locale}@${width}: signature source ${signatureSrc}`);
@@ -96,12 +120,15 @@ const canonicalSource = (url) => {
       );
       check(errors.length === 0, `${locale}@${width}: page errors ${errors.join(" | ")}`);
       check(failedResponses.length === 0, `${locale}@${width}: failed responses ${failedResponses.join(" | ")}`);
+      check(failedRequests.length === 0, `${locale}@${width}: failed requests ${failedRequests.join(" | ")}`);
       await page.close();
 
       for (const slug of SLUGS) {
         const detail = await browser.newPage({ viewport: { width, height } });
         const detailErrors = [];
         const detailFailed = [];
+        const detailRequestFailed = [];
+        detail.on("requestfailed", (request) => detailRequestFailed.push(`${request.url()}: ${request.failure()?.errorText}`));
         detail.on("pageerror", (e) => detailErrors.push(String(e)));
         detail.on("console", (message) => {
           if (message.type() === "error") detailErrors.push(message.text());
@@ -117,6 +144,7 @@ const canonicalSource = (url) => {
         const stageImage = detail.locator(".case-stage .case-cover-image");
         check((await stageImage.count()) === 1, `${locale}@${width}/${slug}: primary cover missing`);
         if (await stageImage.count()) {
+          await inspectImage(stageImage, `${locale}@${width}/${slug}: primary`);
           const current = canonicalSource(await stageImage.evaluate((img) => img.currentSrc || img.src));
           check(current === expected, `${locale}@${width}/${slug}: detail source ${current}`);
         }
@@ -125,6 +153,7 @@ const canonicalSource = (url) => {
         check((await thumbs.count()) === 4, `${locale}@${width}/${slug}: expected four thumbnails`);
         const firstThumbImage = thumbs.first().locator("img");
         if (await firstThumbImage.count()) {
+          await inspectImage(firstThumbImage, `${locale}@${width}/${slug}: thumbnail`);
           const current = canonicalSource(await firstThumbImage.evaluate((img) => img.currentSrc || img.src));
           check(current === expected, `${locale}@${width}/${slug}: first thumbnail source ${current}`);
         } else {
@@ -138,12 +167,24 @@ const canonicalSource = (url) => {
         check((await counter.textContent()).trim() === "2 / 4", `${locale}@${width}/${slug}: ArrowRight`);
         await detail.keyboard.press("ArrowLeft");
         check((await counter.textContent()).trim() === "1 / 4", `${locale}@${width}/${slug}: ArrowLeft`);
+        for (let index = 0; index < 4; index++) {
+          await thumbs.nth(index).click();
+          check((await counter.textContent()).trim() === `${index + 1} / 4`,
+            `${locale}@${width}/${slug}: thumbnail ${index + 1} counter`);
+          check((await thumbs.nth(index).getAttribute("aria-pressed")) === "true",
+            `${locale}@${width}/${slug}: thumbnail ${index + 1} selection`);
+          if (index === 0) await inspectImage(stageImage, `${locale}@${width}/${slug}: reselected primary`);
+          else check((await detail.locator(".case-stage svg").count()) > 0,
+            `${locale}@${width}/${slug}: illustration ${index + 1} missing`);
+        }
+        await thumbs.first().click();
         check(
           !(await detail.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)),
           `${locale}@${width}/${slug}: horizontal overflow`,
         );
         check(detailErrors.length === 0, `${locale}@${width}/${slug}: errors ${detailErrors.join(" | ")}`);
         check(detailFailed.length === 0, `${locale}@${width}/${slug}: failed responses ${detailFailed.join(" | ")}`);
+        check(detailRequestFailed.length === 0, `${locale}@${width}/${slug}: failed requests ${detailRequestFailed.join(" | ")}`);
         await detail.close();
       }
     }

@@ -499,7 +499,7 @@ export default function Portfolio() {
                       src={media.cover.src}
                       alt={tx(media.cover.alt)}
                       fill
-                      quality={88}
+                      quality={75}
                       style={{ objectPosition: media.cover.objectPosition }}
                       sizes={
                         flagship
@@ -842,7 +842,7 @@ export function CaseStudy({ slug }: { slug: string }) {
                 alt={media.cover.alt[locale]}
                 fill
                 priority
-                quality={88}
+                quality={75}
                 sizes="(max-width: 850px) 94vw, 1180px"
                 style={{ objectPosition: media.cover.objectPosition }}
               />
