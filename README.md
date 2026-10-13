@@ -29,6 +29,8 @@ Self-host on a Node server with `npm start` behind an HTTPS reverse proxy. Produ
 
 The repository includes a pinned OpenNext adapter, Wrangler configuration, and Worker build scripts. These prevent Wrangler from trying to migrate the project dynamically on every deployment.
 
+The Worker enables both `nodejs_compat` and `global_fetch_strictly_public`. OpenNext requires the latter when the deployed Worker performs public same-zone fetches; without it Cloudflare returns runtime error 1042.
+
 The existing Cloudflare Workers Builds settings work without changing the dashboard:
 
 - **Build command:** `npm run build` (runs the full OpenNext build, including the underlying Next.js build, and creates both `.next` and `.open-next`)
