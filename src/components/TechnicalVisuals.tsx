@@ -4,51 +4,81 @@ import {
   CircuitBoard,
   MonitorCog,
   Network,
-  Rss,
   Waypoints,
-  Code2,
   Database,
-  Container,
-  Workflow,
   Cloud,
-  ChartNoAxesCombined,
-  ChartLine,
-  Braces,
   Factory,
+  Workflow,
+  Monitor,
+  Router,
+  ClipboardCheck,
+  Wrench,
+  ShieldCheck,
+  Gauge,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { BrandIcon, type BrandName } from "./BrandMarks";
+
+/* Recognisable products get their real mark (Simple Icons, CC0) instead of a
+   generic glyph; concepts and brands without a permission-compatible source
+   (Ignition, AVEVA, WinCC, SOFREL...) keep the lucide icon so nothing is
+   ever drawn from memory. */
+const BRANDS: Record<string, BrandName> = {
+  /* skills grid */
+  MQTT: "mqtt",
+  Python: "python",
+  "JavaScript / HTML / CSS": "javascript",
+  "MS SQL / MySQL / PostgreSQL": "postgresql",
+  InfluxDB: "influxdb",
+  "Docker / Git / n8n": "docker",
+  Dataiku: "dataiku",
+  "AWS AI Services": "amazonaws",
+  /* case-study technology tags */
+  PostgreSQL: "postgresql",
+  MSSQL: "microsoftsqlserver",
+  Oracle: "oracle",
+  "Azure DevOps": "azuredevops",
+};
+
+function conceptIcon(name: string): LucideIcon {
+  if (name.startsWith("Ignition")) return Activity;
+  if (name.startsWith("AVEVA")) return Workflow;
+  if (name.startsWith("WinCC")) return CircuitBoard;
+  if (name.startsWith("SCADA")) return MonitorCog;
+  if (name === "HMI") return Monitor;
+  if (name === "Industrial IoT" || name === "IIoT") return Factory;
+  if (name === "OPC UA") return Network;
+  if (name === "REST APIs") return Waypoints;
+  if (name === "Stream IIOT") return Cloud;
+  if (name === "SOFREL RTU") return Router;
+  if (name === "Testing") return ClipboardCheck;
+  if (name === "Commissioning") return Wrench;
+  if (name === "QA") return ShieldCheck;
+  if (name === "10K+ Sensors") return Gauge;
+  if (name.includes("SQL")) return Database;
+  return Cloud;
+}
+
+/** Icon for one tool name: a brand mark when the tool is a recognisable
+    product, otherwise a concept glyph. Used by the skills grid and the
+    case-study technology cards. */
+export function TechIcon({
+  name,
+  size = 26,
+}: {
+  name: string;
+  size?: number;
+}) {
+  const brand = BRANDS[name];
+  if (brand) return <BrandIcon name={brand} size={size} />;
+  const Icon = conceptIcon(name);
+  return <Icon size={size} strokeWidth={1.75} aria-hidden="true" />;
+}
+
 /* One glyph per tool. Two pairs used to share an icon (both SQL/InfluxDB tiles
    drew the same cylinder, Industrial IoT and AWS the same cloud), which made the
    grid read as three repeated shapes rather than fifteen distinct tools. */
 export function TechSymbol({ name }: { name: string }) {
-  const Icon = name.startsWith("Ignition")
-    ? Activity
-    : name.startsWith("AVEVA")
-      ? Workflow
-      : name.startsWith("WinCC")
-        ? CircuitBoard
-        : name.startsWith("SCADA")
-          ? MonitorCog
-          : name === "Industrial IoT"
-            ? Factory
-            : name === "OPC UA"
-              ? Network
-              : name === "MQTT"
-                ? Rss
-                : name === "REST APIs"
-                  ? Waypoints
-                  : name === "Python"
-                    ? Braces
-                    : name.startsWith("JavaScript")
-                      ? Code2
-                      : name === "InfluxDB"
-                        ? ChartLine
-                        : name.includes("SQL")
-                          ? Database
-                          : name.startsWith("Docker")
-                            ? Container
-                            : name === "Dataiku"
-                              ? ChartNoAxesCombined
-                              : Cloud;
   const color =
     name.startsWith("Ignition") ||
     name.startsWith("JavaScript") ||
@@ -62,7 +92,7 @@ export function TechSymbol({ name }: { name: string }) {
           : "blue";
   return (
     <span className={`tech-symbol tech-${color}`} aria-hidden="true">
-      <Icon size={30} />
+      <TechIcon name={name} size={30} />
     </span>
   );
 }
