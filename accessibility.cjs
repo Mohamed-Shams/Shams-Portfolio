@@ -11,7 +11,28 @@ const fs = require("fs");
       viewport: { width: 390, height: 844 },
     });
     const p = await context.newPage();
-    await p.goto("http://localhost:3000/" + locale);
+    await p.goto("http://localhost:3000/" + locale, {
+      waitUntil: "networkidle",
+    });
+    // The one-shot scroll reveals keep below-the-fold content transparent
+    // until it enters the viewport, which axe would otherwise read as a
+    // contrast failure on a transient state. Walk the page, let every
+    // reveal settle, then scan the final rendered state.
+    await p.evaluate(async () => {
+      const h = document.documentElement.scrollHeight;
+      for (let y = 0; y <= h; y += 400) {
+        window.scrollTo({ top: y, left: 0, behavior: "instant" });
+        await new Promise((r) => setTimeout(r, 70));
+      }
+    });
+    await p.waitForFunction(
+      () =>
+        [...document.querySelectorAll("[data-reveal]")].every((e) =>
+          e.classList.contains("in"),
+        ),
+      { timeout: 10000 },
+    );
+    await p.waitForTimeout(1200);
     const r = await new AxeBuilder({ page: p })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
       .analyze();

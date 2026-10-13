@@ -348,6 +348,12 @@ export function GlobeArt() {
                 />
               ))}
             <circle
+              className={i % 11 === 0 ? "globe-node" : undefined}
+              style={
+                i % 11 === 0
+                  ? { animationDelay: `${((i % 44) / 11) * 1.4}s` }
+                  : undefined
+              }
               cx={p.x}
               cy={p.y}
               r={i % 11 === 0 ? 2.2 : 1}
@@ -371,29 +377,49 @@ export function GlobeArt() {
             fillOpacity=".2"
           />
         ))}
-        <path
-          d="M125 345Q255 75 414 167M70 195Q264 400 410 325M91 358Q265 233 418 360"
-          stroke="#c78134"
-          strokeWidth=".7"
-          opacity=".65"
+        {/* The three signal arcs draw themselves once the contact section has
+            revealed (`.contact.in`), then stay. One-shot, offset only. */}
+        {[
+          { d: "M125 345Q255 75 414 167", delay: "0.2s" },
+          { d: "M70 195Q264 400 410 325", delay: "0.5s" },
+          { d: "M91 358Q265 233 418 360", delay: "0.8s" },
+        ].map((arc) => (
+          <path
+            key={arc.d}
+            className="globe-signal"
+            style={{ animationDelay: arc.delay }}
+            d={arc.d}
+            stroke="#c78134"
+            strokeWidth=".7"
+            opacity=".65"
+          />
+        ))}
+      </g>
+      {/* Slow dashed orbit ring around the globe (rotates, 90s/turn). */}
+      <g className="globe-orbit">
+        <ellipse
+          cx="240"
+          cy="240"
+          rx="256"
+          ry="78"
+          transform="rotate(-24 240 240)"
+          stroke="#1688b5"
+          strokeWidth=".5"
+          strokeDasharray="3 7"
+          opacity=".35"
         />
       </g>
-      <ellipse
-        cx="240"
-        cy="240"
-        rx="246"
-        ry="95"
-        transform="rotate(-44 240 240)"
-        stroke="#1688b5"
-        strokeWidth=".5"
-        opacity=".4"
-      />
       <g transform="translate(281 173)">
-        <path
-          d="M0 31C-12 13-17 7-17 0a17 17 0 0134 0c0 8-6 15-17 31Z"
-          fill="#f1a342"
-        />
-        <circle cy="-1" r="6" fill="#101820" />
+        {/* The inner group carries the float so the CSS transform never
+            clobbers the outer translate attribute. */}
+        <g className="globe-pin">
+          <circle r="26" fill="#f1a342" opacity=".1" />
+          <path
+            d="M0 31C-12 13-17 7-17 0a17 17 0 0134 0c0 8-6 15-17 31Z"
+            fill="#f1a342"
+          />
+          <circle cy="-1" r="6" fill="#101820" />
+        </g>
       </g>
     </svg>
   );

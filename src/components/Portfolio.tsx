@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useLocale } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,6 +17,8 @@ import {
   Database,
   Radio,
   ChevronDown,
+  Copy,
+  Check,
 } from "lucide-react";
 import {
   projects,
@@ -26,7 +28,7 @@ import {
   Localized,
 } from "@/lib/content";
 import { GlobeArt, Scada, TechSymbol, FlowDiagram } from "./TechnicalVisuals";
-import { useReveal, useCountUp } from "./motion";
+import { useCountUp, RevealManager } from "./motion";
 const cv = "/assets/MohamedAhmedShams_CV.pdf";
 
 /* The CV-confirmed flagship leads the grid; the remaining projects keep their
@@ -138,8 +140,23 @@ export function Header() {
     </header>
   );
 }
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return <div className="eyebrow">{children}</div>;
+function Eyebrow({
+  children,
+  reveal,
+  delay,
+}: {
+  children: React.ReactNode;
+  reveal?: boolean;
+  delay?: "1" | "2" | "3";
+}) {
+  return (
+    <div
+      className="eyebrow"
+      {...(reveal ? { "data-reveal": "up", "data-reveal-delay": delay } : {})}
+    >
+      {children}
+    </div>
+  );
 }
 
 /* One-shot hero entrance: opacity/transform only, so nothing shifts layout.
@@ -158,28 +175,50 @@ const heroActions = {
   show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
 };
 
-/* Reveal wrapper: one-shot section fade/slide driven by IntersectionObserver. */
-function Reveal({
-  children,
-  className = "",
-  as: _as = "div",
-  delay = "0",
+/* CopyEmail: small ghost CTA beside the contact mailto link. Writes the
+   address to the clipboard (with a legacy fallback) and flips to a "Copied"
+   state for two seconds; the label change is announced via aria-live. */
+function CopyEmail({
+  email,
+  copy,
+  copied,
 }: {
-  children: React.ReactNode;
-  className?: string;
-  as?: keyof React.JSX.IntrinsicElements;
-  delay?: "0" | "1" | "2" | "3";
+  email: string;
+  copy: string;
+  copied: string;
 }) {
-  const { ref, shown } = useReveal();
+  const [done, setDone] = useState(false);
+  const timer = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (timer.current) window.clearTimeout(timer.current);
+    },
+    [],
+  );
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(email);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = email;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+    setDone(true);
+    if (timer.current) window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setDone(false), 2000);
+  };
   return (
-    <div
-      ref={ref as React.RefObject<HTMLDivElement>}
-      className={
-        "reveal d" + delay + (shown ? " in" : "") + (className ? " " + className : "")
-      }
+    <button
+      type="button"
+      className={"copy-email" + (done ? " copied" : "")}
+      onClick={onCopy}
     >
-      {children}
-    </div>
+      {done ? <Check size={13} /> : <Copy size={13} />}
+      <span aria-live="polite">{done ? copied : copy}</span>
+    </button>
   );
 }
 
@@ -238,6 +277,7 @@ export default function Portfolio() {
       </a>
       <Header />
       <ScrollProgress />
+      <RevealManager />
       <main id="main">
         <section className="hero" id="home">
           <div className="hero-portrait">
@@ -335,21 +375,21 @@ export default function Portfolio() {
         </section>
         <section id="about" className="section about">
           <div className="about-copy">
-            <Eyebrow>{t("About me", "نبذة عني")}</Eyebrow>
-            <h2>
+            <Eyebrow reveal>{t("About me", "نبذة عني")}</Eyebrow>
+            <h2 data-reveal="up" data-reveal-delay="1">
               {t("From Industrial", "من الأنظمة الصناعية")}
               <br />
               {t("Systems to Smarter", "إلى حلول أكثر")}
               <br />
               {t("Solutions.", "ذكاءً.")}
             </h2>
-            <p>
+            <p data-reveal="up" data-reveal-delay="2">
               {t(
                 "I’m a Systems Engineer at pulse by solutions with hands-on experience in SCADA, Industrial IoT, and digital transformation projects across Egypt and Saudi Arabia. I enjoy building reliable, scalable systems that turn real-world data into meaningful insights and smarter operations.",
                 "أنا مهندس أنظمة لدى pulse by solutions، ولدي خبرة عملية في SCADA وإنترنت الأشياء الصناعي ومشروعات التحول الرقمي في مصر والسعودية. أعمل على بناء أنظمة موثوقة وقابلة للتوسع تحوّل بيانات الواقع إلى رؤى مفيدة وعمليات أكثر ذكاءً.",
               )}
             </p>
-            <div className="signature">
+            <div className="signature" data-reveal="up" data-reveal-delay="3">
               <Image
                 src="/assets/signature.webp"
                 alt="Mohamed Shams"
@@ -358,7 +398,7 @@ export default function Portfolio() {
               />
             </div>
           </div>
-          <div className="about-image">
+          <div className="about-image" data-reveal="up">
             <Image
               src="/assets/about-real.webp"
               alt={t(
@@ -376,7 +416,7 @@ export default function Portfolio() {
               {t("Into Real Impact.", "إلى أثر حقيقي.")}
             </div>
           </div>
-          <div className="stats">
+          <div className="stats" data-reveal="up">
             {[
               ["7K+", t("Underground Wells", "بئر مياه جوفية")],
               [
@@ -397,7 +437,7 @@ export default function Portfolio() {
         </section>
         <section id="projects" className="section">
           <div className="section-heading">
-            <div>
+            <div data-reveal="up">
               <Eyebrow>{t("Featured projects", "مشاريع مختارة")}</Eyebrow>
               <h2>{t("Selected Work", "أعمال مختارة")}</h2>
               <p>
@@ -418,7 +458,10 @@ export default function Portfolio() {
               <ArrowRight size={16} />
             </button>
           </div>
-          <div className={"projects-grid" + (all ? " expanded" : "")}>
+          <div
+            className={"projects-grid" + (all ? " expanded" : "")}
+            data-reveal="up"
+          >
             {visibleProjects(all).map((p, i) => {
               const flagship = !all && i === 0;
               return (
@@ -467,15 +510,15 @@ export default function Portfolio() {
         </section>
         <section id="skills" className="section">
           <div className="tech-panel">
-            <Eyebrow>{t("Technical expertise", "الخبرات التقنية")}</Eyebrow>
-            <h2>{t("Tools & Technologies", "الأدوات والتقنيات")}</h2>
-            <p>
+            <Eyebrow reveal>{t("Technical expertise", "الخبرات التقنية")}</Eyebrow>
+            <h2 data-reveal="up" data-reveal-delay="1">{t("Tools & Technologies", "الأدوات والتقنيات")}</h2>
+            <p data-reveal="up" data-reveal-delay="2">
               {t(
                 "The technologies and tools I work with to build industrial and digital solutions.",
                 "التقنيات والأدوات التي أستخدمها لبناء الحلول الصناعية والرقمية.",
               )}
             </p>
-            <div className="flow-wrap">
+            <div className="flow-wrap" data-reveal="up">
               <FlowDiagram
                 labels={{
                   from: t("PLC / Sensors", "PLC / الحساسات"),
@@ -520,7 +563,7 @@ export default function Portfolio() {
                 </button>
               ))}
             </div>
-            <div className="skills-grid">
+            <div className="skills-grid" data-reveal="up">
               {[
                 ...skills.filter((s) => s[0] !== "Industrial IoT"),
                 ...skills.filter((s) => s[0] === "Industrial IoT"),
@@ -549,15 +592,15 @@ export default function Portfolio() {
           </div>
         </section>
         <section id="experience" className="section journey">
-          <Eyebrow>{t("Professional experience", "الخبرة المهنية")}</Eyebrow>
-          <h2>{t("My Journey", "مسيرتي المهنية")}</h2>
-          <p>
+          <Eyebrow reveal>{t("Professional experience", "الخبرة المهنية")}</Eyebrow>
+          <h2 data-reveal="up" data-reveal-delay="1">{t("My Journey", "مسيرتي المهنية")}</h2>
+          <p data-reveal="up" data-reveal-delay="2">
             {t(
               "Key projects and responsibilities throughout my career.",
               "أبرز المشروعات والمسؤوليات خلال مسيرتي المهنية.",
             )}
           </p>
-          <div className="timeline">
+          <div className="timeline" data-reveal="up">
             <div className="employer">
               pulse<small>by solutions</small>
             </div>
@@ -600,15 +643,15 @@ export default function Portfolio() {
           </details>
         </section>
         <section id="certifications" className="section">
-          <Eyebrow>{t("Certifications", "الشهادات")}</Eyebrow>
-          <h2>{t("Continuous Learning", "تعلّم مستمر")}</h2>
-          <p>
+          <Eyebrow reveal>{t("Certifications", "الشهادات")}</Eyebrow>
+          <h2 data-reveal="up" data-reveal-delay="1">{t("Continuous Learning", "تعلّم مستمر")}</h2>
+          <p data-reveal="up" data-reveal-delay="2">
             {t(
               "Professional certifications and key training courses.",
               "شهادات مهنية ودورات تدريبية متخصصة.",
             )}
           </p>
-          <div className="cert-grid">
+          <div className="cert-grid" data-reveal="up">
             {[...credentials, [...training[0], "SIEMENS"]].map((c) => (
               <article className="cert-card" key={c[0]}>
                 <div className={`cert-brand ${c[4]?.toLowerCase()}`}>
@@ -650,7 +693,7 @@ export default function Portfolio() {
             </div>
           </details>
         </section>
-        <section id="contact" className="section contact">
+        <section id="contact" className="section contact" data-reveal="fade">
           <div className="contact-copy">
             <Eyebrow>{t("Contact", "تواصل معي")}</Eyebrow>
             <h2>
@@ -672,6 +715,11 @@ export default function Portfolio() {
               <Mail size={19} />
               <span dir="ltr">mohamed.ah.shams@gmail.com</span>
             </a>
+            <CopyEmail
+              email="mohamed.ah.shams@gmail.com"
+              copy={t("Copy", "نسخ")}
+              copied={t("Copied", "تم النسخ")}
+            />
             <a
               href="https://mohamed-shams.netlify.app/"
               target="_blank"
@@ -710,12 +758,13 @@ export function CaseStudy({ slug }: { slug: string }) {
   return (
     <>
       <Header />
+      <RevealManager />
       <main className="case section">
         <Link className="back-link" href={`/${locale}#projects`}>
           <ArrowLeft size={16} />
           {t("Back to Projects", "العودة للمشاريع")}
         </Link>
-        <div className="case-heading">
+        <div className="case-heading" data-reveal="up">
           <div>
             <Eyebrow>{t("Project case study", "دراسة حالة")}</Eyebrow>
             <h1>{p.title[locale]}</h1>
@@ -731,7 +780,7 @@ export function CaseStudy({ slug }: { slug: string }) {
             {p.sector[locale]}
           </p>
         </div>
-        <div className="case-grid">
+        <div className="case-grid" data-reveal="up">
           <div>
             <div className="case-photo">
               <Image
@@ -795,7 +844,7 @@ export function CaseStudy({ slug }: { slug: string }) {
             </div>
           </div>
         </div>
-        <div className="next-project">
+        <div className="next-project" data-reveal="up" data-reveal-delay="1">
           <Link
             className="text-link"
             href={`/${locale}/projects/${projects[(projects.indexOf(p) + 1) % projects.length].slug}`}

@@ -29,7 +29,7 @@ Self-host on a Node server with `npm start` behind an HTTPS reverse proxy. Produ
 
 - `src/lib/content.ts`: CV-derived bilingual project, skill, certificate and training data.
 - `src/components/Portfolio.tsx`: section components, interactive filters/menu, accessible routed case studies and image gallery.
-- `src/app/globals.css` and `src/app/fidelity.css`: responsive reference-derived visual tokens, layout, the desktop project bento and a final marked Stage 2 block (about, skills, experience, certifications).
+- `src/app/globals.css` and `src/app/fidelity.css`: responsive reference-derived visual tokens, layout, the desktop project bento, a marked Stage 2 block (about, skills, experience, certifications) and a marked Stage 3 block (scroll reveals, data-flow motion, hover polish, contact CTA).
 - `public/assets/card/`: display-resolution card art (see `docs/STAGE1-VISUAL-AUDIT.md`).
 - `public/assets/cert-*.webp`: the five certification marks (33–40px crops; see `docs/STAGE2-VISUAL-AUDIT.md`).
 - `public/assets/MohamedAhmedShams_CV.pdf`: original downloadable CV.
@@ -46,10 +46,12 @@ Fonts load from Google Fonts. Default dark theme intentionally matches the refer
 
 `node scripts/verify-stage2.cjs [BASE_URL]` checks about, skills, experience and certifications in both locales at 1440/1280/1024/768/390: stat numerals rendering at their designed size, the portrait frame ring, section gutters matching the projects grid, a gap-free skills grid, tile baselines, the integration path's legibility, equal certification card heights, brand art that is never upscaled or overflowing, the education block aligning with the timeline rail, and no text below 11px except the shared eyebrow. `node scripts/capture-stage2.cjs <outDir> [BASE_URL]` writes the matching screenshots plus a contact sheet, and `node scripts/audit-stage2.cjs [BASE_URL]` prints the raw geometry those judgements come from.
 
+`node scripts/verify-stage3.cjs [BASE_URL]` checks the Stage 3 reveal system, the SCADA/flow/globe motion, the contact copy CTA, prefers-reduced-motion and no-JS behaviour, all 14 case-study routes, language switching and a 6-width × 2-locale responsive sweep. `node scripts/capture-stage3.cjs <outDir> [BASE_URL]` writes the matching screenshots plus a contact sheet.
+
 `npm run build` includes TypeScript validation. Run `node validate.cjs` with the local server running to exercise all ten viewport/locale combinations, project routes, filters, project expansion, gallery, mobile menu, locale switching and PDF availability. The script uses locally installed Chrome on Windows; change executablePath for other operating systems. Screenshot review compares individual compositions rather than treating the composite reference board as a website screenshot. No numerical fidelity score is claimed.
 
 ## Strict visual audit
 See [the ranked audit](docs/VISUAL-AUDIT.md) for all ten corrections and reference/before/after screenshots. Audit-specific geometry lives in src/app/fidelity.css; technical SVG components live in src/components/TechnicalVisuals.tsx.
 
 ## Staged refinement
-[Stage 1](docs/STAGE1-VISUAL-AUDIT.md) covered the hero and the project grid. [Stage 2](docs/STAGE2-VISUAL-AUDIT.md) covers the about section, the technology icons and skills layout, the professional experience timeline and the certifications — including the About statistics that were rendering at 17px instead of 56px, the certification brand plates, and a single content gutter across the sections. Motion and the contact section are not part of either stage.
+[Stage 1](docs/STAGE1-VISUAL-AUDIT.md) covered the hero and the project grid. [Stage 2](docs/STAGE2-VISUAL-AUDIT.md) covers the about section, the technology icons and skills layout, the professional experience timeline and the certifications — including the About statistics that were rendering at 17px instead of 56px, the certification brand plates, and a single content gutter across the sections. [Stage 3](docs/STAGE3-VISUAL-AUDIT.md) wires the one-shot scroll reveals, adds the SCADA data-flow motion and refined hover states, animates the contact globe's signal arcs and adds a copy-email CTA — all transform/opacity-only, honouring prefers-reduced-motion and the no-JS path, with the Stage 1/2 geometry still frozen.

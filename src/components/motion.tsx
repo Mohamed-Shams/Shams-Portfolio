@@ -2,37 +2,46 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Shared scroll-reveal helper.
- * Adds classes when elements enter the viewport; reverses nothing by default
- * (one-shot reveals avoid repeated animation work while scrolling).
- * When the user prefers reduced motion, returns `true` immediately so
- * callers can render final-state without any transition.
+ * Wires the one-shot scroll reveal for every element carrying [data-reveal].
+ * Renders nothing. Mounted once per page (Portfolio and CaseStudy):
+ *  - adds `reveal-ready` to <html>, so the hidden pre-reveal state only ever
+ *    applies while JavaScript is running (no-JS visitors see the final page);
+ *  - reveals elements once as they enter the viewport (IntersectionObserver,
+ *    disconnected per element after reveal);
+ *  - under prefers-reduced-motion reveals everything immediately, with no
+ *    observer at all (globals.css strips the transitions themselves).
+ * Re-running on remount (locale switch) is safe and required: fresh DOM
+ * starts without `.in`, so every mount re-observes its own elements.
  */
-export function useReveal(threshold = 0.2) {
-  const ref = useRef<HTMLElement | null>(null);
-  const [shown, setShown] = useState(false);
-
+export function RevealManager() {
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const root = document.documentElement;
+    root.classList.add("reveal-ready");
+    const els = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-reveal]"),
+    );
+    if (!els.length) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setShown(true);
+      els.forEach((el) => el.classList.add("in"));
       return;
     }
     const io = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setShown(true);
-          io.disconnect();
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).classList.add("in");
+            io.unobserve(entry.target);
+          }
         }
       },
-      { threshold, rootMargin: "0px 0px -8% 0px" },
+      /* A low ratio keeps tall sections (the project grid on phones) from
+         needing most of themselves visible before they may reveal. */
+      { threshold: 0.05, rootMargin: "0px 0px -6% 0px" },
     );
-    io.observe(el);
+    els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, [threshold]);
-
-  return { ref, shown };
+  }, []);
+  return null;
 }
 
 /**

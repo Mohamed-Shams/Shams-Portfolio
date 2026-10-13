@@ -2245,3 +2245,360 @@ summary:focus-visible {
     font-size: 11px;
   }
 }
+/* ══ Stage 3 refinement: reveal wiring · data-flow motion · hover polish ·
+   contact CTA ══════════════════════════════════════════════════════════════════
+   Scope: the scroll-reveal system Stage 1 left unwired, the SCADA/flow/globe
+   motion Stage 2 deferred, refined hover states, and the contact CTA. The
+   Stage 1 hero and project grid keep their approved look; no rule here
+   changes layout — every added animation is transform/opacity (plus two
+   paint-cheap background-position shimmers on 1px connectors). */
+
+/* 1 · One-shot scroll reveal ────────────────────────────────────────────────
+   Elements opt in with data-reveal="up" (fade + rise) or "fade". The hidden
+   pre-reveal state only applies once RevealManager has put `reveal-ready` on
+   <html>, so the page renders complete without JavaScript. Under
+   prefers-reduced-motion RevealManager adds `.in` immediately and the block
+   at the end pins the final state. */
+.reveal-ready [data-reveal] {
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal-ready [data-reveal="up"] {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.reveal-ready [data-reveal="fade"] {
+  opacity: 0;
+}
+.reveal-ready [data-reveal].in {
+  opacity: 1;
+  transform: none;
+}
+.reveal-ready [data-reveal-delay="1"].in { transition-delay: 0.08s; }
+.reveal-ready [data-reveal-delay="2"].in { transition-delay: 0.16s; }
+.reveal-ready [data-reveal-delay="3"].in { transition-delay: 0.24s; }
+@media print {
+  .reveal-ready [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* 2 · Flow diagram: dots run only once the diagram has entered the view.
+   Stage 1 gated the dots on `.flow-wrap.in`, but nothing ever added that
+   class, so the gate was dead. `.flow-wrap` now carries data-reveal, and the
+   dots stay paused (zero animation work off-screen) until it reveals. */
+.flow-dot {
+  animation-play-state: paused;
+}
+.flow-wrap.in .flow-dot {
+  animation-play-state: running;
+}
+
+/* 3 · Integration path below 1151px: the real-text chips get the same
+   "current" the SVG dots provide — a slow shimmer along each 1px connector
+   (closes the Stage 2 known limitation that the text path was static).
+   RTL moves the dashes the way the path reads. */
+.flow-link {
+  border: 0;
+  height: 1px;
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #2a8bb8 0 4px,
+    transparent 4px 9px
+  );
+  background-repeat: repeat-x;
+  background-size: 9px 1px;
+  animation: flow-shimmer-x 2.6s linear infinite;
+}
+@keyframes flow-shimmer-x {
+  to { background-position-x: 9px; }
+}
+[dir="rtl"] .flow-link {
+  animation-name: flow-shimmer-x-rtl;
+}
+@keyframes flow-shimmer-x-rtl {
+  to { background-position-x: -9px; }
+}
+@media (max-width: 600px) {
+  .flow-link {
+    width: 0;
+    height: 16px;
+    border: 0;
+    background-image: repeating-linear-gradient(
+      180deg,
+      #2a8bb8 0 4px,
+      transparent 4px 9px
+    );
+    background-repeat: repeat-y;
+    background-size: 1px 9px;
+    animation-name: flow-shimmer-y;
+    margin-inline-start: 50%;
+  }
+  @keyframes flow-shimmer-y {
+    to { background-position-y: 9px; }
+  }
+}
+
+/* 4 · SCADA panel: the existing status dot breathes (the chart trace and
+   node pulses already run from Stage 1). */
+.scada .scada-display > span:before {
+  animation: status-pulse 3.6s ease-in-out infinite;
+}
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 3px #f1a3421f; }
+  50% { opacity: 0.55; box-shadow: 0 0 0 5px #f1a34214; }
+}
+
+/* 5 · Contact globe: the signal arcs draw once the section has revealed
+   (`.contact.in` comes from the reveal system — scoped to .reveal-ready so
+   they still render without JavaScript), amber hub nodes pulse, a very slow
+   dashed orbit turns around the globe, and the pin floats gently. */
+.reveal-ready .globe-signal {
+  stroke-dasharray: 620;
+  stroke-dashoffset: 620;
+}
+.contact.in .globe-signal {
+  animation: trace-draw 1.7s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+.globe-node {
+  animation: globe-node-pulse 5.6s ease-in-out infinite;
+}
+@keyframes globe-node-pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.3; }
+}
+.globe-orbit {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: globe-orbit-spin 90s linear infinite;
+}
+@keyframes globe-orbit-spin {
+  to { transform: rotate(360deg); }
+}
+.globe-pin {
+  animation: globe-pin-float 6.5s ease-in-out infinite;
+}
+@keyframes globe-pin-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* 6 · Buttons: lift shadow and a real press state (transform/shadow only;
+   the base lift stays from globals). */
+.button {
+  transition:
+    transform 0.2s,
+    background 0.2s,
+    box-shadow 0.2s,
+    border-color 0.2s;
+}
+.button:hover {
+  box-shadow: 0 10px 26px -10px #f1a34266;
+}
+.button:active {
+  transform: translateY(0) scale(0.985);
+}
+.button.outline:hover {
+  border-color: #f1a342aa;
+  box-shadow: 0 8px 20px -12px #000000cc;
+}
+
+/* 7 · Skill tiles, certification cards, gallery thumbnails: quiet lift and
+   border brightening on hover; touch devices (hover: none) skip the lifts. */
+.skill-tile {
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    transform 0.25s ease;
+}
+.skill-tile:hover {
+  border-color: #3b5670;
+  transform: translateY(-2px);
+}
+.tech-symbol {
+  transition: transform 0.25s ease;
+}
+.skill-tile:hover .tech-symbol {
+  transform: translateY(-2px);
+}
+.cert-card {
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.cert-card:hover {
+  transform: translateY(-3px);
+  border-color: #f1a34255;
+  box-shadow: 0 16px 32px -24px #000000d9;
+}
+.thumbnails button {
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.thumbnails button:hover {
+  border-color: #f1a34299;
+  transform: translateY(-2px);
+}
+@media (hover: none) {
+  .skill-tile:hover,
+  .cert-card:hover,
+  .thumbnails button:hover {
+    transform: none;
+  }
+}
+
+/* 8 · Contact links: icon-chip lift, brighter text and a one-way amber
+   underline slide. The mailto link becomes inline so the new copy control
+   shares its line; inline-flex keeps the icon/text order correct in RTL. */
+.contact-copy > a:not(.button) {
+  position: relative;
+  transition: color 0.2s ease;
+}
+.contact-copy > a:not(.button) svg {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.contact-copy > a:not(.button):hover {
+  color: #ffffff;
+}
+.contact-copy > a:not(.button):hover svg {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -8px #000000cc;
+}
+.contact-copy > a:not(.button):after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--amber), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+[dir="rtl"] .contact-copy > a:not(.button):after {
+  transform-origin: right;
+}
+.contact-copy > a:not(.button):hover:after {
+  transform: scaleX(1);
+}
+.contact-copy > a[href^="mailto"] {
+  display: inline-flex;
+}
+.copy-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: 12px;
+  padding: 7px 11px;
+  background: #101820;
+  border: 1px solid #2a3a4a;
+  border-radius: 7px;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11.5px;
+  line-height: 1;
+  vertical-align: middle;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
+}
+.copy-email:hover {
+  border-color: #f1a34288;
+  color: var(--white);
+}
+.copy-email:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+.copy-email.copied {
+  border-color: #3f9950;
+  color: #7fd694;
+}
+
+/* 9 · Disclosures and the revealed seventh project card: one-shot entrance
+   (re-runs only when the content remounts). */
+@keyframes details-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+details[open] > p,
+details[open] .cert-grid {
+  animation: details-in 0.35s ease;
+}
+.projects-grid.expanded > :nth-child(7) {
+  animation: details-in 0.4s ease;
+}
+
+/* 10 · Small hover refinements: language switch, footer, timeline project
+   links, text-links (the arrow nudges along the reading direction). */
+.language a {
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.language a:hover {
+  background: #1a232c;
+}
+footer a {
+  transition: color 0.2s ease;
+}
+footer a:hover {
+  color: var(--amber);
+}
+.career li a {
+  transition: color 0.2s ease;
+}
+.career li a:hover {
+  color: var(--amber);
+}
+.text-link svg {
+  transition: transform 0.25s ease;
+}
+.text-link:hover svg {
+  transform: translateX(3px);
+}
+[dir="rtl"] .text-link:hover svg {
+  transform: translateX(-3px);
+}
+
+/* 11 · Reduced motion: every Stage 3 addition pins to its final static state.
+   globals.css already strips all animations/transitions with !important; the
+   rules below restore the static visuals that animations were drawing in
+   (revealed content, fully drawn globe arcs) and cancel hover movement. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-ready [data-reveal],
+  .reveal-ready [data-reveal].in {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .reveal-ready .globe-signal {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    animation: none !important;
+  }
+  .globe-node,
+  .globe-orbit,
+  .globe-pin,
+  .flow-link,
+  .scada .scada-display > span:before {
+    animation: none !important;
+  }
+  /* Same specificity as the base `.flow-wrap.in .flow-dot` opener (and later
+     in the file), so reduced motion keeps the dots hidden instead of parked
+     at their keyframe start positions. */
+  .flow-wrap.in .flow-dot {
+    opacity: 0;
+  }
+  .skill-tile:hover,
+  .skill-tile:hover .tech-symbol,
+  .cert-card:hover,
+  .contact-copy > a:not(.button):hover svg,
+  .thumbnails button:hover,
+  .text-link:hover svg {
+    transform: none;
+  }
+}
