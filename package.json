@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0",
-    "build": "next build",
+    "build": "opennextjs-cloudflare build",
+    "build:next": "next build",
     "build:worker": "opennextjs-cloudflare build --skipNextBuild",
-    "build:cloudflare": "opennextjs-cloudflare build",
-    "preview:cloudflare": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "build:cloudflare": "npm run build",
+    "preview:cloudflare": "npm run build && opennextjs-cloudflare preview",
+    "deploy": "npm run build && opennextjs-cloudflare deploy",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit"
   },

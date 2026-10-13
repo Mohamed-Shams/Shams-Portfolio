@@ -31,10 +31,10 @@ The repository includes a pinned OpenNext adapter, Wrangler configuration, and W
 
 The existing Cloudflare Workers Builds settings work without changing the dashboard:
 
-- **Build command:** `npm run build` (creates `.next`)
-- **Deploy command:** `npx wrangler deploy` (its `wrangler.jsonc` build step runs `npm run build:worker`, creating `.open-next` from the existing Next.js output)
+- **Build command:** `npm run build` (runs the full OpenNext build, including the underlying Next.js build, and creates both `.next` and `.open-next`)
+- **Deploy command:** `npx wrangler deploy` (Wrangler detects the compiled OpenNext project and delegates to the OpenNext deploy command)
 
-For local validation, run `npm run build:cloudflare` to build Next.js and the Cloudflare adapter together, or `npm run preview:cloudflare` to launch a local Workers preview. `npm run deploy` is also supported for direct deployment with Cloudflare credentials. Do not change the dashboard's build command to `npm run build:worker` without first creating the Next.js build output.
+OpenNext calls `npm run build:next` internally to compile Next.js without recursively invoking itself. For local validation, run `npm run build:cloudflare` or `npm run preview:cloudflare`. `npm run deploy` is also supported for direct deployment with Cloudflare credentials. `npm run build:worker` is only for rebuilding the Worker from an already-existing `.next` output.
 
 ## Content and assets
 

@@ -13,11 +13,5 @@
   },
   "observability": {
     "enabled": true
-  },
-  // Workers Builds currently runs "npm run build" then "npx wrangler deploy".
-  // Produce the OpenNext Worker during Wrangler's deploy/build step, reusing
-  // the .next output created by the preceding Next.js build.
-  "build": {
-    "command": "npm run build:worker"
   }
 }
