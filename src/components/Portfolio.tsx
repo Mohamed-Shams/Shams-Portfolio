@@ -12,10 +12,7 @@ import {
   Menu,
   X,
   Mail,
-  Globe,
-  Activity,
-  Database,
-  Radio,
+  Github,
   ChevronDown,
   Copy,
   Check,
@@ -25,9 +22,17 @@ import {
   skills,
   credentials,
   training,
+  techNotes,
   Localized,
 } from "@/lib/content";
-import { GlobeArt, Scada, TechSymbol, FlowDiagram } from "./TechnicalVisuals";
+import {
+  GlobeArt,
+  Scada,
+  TechSymbol,
+  TechIcon,
+  FlowDiagram,
+} from "./TechnicalVisuals";
+import { ProjectArt } from "./ProjectArt";
 import { useCountUp, RevealManager } from "./motion";
 const cv = "/assets/MohamedAhmedShams_CV.pdf";
 
@@ -45,6 +50,16 @@ const visibleProjects = (all: boolean) =>
 /* Card art is a display-resolution re-render of the same supplied illustration
    (see docs/STAGE1-VISUAL-AUDIT.md); no subjects were replaced. */
 const cardArt = (image: string) => `/assets/card/card-${image}.webp`;
+
+/* Issuer marks: AWS, Dataiku and Siemens now use the CC0 vector artwork in
+   /assets/brand (sharp at any size); Ignition and AVEVA have no
+   permission-compatible vector source, so they keep the supplied raster crop
+   displayed at its natural resolution. */
+const vectorCertMarks = new Set(["aws", "dataiku", "siemens"]);
+const certMark = (brand: string) =>
+  vectorCertMarks.has(brand.toLowerCase())
+    ? `/assets/brand/${brand.toLowerCase()}.svg`
+    : `/assets/cert-${brand.toLowerCase()}.webp`;
 export function Header() {
   const locale = useLocale();
   const ar = locale === "ar";
@@ -656,10 +671,10 @@ export default function Portfolio() {
               <article className="cert-card" key={c[0]}>
                 <div className={`cert-brand ${c[4]?.toLowerCase()}`}>
                   <Image
-                    src={`/assets/cert-${c[4]?.toLowerCase()}.webp`}
+                    src={certMark(c[4]!)}
                     alt={c[4]}
-                    width={88}
-                    height={88}
+                    width={96}
+                    height={96}
                   />
                 </div>
                 <div>
@@ -721,12 +736,12 @@ export default function Portfolio() {
               copied={t("Copied", "تم النسخ")}
             />
             <a
-              href="https://mohamed-shams.netlify.app/"
+              href="https://github.com/Mohamed-Shams"
               target="_blank"
               rel="noreferrer"
             >
-              <Globe size={19} />
-              {t("Professional portfolio", "الموقع المهني")}
+              <Github size={19} />
+              {t("GitHub profile", "ملف GitHub")}
             </a>
             <a href={cv} download className="button outline">
               {t("Download CV", "تحميل السيرة الذاتية")}
@@ -753,15 +768,28 @@ export function CaseStudy({ slug }: { slug: string }) {
   const locale = useLocale() as "ar" | "en";
   const ar = locale === "ar";
   const p = projects.find((p) => p.slug === slug)!;
-  const [photo, setPhoto] = useState(p.image);
   const t = (a: string, b: string) => (ar ? b : a);
+  const total = p.gallery.length;
+  const [idx, setIdx] = useState(0);
+  const item = p.gallery[idx];
+  const next = projects[(projects.indexOf(p) + 1) % projects.length];
+  const go = (delta: number) => setIdx((i) => (i + delta + total) % total);
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      go(-1);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      go(1);
+    }
+  };
   return (
     <>
       <Header />
       <RevealManager />
       <main className="case section">
         <Link className="back-link" href={`/${locale}#projects`}>
-          <ArrowLeft size={16} />
+          {ar ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
           {t("Back to Projects", "العودة للمشاريع")}
         </Link>
         <div className="case-heading" data-reveal="up">
@@ -774,83 +802,198 @@ export function CaseStudy({ slug }: { slug: string }) {
               ))}
             </div>
           </div>
-          <p dir="ltr">
-            {p.date}
-            <br />
-            {p.sector[locale]}
+          <p className="case-meta">
+            <span dir="ltr">{p.date}</span>
+            <span>{p.sector[locale]}</span>
           </p>
         </div>
-        <div className="case-grid" data-reveal="up">
-          <div>
-            <div className="case-photo">
-              <Image
-                src={`/assets/${photo}.webp`}
-                alt={t(
-                  "Illustrative industrial scene from the supplied design reference; not an actual project photograph.",
-                  "مشهد صناعي توضيحي من المرجع التصميمي المقدم، وليس صورة فعلية للمشروع.",
-                )}
-                fill
-                priority
-                sizes="(max-width:700px) 90vw, 55vw"
-              />
-            </div>
-            <p className="caption">
-              {t(
-                "Reference imagery · Illustrative, not actual project photography",
-                "صور مرجعية توضيحية · ليست صورًا فعلية للمشروع",
-              )}
-            </p>
-            <div className="thumbnails">
-              {[p.image, "plant", "city"].map((img, i) => (
-                <button
-                  key={i}
-                  aria-label={`${t("View image", "عرض الصورة")} ${i + 1}`}
-                  aria-pressed={photo === img}
-                  onClick={() => setPhoto(img)}
-                >
-                  <Image
-                    src={`/assets/${img}.webp`}
-                    alt=""
-                    fill
-                    sizes="160px"
-                  />
-                </button>
-              ))}
+
+        {/* Gallery — three original vector plates per project (site scene,
+            verified architecture path, operations view). Arrow keys work when
+            the stage has focus; the counter is announced politely. */}
+        <figure className="case-hero" data-reveal="up">
+          <div
+            className="case-stage"
+            role="group"
+            tabIndex={0}
+            onKeyDown={onKey}
+            aria-label={t("Project gallery", "معرض المشروع")}
+          >
+            <ProjectArt
+              key={item.kind}
+              project={p}
+              kind={item.kind}
+              title={p.title[locale]}
+              label={item.caption[locale]}
+              locale={locale}
+            />
+            <div className="case-controls">
+              <button
+                type="button"
+                className="case-nav"
+                onClick={() => go(-1)}
+                aria-label={t("Previous image", "الصورة السابقة")}
+              >
+                {ar ? <ArrowRight size={18} /> : <ArrowLeft size={18} />}
+              </button>
+              <span className="case-counter" aria-live="polite">
+                {idx + 1} / {total}
+              </span>
+              <button
+                type="button"
+                className="case-nav"
+                onClick={() => go(1)}
+                aria-label={t("Next image", "الصورة التالية")}
+              >
+                {ar ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
+              </button>
             </div>
           </div>
-          <div className="case-text">
+          <figcaption className="case-caption">
+            <span className="case-caption-text">{item.caption[locale]}</span>
+            <span className="case-illustrative">
+              {t(
+                "Original illustrative artwork — not a project photograph.",
+                "عمل فني توضيحي أصلي — وليس صورة فعلية للمشروع.",
+              )}
+            </span>
+          </figcaption>
+          <div
+            className="thumbnails"
+            role="group"
+            aria-label={t("Gallery thumbnails", "مصغّرات المعرض")}
+          >
+            {p.gallery.map((g, i) => (
+              <button
+                key={g.kind}
+                type="button"
+                aria-pressed={idx === i}
+                aria-label={`${t("View image", "عرض الصورة")} ${i + 1} — ${
+                  g.caption[locale]
+                }`}
+                onClick={() => setIdx(i)}
+              >
+                <span className="thumb-art" aria-hidden="true">
+                  <ProjectArt
+                    project={p}
+                    kind={g.kind}
+                    title={p.title[locale]}
+                    label=""
+                    locale={locale}
+                    slice
+                  />
+                </span>
+                <span className="thumb-index" aria-hidden="true">{i + 1}</span>
+              </button>
+            ))}
+          </div>
+        </figure>
+
+        <div className="case-overview" data-reveal="up">
+          <section className="case-summary">
             <h2>{t("Project Overview", "نظرة عامة")}</h2>
-            <p>{p.overview[locale]}</p>
-            <h2>{t("My Responsibilities", "مسؤولياتي")}</h2>
-            <ul>
-              {p.responsibilities.map((r, i) => (
-                <li key={i}>{r[locale]}</li>
-              ))}
-            </ul>
-            <h2>{t("Key Technologies", "التقنيات الرئيسية")}</h2>
-            <div className="case-tools">
-              {p.tags.map((tag, i) => (
-                <div key={tag}>
-                  {i % 3 === 0 ? (
-                    <Activity />
-                  ) : i % 3 === 1 ? (
-                    <Database />
-                  ) : (
-                    <Radio />
-                  )}
-                  <span>{tag}</span>
+            <p className="case-lead">{p.overview[locale]}</p>
+          </section>
+          <aside
+            className="case-facts"
+            aria-label={t("At a glance", "لمحة سريعة")}
+          >
+            <h3>{t("At a glance", "لمحة سريعة")}</h3>
+            <dl>
+              <div>
+                <dt>{t("Period", "الفترة")}</dt>
+                <dd dir="ltr">{p.date}</dd>
+              </div>
+              <div>
+                <dt>{t("Sector", "القطاع")}</dt>
+                <dd>{p.sector[locale]}</dd>
+              </div>
+              {p.scale.map((s) => (
+                <div key={s.value}>
+                  <dt>{s.label[locale]}</dt>
+                  <dd dir="ltr">{s.value}</dd>
                 </div>
               ))}
-            </div>
-          </div>
+            </dl>
+          </aside>
         </div>
+
+        <div className="case-columns" data-reveal="up">
+          <section className="case-resp">
+            <h2>{t("My Responsibilities", "مسؤولياتي")}</h2>
+            <ol>
+              {p.responsibilities.map((r, i) => (
+                <li key={i}>
+                  <span className="resp-num" aria-hidden="true">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span>{r[locale]}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+          <section className="case-tech" aria-labelledby="case-tech-h">
+            <h2 id="case-tech-h">{t("Technology", "التقنيات")}</h2>
+            <div className="case-tools">
+              {p.tags.map((tag) => {
+                const note = techNotes[tag];
+                return (
+                  <div className="case-tool" key={tag}>
+                    <span className="tool-icon">
+                      <TechIcon name={tag} size={23} />
+                    </span>
+                    <div>
+                      <h3>{tag}</h3>
+                      {note && <p>{note[locale]}</p>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+
+        {/* Architecture — only the four steps recorded in content.ts, drawn
+            wide for desktop and re-rendered as a text ladder on small screens
+            so no diagram type ever scales below legibility. */}
+        <section className="case-arch" data-reveal="up">
+          <h2>{t("Architecture", "البنية المعمارية")}</h2>
+          <div className="arch-frame">
+            <div className="arch-svg">
+              <ProjectArt
+                project={p}
+                kind="flow"
+                title={t("Architecture", "البنية المعمارية")}
+                label={p.architecture.note[locale]}
+                locale={locale}
+              />
+            </div>
+            <ol className="arch-steps">
+              {p.architecture.nodes.map((n, i) => (
+                <li
+                  key={i}
+                  className={
+                    i === 0 || i === p.architecture.nodes.length - 1
+                      ? "accent"
+                      : ""
+                  }
+                >
+                  <span className="arch-num" aria-hidden="true">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span>{n[locale]}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <p className="arch-note">{p.architecture.note[locale]}</p>
+        </section>
+
         <div className="next-project" data-reveal="up" data-reveal-delay="1">
-          <Link
-            className="text-link"
-            href={`/${locale}/projects/${projects[(projects.indexOf(p) + 1) % projects.length].slug}`}
-          >
+          <Link className="text-link" href={`/${locale}/projects/${next.slug}`}>
             {t("Next project", "المشروع التالي")}
-            <ArrowRight size={18} />
+            <span className="next-title">{next.title[locale]}</span>
+            {ar ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
           </Link>
         </div>
       </main>
