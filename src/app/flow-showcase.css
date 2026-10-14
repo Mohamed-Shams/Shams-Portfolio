@@ -162,7 +162,38 @@
     font-size: 12px;
     padding: 11px 12px;
   }
+  /* Keep the connections clearly visible between vertical real-text steps.
+     The original width:0 line was effectively invisible on phones. */
+  .flow-showcase .flow-link {
+    position: relative;
+    width: 2px;
+    min-height: 17px;
+    height: 17px;
+    margin-inline-start: calc(50% - 1px);
+    background: repeating-linear-gradient(
+      180deg, #44b5da 0 5px, transparent 5px 9px
+    );
+    background-size: 2px 9px;
+  }
+  .flow-showcase .flow-link::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    inset-inline-start: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ffd28a;
+    box-shadow: 0 0 11px #f1a342b8, 0 0 3px #fff1d4;
+    animation: flow-vertical-packet 2.5s ease-in infinite;
+  }
   .flow-showcase .flow-note { font-size: 10px; }
+}
+@keyframes flow-vertical-packet {
+  0% { opacity: 0; transform: translateY(0); }
+  18% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(13px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .flow-showcase::after,
@@ -171,7 +202,8 @@
   .flow-showcase .flow-svg-node.is-active rect,
   .flow-showcase .flow-chip,
   .flow-showcase .flow-link,
-  .flow-showcase-indicator { animation: none !important; }
+  .flow-showcase-indicator,
+  .flow-showcase .flow-link::after { animation: none !important; }
   .flow-showcase .flow-svg-packet { display: none; }
 }
 @media print {

@@ -37,6 +37,9 @@ fs.mkdirSync(OUT, { recursive: true });
         assert.equal(await flow.locator("summary").count(), 0, tag + " not collapsed");
         await flow.evaluate(el => el.scrollIntoView({ behavior: "instant", block: "center" }));
         await page.waitForTimeout(400);
+        if (process.env.FLOW_INJECT_LOCAL_CSS === "1") {
+          await page.addStyleTag({ path: "src/app/flow-showcase.css" });
+        }
         assert(await flow.isVisible(), tag + " flow always visible");
         const desktop = width > 1150;
         const svg = flow.locator("svg.flow-diagram");
@@ -58,6 +61,20 @@ fs.mkdirSync(OUT, { recursive: true });
           assert(css.includes("flow-shimmer"), tag + " small screen moving connector");
           const state = await flow.locator(".flow-step.accent .flow-chip").evaluate(e => getComputedStyle(e).animationName);
           assert(state.includes("flow-chip-activate"), tag + " highlighted Ignition node breathes");
+          if (width === 390 && process.env.FLOW_CHECK_MOBILE_CONNECTORS === "1") {
+            const connector = await flow.locator(".flow-link").first().evaluate(el => {
+              const rect = el.getBoundingClientRect();
+              return {
+                width: rect.width,
+                height: rect.height,
+                motion: getComputedStyle(el, "::after").animationName,
+              };
+            });
+            assert(connector.width >= 2 && connector.height >= 17,
+              tag + " mobile flow connector visible");
+            assert(connector.motion.includes("flow-vertical-packet"),
+              tag + " mobile packet visibly travels");
+          }
         }
         await page.screenshot({ path: path.join(OUT, tag + ".png") });
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
