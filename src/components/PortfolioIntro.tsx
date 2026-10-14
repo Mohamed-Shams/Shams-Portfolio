@@ -1,13 +1,29 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 
-const SESSION_KEY = "shams-portfolio-intro-v4";
-const HERO_REVEAL_MS = 1030;
-const INTRO_DISMISS_MS = 1430;
+/*
+ * V5 cinematic intro — five scenes, ~2.05 s, starts at FIRST PAINT.
+ *
+ * An inline bootstrap script in the root layout decides synchronously,
+ * before the page paints, whether the intro plays at all and stamps
+ * `data-intro-play` + `data-intro-t0` (ms epoch) on <html>. The overlay
+ * below is part of the server HTML, so its CSS scene animations begin at
+ * first paint instead of waiting for hydration. React joins the running
+ * timeline on mount: every timer is anchored to data-intro-t0, never to
+ * "now", so late hydration continues the sequence instead of restarting
+ * it. Decisions (session seen / reduced motion / URL hash / preview) all
+ * happen in the bootstrap script; this component only follows
+ * `data-intro-play`.
+ */
 
-/** Decorative first-visit greeting. The real page is always rendered and usable. */
+const SESSION_KEY = "shams-portfolio-intro-v5";
+const HERO_MS = 1800; // hero starts under the still-visible overlay (seamless handoff)
+const EXIT_MS = 2050; // overlay exit animation begins
+const CLEANUP_MS = 2800; // overlay unmounted, scroll unlocked
+const GRACE_MS = 550; // minimum intro visibility before interaction may dismiss it
+const EXIT_FADE_MS = 750; // JS-side safety matching the CSS exit duration
+
 export function PortfolioIntro({
   locale,
   onFinished,
@@ -15,104 +31,152 @@ export function PortfolioIntro({
   locale: "en" | "ar";
   onFinished: (ready: boolean) => void;
 }) {
-  const [visible, setVisible] = useState(false);
-  const shouldPlay = useRef<boolean | null>(null);
+  const [gone, setGone] = useState(false);
+  const [exiting, setExiting] = useState(false);
+  const [pct, setPct] = useState(0);
+  const finished = useRef(false);
 
   useEffect(() => {
-    if (shouldPlay.current === null) {
-      const skip = window.matchMedia("(prefers-reduced-motion: reduce)").matches || Boolean(window.location.hash);
-      shouldPlay.current = !skip;
-      if (!skip) {
-        try {
-          if (window.sessionStorage.getItem(SESSION_KEY)) shouldPlay.current = false;
-          else window.sessionStorage.setItem(SESSION_KEY, "seen");
-        } catch {
-          // Optional session storage may be unavailable in private browsing.
-        }
+    const html = document.documentElement;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const t0Attr = Number(html.getAttribute("data-intro-t0")) || Date.now();
+
+    const finish = () => {
+      if (!finished.current) {
+        finished.current = true;
+        onFinished(true);
       }
-    }
-    if (!shouldPlay.current) {
-      onFinished(true);
+    };
+    const cleanupDom = () => {
+      html.removeAttribute("data-intro-play");
+      html.classList.remove("intro-lock");
+    };
+
+    // No intro (reduced motion, already seen, deep link, stale bfcache):
+    // reveal the page immediately and drop the SSR overlay.
+    if (
+      reduce ||
+      !html.hasAttribute("data-intro-play") ||
+      Date.now() - t0Attr > 4000
+    ) {
+      cleanupDom();
+      finish();
+      setGone(true);
       return;
     }
-    // Keep the initial decision across React Strict Mode's effect replay.
-    // Its first cleanup cancels the timer, so the replay must schedule it again.
-    setVisible(true);
-    // Overlap the Hero entrance with the final fraction of the intro.
-    // Otherwise its own stagger produces a dark gap after the overlay fades.
-    let heroStarted = false;
-    let dismissed = false;
-    const revealHero = () => {
-      if (heroStarted) return;
-      heroStarted = true;
-      onFinished(true);
-    };
-    const dismiss = () => {
-      if (dismissed) return;
-      dismissed = true;
-      revealHero();
-      setVisible(false);
-    };
-    const heroTimer = window.setTimeout(revealHero, HERO_REVEAL_MS);
-    const dismissTimer = window.setTimeout(dismiss, INTRO_DISMISS_MS);
 
-    // The greeting is decorative: anyone who tries to use the page should
-    // immediately see the action and its focus indicator instead of the overlay.
-    window.addEventListener("pointerdown", dismiss, true);
+    html.classList.add("intro-lock");
+    const elapsed = () => Date.now() - t0Attr;
+    const at = (ms: number) => Math.max(0, ms - elapsed());
+    let cancelled = false;
+    const timers: number[] = [];
+    const schedule = (fn: () => void, ms: number) =>
+      timers.push(window.setTimeout(fn, ms));
+
+    // Honest decorative progress readout, synchronized with the CSS bar
+    // (both span 0.85s → 1.9s from first paint).
+    let raf = 0;
+    const tick = () => {
+      if (cancelled) return;
+      const p = Math.min(1, Math.max(0, (elapsed() - 850) / 1050));
+      setPct(Math.round(p * 100));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    schedule(finish, at(HERO_MS));
+    schedule(() => setExiting(true), at(EXIT_MS));
+    schedule(() => {
+      cleanupDom();
+      setGone(true);
+    }, at(CLEANUP_MS));
+
+    // The greeting is decorative: real interaction intent skips the rest.
+    // Armed only after GRACE_MS so the window-focus click that often lands
+    // on a freshly opened tab does not erase the intro before it is seen.
+    let armed = false;
+    const armT = window.setTimeout(() => {
+      armed = true;
+    }, at(GRACE_MS));
+    const dismiss = () => {
+      if (!armed || cancelled || finished.current) return;
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      timers.forEach(window.clearTimeout);
+      window.clearTimeout(armT);
+      finish();
+      setExiting(true);
+      schedule(() => {
+        cleanupDom();
+        setGone(true);
+      }, EXIT_FADE_MS);
+    };
     window.addEventListener("keydown", dismiss, true);
+    window.addEventListener("pointerdown", dismiss, true);
+    window.addEventListener("wheel", dismiss, { capture: true, passive: true });
+
     return () => {
-      window.clearTimeout(heroTimer);
-      window.clearTimeout(dismissTimer);
-      window.removeEventListener("pointerdown", dismiss, true);
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      timers.forEach(window.clearTimeout);
+      window.clearTimeout(armT);
       window.removeEventListener("keydown", dismiss, true);
+      window.removeEventListener("pointerdown", dismiss, true);
+      window.removeEventListener("wheel", dismiss, true);
+      html.classList.remove("intro-lock");
     };
   }, [onFinished]);
 
+  if (gone) return null;
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          className="portfolio-intro"
-          aria-hidden="true"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, y: -24 }}
-          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        >
-          <div className="portfolio-intro-rings" />
-          <svg className="portfolio-intro-signals" viewBox="0 0 840 520" preserveAspectRatio="xMidYMid meet">
-            <path d="M0 156H224L272 204H342M840 365H627L590 328H496" />
-            <path d="M0 318H174L222 270H310M840 168H688L624 232H540" />
-            <circle cx="342" cy="204" r="3" />
-            <circle cx="496" cy="328" r="3" />
-            <circle cx="310" cy="270" r="3" />
-            <circle cx="540" cy="232" r="3" />
-          </svg>
-          <motion.div
-            className="portfolio-intro-content"
-            initial="hidden"
-            animate="show"
-            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.17, delayChildren: 0.12 } } }}
-          >
-            <motion.div
-              className="portfolio-intro-mark"
-              variants={{
-                hidden: { opacity: 0, scale: 0.78, y: 20, filter: "blur(6px)" },
-                show: { opacity: 1, scale: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.67, ease: [0.16, 1, 0.3, 1] } },
-              }}
-            >MS</motion.div>
-            <motion.strong variants={{
-              hidden: { opacity: 0, y: 22 },
-              show: { opacity: 1, y: 0, transition: { duration: 0.56, ease: [0.16, 1, 0.3, 1] } },
-            }}>{locale === "ar" ? "محمد أحمد شمس" : "Mohamed Ahmed Shams"}</motion.strong>
-            <motion.span variants={{
-              hidden: { opacity: 0, y: 14 },
-              show: { opacity: 1, y: 0, transition: { duration: 0.42, ease: "easeOut" } },
-            }}>{locale === "ar" ? "مهندس أنظمة / إنترنت الأشياء الصناعي" : "Systems Engineer / Industrial IoT"}</motion.span>
-            <div className="portfolio-intro-line"><i /></div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div
+      className={"portfolio-intro" + (exiting ? " intro-exit" : "")}
+      aria-hidden="true"
+    >
+      <div className="intro-spotlight" />
+      <div className="intro-orb" />
+      <div className="portfolio-intro-rings" />
+      <svg
+        className="portfolio-intro-signals"
+        viewBox="0 0 840 520"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <path d="M0 156H224L272 204H342M840 365H627L590 328H496" />
+        <path d="M0 318H174L222 270H310M840 168H688L624 232H540" />
+        <circle cx="342" cy="204" r="3" />
+        <circle cx="496" cy="328" r="3" />
+        <circle cx="310" cy="270" r="3" />
+        <circle cx="540" cy="232" r="3" />
+      </svg>
+      <span className="intro-frame tl" />
+      <span className="intro-frame tr" />
+      <span className="intro-frame bl" />
+      <span className="intro-frame br" />
+      <div className="portfolio-intro-content">
+        <div className="intro-badge">
+          <span className="intro-badge-ring" />
+          <b className="intro-mark">MS</b>
+        </div>
+        <strong className="intro-name">
+          {locale === "ar" ? "محمد أحمد شمس" : "Mohamed Ahmed Shams"}
+        </strong>
+        <span className="intro-role">
+          {locale === "ar"
+            ? "مهندس أنظمة · سكادا · إنترنت الأشياء الصناعي"
+            : "Systems Engineer | SCADA | Industrial IoT"}
+        </span>
+        <div className="intro-progress">
+          <div className="portfolio-intro-line">
+            <i />
+          </div>
+          <div className="intro-progress-meta">
+            <span>
+              {locale === "ar" ? "جارٍ تجهيز التجربة" : "Preparing experience"}
+            </span>
+            <b className="intro-pct">{pct}%</b>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

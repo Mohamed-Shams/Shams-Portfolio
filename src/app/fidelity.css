@@ -3118,16 +3118,45 @@ footer a:hover {
   }
 }
 
-/* V4 introductory signature: decorative, pointer-transparent and quick. */
+/* V5 cinematic intro — five scenes anchored to FIRST PAINT.
+   The overlay ships inside the server HTML and stays display:none until the
+   inline bootstrap stamps data-intro-play on <html> (first eligible visit or
+   ?motionPreview=1). Scene clocks are plain CSS delays measured from that
+   first paint; React only joins later (progress readout, exit class), so
+   hydration latency can neither delay nor restart the sequence.
+   Timeline: atmosphere 0s → badge 0.42s → name 0.82s → role 0.98s →
+   progress 0.85s–1.9s → hero handoff 1.8s → exit 2.05s. */
 .portfolio-intro {
   position: fixed;
   inset: 0;
   z-index: 90;
   pointer-events: none;
-  display: grid;
+  display: none;
   place-items: center;
   overflow: hidden;
   background: radial-gradient(circle at 50% 45%, #2d2019 0%, #11151a 37%, #080d12 78%);
+}
+html[data-intro-play] .portfolio-intro { display: grid; }
+html.intro-lock { overflow: hidden; }
+
+.portfolio-intro-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-inline: 20px;
+}
+
+/* Scene 1 — atmosphere: dark plate, amber spotlight, drawing signal lines. */
+.intro-spotlight {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(58% 46% at 50% 42%, #f1a34214 0%, transparent 62%),
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, #05070a92 100%);
+  opacity: 0;
+  animation: intro-fade-in 0.85s ease-out both;
 }
 .portfolio-intro-rings {
   position: absolute;
@@ -3136,11 +3165,7 @@ footer a:hover {
   border: 1px solid #f1a34222;
   border-radius: 50%;
   box-shadow: 0 0 0 64px #f1a34208, 0 0 0 128px #f1a34206, 0 0 0 192px #f1a34204;
-  animation: portfolio-rings-arrive 1.25s cubic-bezier(.16,1,.3,1) both;
-}
-@keyframes portfolio-rings-arrive {
-  from { opacity: 0; transform: scale(.82); }
-  to { opacity: 1; transform: scale(1); }
+  animation: intro-rings-arrive 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
 }
 .portfolio-intro-signals {
   position: absolute;
@@ -3151,17 +3176,20 @@ footer a:hover {
   fill: none;
   stroke: #42b0d2;
   stroke-width: 1;
-  opacity: .6;
+  opacity: 0.6;
 }
 .portfolio-intro-signals path {
   stroke-dasharray: 440;
   stroke-dashoffset: 440;
-  animation: portfolio-signal-draw 1.24s cubic-bezier(.4,0,.2,1) .16s both;
+  animation: intro-signal-draw 1.05s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
 }
-.portfolio-intro-signals path:nth-child(even) { animation-delay: .32s; stroke: #e0a052; }
-.portfolio-intro-signals circle { fill: #f1a342; stroke: none; opacity: 0; animation: portfolio-node-in .35s ease 1.05s both; }
-@keyframes portfolio-signal-draw { to { stroke-dashoffset: 0; } }
-@keyframes portfolio-node-in { to { opacity: .85; } }
+.portfolio-intro-signals path:nth-child(even) { animation-delay: 0.45s; stroke: #e0a052; }
+.portfolio-intro-signals circle {
+  fill: #f1a342;
+  stroke: none;
+  opacity: 0;
+  animation: intro-node-in 0.35s ease 1.15s both;
+}
 @media (max-width: 600px) {
   /* Keep moving data lines at the perimeter, clear of the name and subtitle. */
   .portfolio-intro-signals {
@@ -3169,34 +3197,76 @@ footer a:hover {
     mask-image: radial-gradient(ellipse 39% 42% at center, transparent 52%, #000 98%);
   }
 }
-.portfolio-intro-content {
+
+/* Scene 2 — identity: amber orb blooms behind the MS badge. */
+.intro-orb {
+  position: absolute;
+  width: min(46vw, 400px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, #f1a3422e 0%, #f1a34212 45%, transparent 70%);
+  filter: blur(2px);
+  opacity: 0;
+  transform: scale(0.55);
+  animation: intro-orb-bloom 1.05s cubic-bezier(0.2, 0.7, 0.3, 1) 0.38s both;
+}
+.intro-badge {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  text-align: center;
-  padding-inline: 20px;
+  width: clamp(84px, 14vw, 116px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  margin-bottom: 6px;
+  border-radius: 26px;
+  border: 2px solid #f1a34255;
+  background: #0d1117cc;
+  box-shadow: 0 0 44px #f1a3422e, inset 0 0 18px #f1a34214;
+  opacity: 0;
+  transform: scale(0.78) translateY(14px);
+  filter: blur(9px);
+  animation: intro-badge-in 0.72s cubic-bezier(0.16, 1, 0.3, 1) 0.42s both;
 }
-.portfolio-intro-mark {
-  font: 500 clamp(65px, 11vw, 116px)/1 "Space Grotesk", sans-serif;
-  letter-spacing: -0.09em;
-  padding-inline-end: 0.09em;
+.intro-badge-ring {
+  position: absolute;
+  inset: -12px;
+  border-radius: 34px;
+  border: 1px solid #f1a3421f;
+  opacity: 0;
+  animation: intro-badge-ring 2.6s ease-in-out 0.95s infinite;
+}
+.intro-mark {
+  font: 500 clamp(34px, 6vw, 52px)/1 "Space Grotesk", sans-serif;
+  letter-spacing: -0.06em;
   color: var(--amber);
-  text-shadow: 0 0 55px #f1a34235;
+  text-shadow: 0 0 26px #f1a34245;
 }
-.portfolio-intro-content strong {
+
+/* Scene 3 — name and specialization, staggered typography. */
+.intro-name {
   font: 600 clamp(17px, 3vw, 23px)/1.4 "Space Grotesk", Alexandria, sans-serif;
   color: #f4f5f6;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: intro-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.82s both;
 }
-.portfolio-intro-content span {
+.intro-role {
   font: 400 12px/1.7 Inter, Alexandria, sans-serif;
+  letter-spacing: 0.02em;
   color: #b4bdc6;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: intro-rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.98s both;
+}
+
+/* Scene 4 — progress: decorative bar + readout, honestly labelled. */
+.intro-progress {
+  margin-top: 20px;
+  opacity: 0;
+  animation: intro-fade-in 0.5s ease 0.82s both;
 }
 .portfolio-intro-line {
-  width: min(215px, 64vw);
+  width: min(225px, 64vw);
   height: 2px;
-  margin-top: 23px;
   background: #f1a34226;
   overflow: hidden;
 }
@@ -3206,13 +3276,104 @@ footer a:hover {
   height: 100%;
   background: linear-gradient(90deg, transparent, var(--amber), #f7d6a7);
   transform-origin: left;
-  animation: portfolio-intro-progress 1.34s cubic-bezier(.24,.7,.28,1) .09s both;
+  transform: scaleX(0);
+  animation: intro-progress 1.05s cubic-bezier(0.3, 0.5, 0.35, 1) 0.85s both;
 }
 [dir="rtl"] .portfolio-intro-line i {
   transform-origin: right;
   background: linear-gradient(270deg, transparent, var(--amber), #f7d6a7);
 }
-@keyframes portfolio-intro-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.intro-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  width: min(225px, 64vw);
+  margin-top: 9px;
+  font: 400 10.5px/1 Inter, Alexandria, sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8b959e;
+}
+.intro-pct {
+  color: var(--amber);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Corner frame marks, echoing the engineering-plate framing. */
+.intro-frame {
+  position: absolute;
+  width: 58px;
+  height: 58px;
+  opacity: 0;
+  animation: intro-frame-in 0.7s ease 0.3s both;
+}
+.intro-frame.tl { top: 26px; left: 26px; border-left: 1px solid #f1a34233; border-top: 1px solid #f1a34233; }
+.intro-frame.tr { top: 26px; right: 26px; border-right: 1px solid #f1a34233; border-top: 1px solid #f1a34233; animation-delay: 0.42s; }
+.intro-frame.bl { bottom: 26px; left: 26px; border-left: 1px solid #f1a34233; border-bottom: 1px solid #f1a34233; animation-delay: 0.54s; }
+.intro-frame.br { bottom: 26px; right: 26px; border-right: 1px solid #f1a34233; border-bottom: 1px solid #f1a34233; animation-delay: 0.66s; }
+@media (max-width: 600px) {
+  .intro-frame { width: 40px; height: 40px; }
+}
+
+/* Scene 5 — exit: content lifts, plate fades and settles (React adds
+   .intro-exit at EXIT_MS, or immediately on user interaction). */
+.intro-exit .portfolio-intro-content {
+  animation: intro-exit-content 0.34s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+}
+.intro-exit {
+  animation: intro-exit-root 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.12s both;
+}
+.intro-exit .portfolio-intro-signals,
+.intro-exit .intro-spotlight,
+.intro-exit .portfolio-intro-rings,
+.intro-exit .intro-orb,
+.intro-exit .intro-frame,
+.intro-exit .intro-badge-ring {
+  animation: intro-fade-out 0.4s ease both;
+}
+.intro-exit .portfolio-intro-signals { animation-delay: 0.05s; }
+
+@keyframes intro-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes intro-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes intro-rings-arrive {
+  from { opacity: 0; transform: scale(0.82); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes intro-signal-draw { to { stroke-dashoffset: 0; } }
+@keyframes intro-node-in { to { opacity: 0.85; } }
+@keyframes intro-orb-bloom {
+  from { opacity: 0; transform: scale(0.55); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes intro-badge-in {
+  from { opacity: 0; transform: scale(0.78) translateY(14px); filter: blur(9px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes intro-badge-ring {
+  0% { opacity: 0; transform: scale(0.92); }
+  45% { opacity: 0.9; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+@keyframes intro-rise {
+  from { opacity: 0; transform: translateY(var(--intro-rise, 18px)); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes intro-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes intro-frame-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes intro-exit-content {
+  to { opacity: 0; transform: translateY(-18px); }
+}
+@keyframes intro-exit-root {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.976); }
+}
+
 .hero-instrument .scada { pointer-events: none; }
 @media (prefers-reduced-motion: reduce) {
   .portfolio-intro { display: none; }
