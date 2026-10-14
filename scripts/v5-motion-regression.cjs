@@ -305,8 +305,8 @@ async function verifyJourney(browser, locale, size) {
     await ctx.close();
   }
 }
-async function verifyReduced(browser, locale, size) {
-  const tag = locale + "-" + size.name + "-reduced";
+async function verifyForcedFullMotion(browser, locale, size) {
+  const tag = locale + "-" + size.name + "-full-motion-override";
   const ctx = await browser.newContext({
     viewport: { width: size.width, height: size.height }, reducedMotion: "reduce",
     recordVideo: { dir: OUT, size: { width: size.width, height: size.height } },
@@ -314,20 +314,22 @@ async function verifyReduced(browser, locale, size) {
   const page = await ctx.newPage();
   const assertNoErrors = track(page, tag);
   try {
-    await page.goto(BASE + "/" + locale, { waitUntil: "load" });
-    await page.evaluate(() => document.fonts.ready);
-    await page.waitForTimeout(500);
+    await page.goto(BASE + "/" + locale, { waitUntil: "commit" });
+    await page.locator(".portfolio-intro").waitFor({ state: "attached", timeout: 12000 });
     const v = await state(page);
     await screenshot(page, tag);
-    check(v.reduced && !v.play && !v.introVisible && v.hero === 1 && v.overflow <= 1,
-      tag + " skips intro and shows hero", JSON.stringify(v));
-    await page.waitForFunction(() => document.documentElement.classList.contains("reveal-ready"),
-      null, { timeout: 8000 });
-    const reveal = await page.locator("[data-reveal]").evaluateAll(els =>
-      els.every(el => getComputedStyle(el).opacity === "1"));
-    check(reveal, tag + " all sections statically visible");
-    const animations = await page.evaluate(() => document.getAnimations().length);
-    check(animations === 0, tag + " zero active animations", String(animations));
+    check(v.reduced && v.play && v.introVisible && v.overflow <= 1,
+      tag + " plays intro even when system requests reduced motion", JSON.stringify(v));
+    const introAnimations = await page.evaluate(() => document.getAnimations().filter(a =>
+      a.playState === "running").length);
+    check(introAnimations > 0, tag + " intro has actual running animations", String(introAnimations));
+    await page.waitForFunction(() =>
+      Boolean(document.querySelector(".hero.motion-ready")) &&
+      !document.documentElement.hasAttribute("data-intro-play"),
+      null, { timeout: 12000 });
+    await page.waitForTimeout(1700);
+    check(await page.locator(".hero h1").evaluate(el => getComputedStyle(el).opacity === "1"),
+      tag + " Hero finishes full cinematic reveal");
   } finally {
     assertNoErrors();
     const video = page.video();
@@ -471,7 +473,7 @@ async function main() {
     for (const locale of ["en", "ar"]) {
       for (const size of SIZES) {
         for (const [label, fn] of [
-          ["journey", verifyJourney], ["reduced", verifyReduced], ["no-JavaScript", verifyNoJS],
+          ["journey", verifyJourney], ["forced full motion", verifyForcedFullMotion], ["no-JavaScript", verifyNoJS],
         ]) {
           try { await fn(browser, locale, size); }
           catch (error) {

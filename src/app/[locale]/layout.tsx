@@ -2,7 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 const INTRO_BOOTSTRAP =
-  "(function(){try{var d=document.documentElement;if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;" +
+  "(function(){try{var d=document.documentElement;" +
   "var p=new URLSearchParams(location.search).get('motionPreview')==='1';" +
   "var home=['/en','/ar','/en/','/ar/'].includes(location.pathname);" +
   "if(home&&(p||!location.hash)){d.setAttribute('data-intro-play','');d.setAttribute('data-intro-t0',String(Date.now()));" +

@@ -14,7 +14,7 @@ import { useEffect, useRef, useState } from "react";
  * first paint instead of waiting for hydration. React joins the running
  * timeline on mount: every timer is anchored to data-intro-t0, never to
  * "now", so late hydration continues the sequence instead of restarting
- * it. Decisions (homepage route / reduced motion / URL hash / preview) all
+ * it. Decisions (homepage route / URL hash / preview) all
  * happen in the bootstrap script; this component only follows
  * `data-intro-play`.
  */
@@ -40,7 +40,6 @@ export function PortfolioIntro({
 
   useEffect(() => {
     const html = document.documentElement;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const t0Attr = Number(html.getAttribute("data-intro-t0")) || Date.now();
 
     const finish = () => {
@@ -54,10 +53,9 @@ export function PortfolioIntro({
       html.classList.remove("intro-lock");
     };
 
-    // No intro (reduced motion, deep link, stale bfcache):
+    // No intro (deep link, stale bfcache):
     // reveal the page immediately and drop the SSR overlay.
     if (
-      reduce ||
       !html.hasAttribute("data-intro-play") ||
       Date.now() - t0Attr > 4500
     ) {

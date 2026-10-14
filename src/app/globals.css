@@ -1758,17 +1758,6 @@ footer > a:last-child {
     padding: 6px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  *,
-  *:before,
-  *:after {
-    animation: none !important;
-    transition: none !important;
-  }
-}
 .skip-link {
   position: fixed;
   top: -80px;

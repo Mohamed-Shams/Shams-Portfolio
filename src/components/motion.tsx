@@ -11,8 +11,7 @@ import { useEffect, useRef, useState } from "react";
  *    applies while JavaScript is running (no-JS visitors see the final page);
  *  - reveals elements/groups once as they enter the viewport (one shared
  *    IntersectionObserver, unobserved after reveal);
- *  - under prefers-reduced-motion reveals everything immediately, with no
- *    observer at all (the CSS reduce block strips transitions itself).
+ *  - scroll entrances run consistently regardless of OS animation settings.
  * Re-running on remount (locale switch) is safe and required: fresh DOM
  * starts without `.in`, so every mount re-observes its own elements.
  */
@@ -39,12 +38,6 @@ export function RevealManager() {
       });
     }
     if (!els.length && !groups.length) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      els.forEach((el) => el.classList.add("in"));
-      groups.forEach((g) => g.classList.add("in"));
-      eachGroups.forEach((group) => getItems(group).forEach((el) => el.classList.add("in")));
-      return;
-    }
     const settleTimers: number[] = [];
     const cardIo = new IntersectionObserver((entries) => {
       for (const entry of entries) {
@@ -105,8 +98,7 @@ export function RevealManager() {
 }
 
 /**
- * Count-up for the about statistics. Runs once when visible; honors
- * prefers-reduced-motion by jumping straight to the final value.
+ * Count-up for the about statistics. Runs once when visible.
  * `startDelay` staggers sibling counters so they do not tick in unison.
  * Final rendered strings exactly match the original hard-coded values.
  */
@@ -120,11 +112,6 @@ export function useCountUp(
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      setText(target);
-      return;
-    }
     const parse = /([\d.]+)\s*([KM+]+)?/i.exec(target);
     if (!parse) return;
     const value = parseFloat(parse[1]);

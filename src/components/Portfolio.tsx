@@ -239,7 +239,6 @@ function Stat({ value, label, index }: { value: string; label: string; index: nu
 function ScrollProgress() {
   const progress = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let raf = 0;
     const onScroll = () => {
       cancelAnimationFrame(raf);
@@ -284,16 +283,6 @@ export default function Portfolio() {
     }
     setHeroReady(ready);
   }, []);
-  // Keep server and first client render identical. Reading the media query in
-  // render would create different Framer Motion initial styles during hydration.
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReduced(preference.matches);
-    sync();
-    preference.addEventListener("change", sync);
-    return () => preference.removeEventListener("change", sync);
-  }, []);
   return (
     <>
       <noscript>
@@ -307,7 +296,7 @@ export default function Portfolio() {
       <ScrollProgress />
       <RevealManager />
       <main id="main">
-        <section className={"hero" + (heroReady || reduced ? " motion-ready" : "") + (heroCinematic && !reduced ? " is-cinematic" : "")} id="home">
+        <section className={"hero" + (heroReady ? " motion-ready" : "") + (heroCinematic ? " is-cinematic" : "")} id="home">
           <div className="hero-portrait" data-hero-item="0">
             <Image
               src="/assets/portrait.webp"

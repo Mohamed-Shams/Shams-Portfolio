@@ -1613,42 +1613,6 @@
   transform-origin: center;
 }
 
-/* ---- Reduced motion: stop everything decorative ---- */
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-  .scroll-progress {
-    display: none;
-  }
-  .hero .industrial,
-  .hero .refinery {
-    animation: none;
-  }
-  .scada-trace {
-    stroke-dashoffset: 0;
-    animation: none;
-  }
-  .scada circle,
-  .signal-lines path,
-  .flow-dot,
-  .globe-art {
-    animation: none !important;
-  }
-  .hero-copy > * {
-    opacity: 1 !important;
-    animation: none !important;
-  }
-  .flow-dot {
-    opacity: 0 !important;
-  }
-  .nav a:after {
-    display: none;
-  }
-}
-
 /* Touch devices: no hover-dependent continuous effects */
 @media (hover: none) {
   .project-card .card-image img {
@@ -2267,7 +2231,7 @@ summary:focus-visible {
    Elements opt in with data-reveal="up" (fade + rise) or "fade". The hidden
    pre-reveal state only applies once RevealManager has put `reveal-ready` on
    <html>, so the page renders complete without JavaScript. Under
-   prefers-reduced-motion RevealManager adds `.in` immediately and the block
+   RevealManager adds `.in` when the section enters view and the block
    at the end pins the final state. */
 .reveal-ready [data-reveal] {
   transition: opacity 0.6s ease, transform 0.6s ease;
@@ -2572,45 +2536,6 @@ footer a:hover {
 }
 [dir="rtl"] .text-link:hover svg {
   transform: translateX(-3px);
-}
-
-/* 11 · Reduced motion: every Stage 3 addition pins to its final static state.
-   globals.css already strips all animations/transitions with !important; the
-   rules below restore the static visuals that animations were drawing in
-   (revealed content, fully drawn globe arcs) and cancel hover movement. */
-@media (prefers-reduced-motion: reduce) {
-  .reveal-ready [data-reveal],
-  .reveal-ready [data-reveal].in {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-  .reveal-ready .globe-signal {
-    stroke-dasharray: none;
-    stroke-dashoffset: 0;
-    animation: none !important;
-  }
-  .globe-node,
-  .globe-orbit,
-  .globe-pin,
-  .flow-link,
-  .scada .scada-display > span:before {
-    animation: none !important;
-  }
-  /* Same specificity as the base `.flow-wrap.in .flow-dot` opener (and later
-     in the file), so reduced motion keeps the dots hidden instead of parked
-     at their keyframe start positions. */
-  .flow-wrap.in .flow-dot {
-    opacity: 0;
-  }
-  .skill-tile:hover,
-  .skill-tile:hover .tech-symbol,
-  .cert-card:hover,
-  .contact-copy > a:not(.button):hover svg,
-  .thumbnails button:hover,
-  .text-link:hover svg {
-    transform: none;
-  }
 }
 
 /* ══ Case-study depth: original gallery art · hierarchy · architecture ══════
@@ -3071,13 +2996,6 @@ footer a:hover {
     padding: 12px 14px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .case-stage > .project-art,
-  .case-stage > .case-cover-image {
-    animation: none;
-  }
-}
-
 /* ===== Stage 1 (homepage elevation): hero + about polish =====
    Scoped additions for this stage only. The tinted vignette above and the
    portrait's :after key light carry most of the change; what follows adds
@@ -3101,12 +3019,6 @@ footer a:hover {
 }
 [dir="rtl"] .section.about {
   background: radial-gradient(48% 62% at 16% 18%, #17242f1f, transparent 74%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scroll svg {
-    animation: none;
-  }
 }
 
 /* Stage 1 final QA · phones crop the portrait tighter, so the face sits in the
@@ -3379,17 +3291,6 @@ html.intro-lock { overflow: hidden; }
 }
 
 .hero-instrument .scada { pointer-events: none; }
-@media (prefers-reduced-motion: reduce) {
-  .portfolio-intro { display: none; }
-  .portfolio-intro-line i, .portfolio-intro-rings, .portfolio-intro-signals * { animation: none !important; }
-  .hero.motion-ready .scada-trace { animation: none !important; stroke-dashoffset: 0 !important; }
-  .hero-copy > *,
-  .hero-portrait {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-}
-
 /* V5 motion identity: a clear first-visit Hero handoff, followed by compact,
    readable reveals across the actual portfolio sections. No-JS and returning
    visitors never enter an opacity-zero state. All entrance offsets are small
@@ -3556,7 +3457,7 @@ html.reveal-ready [data-reveal="right"].in {
   animation: trace-draw 1.7s cubic-bezier(0.45, 0, 0.2, 1) forwards;
 }
 
-@media (prefers-reduced-motion: reduce), print {
+@media print {
   html[data-intro-play] .hero [data-hero-item],
   html.reveal-ready [data-reveal-group] > [data-reveal-item],
   html.reveal-ready [data-reveal="right"] {
@@ -3714,7 +3615,7 @@ html.reveal-ready .journey .career li[data-reveal="up"] {
 }
 
 /* Readability/accessibility wins over every decorative scene. */
-@media (prefers-reduced-motion: reduce), print {
+@media print {
   .hero.motion-ready.is-cinematic [data-hero-item],
   .hero.motion-ready.is-cinematic .hero-portrait,
   .hero.motion-ready .hero-instrument,
