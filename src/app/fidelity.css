@@ -3654,7 +3654,9 @@ html.reveal-ready .journey .career li[data-reveal="up"] {
 }
 .globe-art[tabindex] {
   cursor: grab;
-  touch-action: none;
+  /* Horizontal gestures rotate the globe; vertical touch swipes remain
+     native page scrolling. Pinch gestures belong to the browser. */
+  touch-action: pan-y pinch-zoom;
 }
 .globe-art[data-dragging="true"] { cursor: grabbing; }
 .globe-art:focus-visible {

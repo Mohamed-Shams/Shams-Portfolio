@@ -324,15 +324,110 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
   const [view, setView] = useState({ lon: 20, lat: 0, zoom: 1 });
   const [dragging, setDragging] = useState(false);
   const [activeCountry, setActiveCountry] = useState<string | null>(null);
+  const viewRef = useRef(view);
+  const visibleRef = useRef(false);
+  const hoveredRef = useRef(false);
+  const focusedRef = useRef(false);
+  const engineReadyRef = useRef(false);
+  const motionFrameRef = useRef<number | null>(null);
+  const idleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const drag = useRef<{
-    id: number; x: number; y: number; lon: number; lat: number; lastFrame: number;
+    id: number; x: number; y: number; lon: number; lat: number;
+    moved: boolean; lastFrame: number; lastX: number; lastY: number;
+    velocityLon: number; velocityLat: number; pointerType: string;
   } | null>(null);
+  const applyView = useCallback((next: { lon: number; lat: number; zoom: number }) => {
+    const bounded = {
+      lon: ((next.lon + 540) % 360) - 180,
+      lat: Math.max(-65, Math.min(65, next.lat)),
+      zoom: Math.max(1, Math.min(1.65, next.zoom)),
+    };
+    viewRef.current = bounded;
+    if (isMounted.current) setView(bounded);
+  }, []);
+  const stopMotion = useCallback(() => {
+    if (idleTimeoutRef.current !== null) {
+      clearTimeout(idleTimeoutRef.current);
+      idleTimeoutRef.current = null;
+    }
+    if (motionFrameRef.current !== null) {
+      cancelAnimationFrame(motionFrameRef.current);
+      motionFrameRef.current = null;
+    }
+  }, []);
+  const scheduleIdle = useCallback(() => {
+    stopMotion();
+    if (!engineReadyRef.current || !visibleRef.current ||
+        hoveredRef.current || focusedRef.current || drag.current) return;
+    // A restrained, bounded drift keeps the real geography alive without
+    // revolving experience markers away from the user's chosen region.
+    idleTimeoutRef.current = setTimeout(() => {
+      idleTimeoutRef.current = null;
+      if (!visibleRef.current || hoveredRef.current || focusedRef.current || drag.current) return;
+      const anchor = viewRef.current;
+      const start = performance.now();
+      let previous = 0;
+      const tick = (now: number) => {
+        if (!visibleRef.current || hoveredRef.current || focusedRef.current || drag.current) {
+          motionFrameRef.current = null;
+          return;
+        }
+        // Updating at <=12fps avoids redrawing the Natural Earth projection
+        // every animation frame; halo, twinkles and orbit remain CSS-smooth.
+        if (now - previous >= 85) {
+          const elapsed = now - start;
+          applyView({
+            ...anchor,
+            lon: anchor.lon + Math.sin(elapsed / 5200) * 1.5,
+            lat: anchor.lat + Math.sin(elapsed / 7400) * .35,
+          });
+          previous = now;
+        }
+        motionFrameRef.current = requestAnimationFrame(tick);
+      };
+      motionFrameRef.current = requestAnimationFrame(tick);
+    }, 2700);
+  }, [applyView, stopMotion]);
+  const coastAfterRelease = useCallback((velocityLon: number, velocityLat: number) => {
+    stopMotion();
+    if (Math.hypot(velocityLon, velocityLat) < .002 || !visibleRef.current) {
+      scheduleIdle();
+      return;
+    }
+    const start = performance.now();
+    let previous = start;
+    const tick = (now: number) => {
+      if (!visibleRef.current || drag.current) {
+        motionFrameRef.current = null;
+        return;
+      }
+      const dt = Math.min(42, now - previous);
+      previous = now;
+      const decay = Math.exp(-dt / 190);
+      velocityLon *= decay;
+      velocityLat *= decay;
+      const current = viewRef.current;
+      applyView({
+        ...current,
+        lon: current.lon + velocityLon * dt,
+        lat: current.lat + velocityLat * dt,
+      });
+      if (Math.hypot(velocityLon, velocityLat) < .001 || now - start > 1100) {
+        motionFrameRef.current = null;
+        scheduleIdle();
+      } else {
+        motionFrameRef.current = requestAnimationFrame(tick);
+      }
+    };
+    motionFrameRef.current = requestAnimationFrame(tick);
+  }, [applyView, scheduleIdle, stopMotion]);
   const loadEngine = useCallback(() => {
     if (!enginePromise.current) {
       enginePromise.current = Promise.all([
         import("d3-geo"), import("../lib/globe-world.json"),
       ]).then(([geo, world]) => {
         const value = { geo, world: world.default };
+        engineReadyRef.current = true;
         if (isMounted.current) setEngine(value);
         return value;
       }).catch((error) => {
@@ -361,6 +456,24 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
       observer.disconnect();
     };
   }, [loadEngine]);
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    // No geo reprojection or requestAnimationFrame loop while off screen.
+    const observer = new IntersectionObserver(([entry]) => {
+      visibleRef.current = !!entry?.isIntersecting;
+      if (!visibleRef.current) stopMotion();
+      else scheduleIdle();
+    }, { threshold: .12 });
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      stopMotion();
+    };
+  }, [scheduleIdle, stopMotion]);
+  useEffect(() => {
+    if (engine) scheduleIdle();
+  }, [engine, scheduleIdle]);
   const changed = view.lon !== 20 || view.lat !== 0 || view.zoom !== 1;
   const projected = useMemo(() => {
     if (!engine || !changed) return null;
@@ -378,49 +491,83 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
       borders: path(geo.borders as import("d3-geo").GeoPermissibleObjects) ?? "",
     };
   }, [changed, engine, view]);
-  const rotate = (lon: number, lat: number) => setView((v) => ({
-    ...v, lon: ((lon + 540) % 360) - 180,
-    lat: Math.max(-65, Math.min(65, lat)),
-  }));
+  const rotate = (lon: number, lat: number) =>
+    applyView({ ...viewRef.current, lon, lat });
   const zoomBy = (amount: number) => {
+    stopMotion();
     void loadEngine().then(() => {
-      if (isMounted.current) setView((v) => ({
-        ...v, zoom: Math.max(1, Math.min(1.65, +(v.zoom + amount).toFixed(2))),
-      }));
+      if (isMounted.current) {
+        applyView({ ...viewRef.current, zoom: +(viewRef.current.zoom + amount).toFixed(2) });
+        scheduleIdle();
+      }
     }).catch(() => {}); // retain the SSR globe if offline
   };
   const resetView = () => {
-    setView({ lon: 20, lat: 0, zoom: 1 });
+    stopMotion();
+    applyView({ lon: 20, lat: 0, zoom: 1 });
     setActiveCountry(null);
+    scheduleIdle();
   };
   const pointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (drag.current) return; // single-pointer interaction (no pinch conflict)
     if ((event.target as Element).closest(".globe-beacon")) return;
+    stopMotion();
     void loadEngine();
     drag.current = {
       id: event.pointerId, x: event.clientX, y: event.clientY,
-      lon: view.lon, lat: view.lat, lastFrame: 0,
+      lon: viewRef.current.lon, lat: viewRef.current.lat, lastFrame: performance.now(),
+      lastX: event.clientX, lastY: event.clientY,
+      velocityLon: 0, velocityLat: 0, moved: false, pointerType: event.pointerType,
     };
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setDragging(true);
   };
   const pointerMove = (event: ReactPointerEvent<SVGSVGElement>) => {
     const current = drag.current;
-    if (!current || current.id !== event.pointerId || !engine) return;
+    if (!current || current.id !== event.pointerId) return;
+    const dx = event.clientX - current.x;
+    const dy = event.clientY - current.y;
+    if (!current.moved) {
+      if (Math.hypot(dx, dy) < 8) return;
+      if (current.pointerType === "touch" && Math.abs(dy) > Math.abs(dx) * 1.15) {
+        // Let the browser handle vertical swipe to scroll down the page.
+        drag.current = null;
+        scheduleIdle();
+        return;
+      }
+      if (!engineReadyRef.current) return;
+      current.moved = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      setDragging(true);
+      setActiveCountry(null);
+    }
+    if (!engineReadyRef.current) return;
     const time = performance.now();
     if (time - current.lastFrame < 28) return; // ~30fps max while dragging
+    const dt = Math.max(1, time - current.lastFrame);
+    const scale = 480 / event.currentTarget.getBoundingClientRect().width / viewRef.current.zoom;
+    // Cap release velocity: quick swipes coast briefly but never spin away.
+    current.velocityLon = Math.max(-.09, Math.min(.09,
+      -(event.clientX - current.lastX) * .43 * scale / dt));
+    current.velocityLat = Math.max(-.07, Math.min(.07,
+      (event.clientY - current.lastY) * .35 * scale / dt));
     current.lastFrame = time;
-    const scale = 480 / event.currentTarget.getBoundingClientRect().width / view.zoom;
-    rotate(current.lon - (event.clientX - current.x) * .43 * scale,
-      current.lat + (event.clientY - current.y) * .35 * scale);
+    current.lastX = event.clientX;
+    current.lastY = event.clientY;
+    rotate(current.lon - dx * .43 * scale, current.lat + dy * .35 * scale);
   };
-  const pointerUp = (event: ReactPointerEvent<SVGSVGElement>) => {
+  const finishPointer = (event: ReactPointerEvent<SVGSVGElement>, cancelled = false) => {
     if (drag.current?.id !== event.pointerId) return;
+    const current = drag.current;
     drag.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
     setDragging(false);
+    if (current.moved && !cancelled) {
+      const age = performance.now() - current.lastFrame;
+      const decay = age > 120 ? 0 : Math.exp(-age / 80);
+      coastAfterRelease(current.velocityLon * decay, current.velocityLat * decay);
+    } else scheduleIdle();
   };
   const onGlobeKey = (event: ReactKeyboardEvent<SVGSVGElement>) => {
     if (event.target !== event.currentTarget) return;
@@ -431,12 +578,12 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
     const delta = increments[event.key];
     if (delta) {
       event.preventDefault();
+      stopMotion();
       void loadEngine().then(() => {
-        if (isMounted.current) setView((v) => ({
-          ...v,
-          lon: ((v.lon + delta[0] + 540) % 360) - 180,
-          lat: Math.max(-65, Math.min(65, v.lat + delta[1])),
-        }));
+        if (isMounted.current) {
+          rotate(viewRef.current.lon + delta[0], viewRef.current.lat + delta[1]);
+          scheduleIdle();
+        }
       }).catch(() => {});
     } else if (event.key === "+" || event.key === "=") {
       event.preventDefault(); zoomBy(.15);
@@ -474,8 +621,30 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
       data-zoom={view.zoom.toFixed(2)}
       onPointerDown={pointerDown}
       onPointerMove={pointerMove}
-      onPointerUp={pointerUp}
-      onPointerCancel={pointerUp}
+      onPointerUp={(event) => finishPointer(event)}
+      onPointerCancel={(event) => finishPointer(event, true)}
+      onLostPointerCapture={(event) => finishPointer(event, true)}
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse") {
+          hoveredRef.current = true;
+          stopMotion();
+        }
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === "mouse") {
+          hoveredRef.current = false;
+          if (!drag.current) scheduleIdle();
+        }
+      }}
+      onFocusCapture={() => {
+        focusedRef.current = true;
+        stopMotion();
+      }}
+      onBlurCapture={(event) => {
+        if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+        focusedRef.current = false;
+        scheduleIdle();
+      }}
       onKeyDown={onGlobeKey}
       aria-label={locale === "ar"
         ? "كرة أرضية تفاعلية. اسحب للتدوير، الأسهم للتحريك، وزائد أو ناقص للتكبير أو التصغير. مواقع مصر والسعودية."
@@ -603,11 +772,17 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
             role="button"
             tabIndex={0}
             aria-pressed={activeCountry === location.id}
-            onClick={() => setActiveCountry((current) => current === location.id ? null : location.id)}
+            onClick={() => {
+              stopMotion();
+              setActiveCountry((current) => current === location.id ? null : location.id);
+              scheduleIdle();
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
+                stopMotion();
                 setActiveCountry((current) => current === location.id ? null : location.id);
+                scheduleIdle();
               }
             }}
             aria-label={locale === "ar"
@@ -649,6 +824,27 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
       </g>
     </svg>
     <div className="globe-controls" role="group"
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse") {
+          hoveredRef.current = true;
+          stopMotion();
+        }
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === "mouse") {
+          hoveredRef.current = false;
+          scheduleIdle();
+        }
+      }}
+      onFocusCapture={() => {
+        focusedRef.current = true;
+        stopMotion();
+      }}
+      onBlurCapture={(event) => {
+        if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+        focusedRef.current = false;
+        scheduleIdle();
+      }}
       aria-label={ar ? "التحكم في الكرة الأرضية" : "Globe controls"}>
       <button type="button" onClick={() => zoomBy(.15)} disabled={view.zoom >= 1.65}
         aria-label={ar ? "تكبير الكرة الأرضية" : "Zoom in globe"} title={ar ? "تكبير" : "Zoom in"}>
