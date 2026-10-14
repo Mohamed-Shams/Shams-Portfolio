@@ -1,0 +1,3 @@
+# Keep original certificates as exact binary files. Windows system Git may
+# otherwise apply the astextplain PDF driver and misreport their contents.
+public/certificates/*.pdf binary

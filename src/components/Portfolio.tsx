@@ -15,6 +15,8 @@ import {
   ChevronDown,
   Copy,
   Check,
+  FileText,
+  ExternalLink,
 } from "lucide-react";
 import {
   projects,
@@ -27,6 +29,10 @@ import {
   Localized,
 } from "@/lib/content";
 import {
+  certificateDocuments,
+  certificateLinksByCard,
+} from "@/lib/certificateDocuments";
+import {
   GlobeArt,
   Scada,
   TechSymbol,
@@ -35,6 +41,7 @@ import {
 } from "./TechnicalVisuals";
 import { ProjectArt } from "./ProjectArt";
 import { PortfolioIntro } from "./PortfolioIntro";
+import { PlatformTicker } from "./PlatformTicker";
 import { useCountUp, RevealManager } from "./motion";
 const cv = "/assets/MohamedAhmedShams_CV.pdf";
 
@@ -49,15 +56,16 @@ const orderedProjects = [
 const visibleProjects = (all: boolean) =>
   orderedProjects.slice(0, all ? 7 : 6);
 
-/* Issuer marks: AWS, Dataiku and Siemens now use the CC0 vector artwork in
-   /assets/brand (sharp at any size); Ignition and AVEVA have no
-   permission-compatible vector source, so they keep the supplied raster crop
-   displayed at its natural resolution. */
+/* Platform marks: preserve sharp existing CC0 vectors and reuse the genuine
+   issuer icons from the old portfolio for Ignition and AVEVA. */
 const vectorCertMarks = new Set(["aws", "dataiku", "siemens"]);
-const certMark = (brand: string) =>
-  vectorCertMarks.has(brand.toLowerCase())
-    ? `/assets/brand/${brand.toLowerCase()}.svg`
-    : `/assets/cert-${brand.toLowerCase()}.webp`;
+const certMark = (brand: string) => {
+  const key = brand.toLowerCase();
+  if (vectorCertMarks.has(key)) return `/assets/brand/${key}.svg`;
+  if (key === "ignition") return "/assets/platforms/ignition-logo.png";
+  if (key === "aveva") return "/assets/platforms/aveva.png";
+  return `/assets/cert-${key}.webp`;
+};
 export function Header() {
   const locale = useLocale();
   const ar = locale === "ar";
@@ -691,6 +699,7 @@ export default function Portfolio() {
             )}
           </p>
           </div>
+          <PlatformTicker locale={locale} />
           <div className="cert-grid" data-reveal-group="true" data-reveal-each="true">
             {[...credentials, [...training[0], "SIEMENS"]].map((c) => (
               <article className="cert-card" key={c[0]} data-reveal-item="true">
@@ -709,9 +718,71 @@ export default function Portfolio() {
                   {c[4] === "SIEMENS" && (
                     <small>{t("Training course", "دورة تدريبية")}</small>
                   )}
+                  {certificateLinksByCard[c[0]]?.length > 0 && (
+                    <div className="cert-pdf-links">
+                      {certificateLinksByCard[c[0]].map((id) => {
+                        const doc = certificateDocuments.find((item) => item.id === id);
+                        if (!doc) return null;
+                        return (
+                          <a key={id} href={doc.pdf} target="_blank" rel="noopener noreferrer"
+                            aria-label={`${t("View PDF", "عرض الشهادة")}: ${ar ? doc.titleAr : doc.title}`}>
+                            <FileText size={13} />
+                            {id === "dataiku-core"
+                              ? t("Core PDF", "الشهادة الأساسية")
+                              : id === "dataiku-advanced"
+                                ? t("Advanced PDF", "الشهادة المتقدمة")
+                                : t("View PDF", "عرض الشهادة")}
+                          </a>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </article>
             ))}
+          </div>
+          <div className="certificate-library" id="certificate-library">
+            <div className="certificate-library-heading">
+              <div>
+                <h3>{t("Certificate Documents", "ملفات الشهادات")}</h3>
+                <p>{t(
+                  "Original certificate PDFs from my previous portfolio, including earlier Ignition credentials and professional training.",
+                  "ملفات الشهادات الأصلية من موقعي السابق، بما في ذلك اعتمادات Ignition السابقة والدورات المهنية.",
+                )}</p>
+              </div>
+              <span className="certificate-library-count">
+                {certificateDocuments.length} {t("PDFs", "ملفات PDF")}
+              </span>
+            </div>
+            <div className="certificate-library-rail" aria-label={t("Browse certificate PDFs", "استعراض ملفات الشهادات")}>
+              {certificateDocuments.map((doc) => (
+                <article className="certificate-document" key={doc.id}>
+                  <div className="certificate-document-top">
+                    <span className="certificate-document-icon">
+                      {doc.brand ? (
+                        <Image src={certMark(doc.brand)} alt="" width={40} height={40} />
+                      ) : <FileText size={25} />}
+                    </span>
+                    <small>PDF</small>
+                  </div>
+                  <h4>{ar ? doc.titleAr : doc.title}</h4>
+                  <p>{doc.issuer}</p>
+                  <div className="certificate-document-actions">
+                    <a href={doc.pdf} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink size={14} />
+                      {t("View", "عرض")}
+                    </a>
+                    <a href={doc.pdf} download aria-label={`${t("Download PDF", "تنزيل الشهادة")}: ${ar ? doc.titleAr : doc.title}`}>
+                      <Download size={14} />
+                      {t("Download", "تنزيل")}
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <p className="certificate-library-hint">
+              {t("Scroll horizontally to explore all documents.", "مرّر أفقياً لاستعراض جميع الملفات.")}
+            </p>
           </div>
           <details className="training">
             <summary>
@@ -727,6 +798,13 @@ export default function Portfolio() {
                     <h3>{c[ar ? 1 : 0]}</h3>
                     <p>{c[2]}</p>
                     <time>{c[3]}</time>
+                    {certificateLinksByCard[c[0]]?.map((id) => {
+                      const doc = certificateDocuments.find((item) => item.id === id);
+                      if (!doc) return null;
+                      return <a key={id} className="training-pdf-link" href={doc.pdf} target="_blank" rel="noopener noreferrer">
+                        <FileText size={14} /> {t("View certificate PDF", "عرض شهادة PDF")}
+                      </a>;
+                    })}
                   </div>
                 </article>
               ))}

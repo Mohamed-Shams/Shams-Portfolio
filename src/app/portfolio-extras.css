@@ -1,0 +1,218 @@
+/* Old portfolio platform ticker, adapted to the premium Next.js layout.
+   Duplicated groups create a seamless continuous loop without GSAP. */
+.platform-ticker {
+  margin: 24px 0 26px;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #27425583;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #0b1823, #0a1018 65%, #0a1821);
+  box-shadow: inset 0 1px #acc7d316;
+}
+.platform-ticker-head {
+  padding: 17px 24px 7px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.platform-ticker-head > span {
+  color: #f2c27d;
+  font: 700 12px/1.4 Inter, Alexandria, sans-serif;
+  letter-spacing: .08em;
+}
+.platform-ticker-head small {
+  color: #8ba8b9;
+  font: 400 11px/1.4 Inter, Alexandria, sans-serif;
+}
+.platform-ticker-window {
+  padding: 9px 0 17px;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+.platform-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: platform-marquee 46s linear infinite;
+  will-change: transform;
+}
+.platform-ticker:is(:hover, :focus-within) .platform-ticker-track {
+  animation-play-state: paused;
+}
+.platform-ticker-set {
+  display: flex;
+  flex: none;
+  gap: 12px;
+  padding-inline-end: 12px;
+}
+.platform-ticker-item {
+  --ticker-glow: #f1a342;
+  width: 111px;
+  min-height: 103px;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 8px;
+  border-radius: 12px;
+  background: #12222b77;
+  border: 1px solid #28435a60;
+  text-decoration: none;
+  transition: background .25s ease, border-color .25s ease;
+}
+.platform-ticker-item:hover,
+.platform-ticker-item:focus-visible {
+  background: #19323f;
+  border-color: var(--ticker-glow);
+}
+.platform-ticker-item:focus-visible { outline: 2px solid #e8ae60; outline-offset: -2px; }
+.platform-ticker-icon {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px var(--ticker-glow));
+  transition: transform .3s ease, filter .3s ease;
+}
+.platform-ticker-item:hover .platform-ticker-icon,
+.platform-ticker-item:focus-visible .platform-ticker-icon {
+  transform: scale(1.13);
+  filter: drop-shadow(0 0 13px var(--ticker-glow));
+}
+.platform-ticker-label {
+  color: #c8d7df;
+  text-align: center;
+  font: 500 10px/1.25 Inter, sans-serif;
+}
+@keyframes platform-marquee { to { transform: translateX(-50%); } }
+
+/* Public original certificate PDFs, directly viewable and downloadable. */
+.certificate-library { margin-top: 29px; min-width: 0; scroll-margin-top: 110px; }
+.certificate-library-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.certificate-library-heading h3 {
+  margin: 0 0 7px;
+  color: #f2f5f6;
+  font: 650 19px/1.4 Inter, Alexandria, sans-serif;
+}
+.certificate-library-heading p {
+  margin: 0;
+  max-width: 700px;
+  color: #9eb5c1;
+  font: 400 12px/1.6 Inter, Alexandria, sans-serif;
+}
+.certificate-library-count {
+  flex: none;
+  padding: 6px 11px;
+  color: #efbe75;
+  border: 1px solid #956a365e;
+  border-radius: 50px;
+  font: 600 12px/1.4 Inter, Alexandria, sans-serif;
+}
+.certificate-library-rail {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 5px 3px 15px;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: #996c35 #132330;
+}
+.certificate-document {
+  flex: 0 0 220px;
+  min-height: 206px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+  border: 1px solid #284153b5;
+  border-radius: 12px;
+  background: linear-gradient(150deg, #142431e8, #0c141df2);
+  transition: border-color .25s ease, transform .25s ease;
+}
+.certificate-document:hover,
+.certificate-document:focus-within {
+  border-color: #b68149b5;
+  transform: translateY(-3px);
+}
+.certificate-document-top { display: flex; justify-content: space-between; align-items: start; }
+.certificate-document-top small {
+  color: #ce9551;
+  letter-spacing: .12em;
+  font: 700 10px/1.4 Inter, sans-serif;
+}
+.certificate-document-icon {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid #345467;
+  background: #0b1b29;
+  color: #f1a342;
+}
+.certificate-document-icon img { width: 36px; height: 36px; object-fit: contain; }
+.certificate-document h4 {
+  margin: 12px 0 4px;
+  color: #f2f6f8;
+  font: 600 13px/1.45 Inter, Alexandria, sans-serif;
+}
+.certificate-document p {
+  margin: 0 0 13px;
+  font: 400 11px/1.4 Inter, Alexandria, sans-serif;
+  color: #94b0bc;
+}
+.certificate-document-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.certificate-document-actions a,
+.cert-pdf-links a,
+.training-pdf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #f0b66c;
+  font: 600 11px/1.5 Inter, Alexandria, sans-serif;
+  text-decoration: none;
+  transition: color .2s ease;
+}
+.certificate-document-actions a:hover,
+.cert-pdf-links a:hover,
+.training-pdf-link:hover { color: #ffe5b3; text-decoration: underline; }
+.certificate-document-actions a:focus-visible,
+.cert-pdf-links a:focus-visible,
+.training-pdf-link:focus-visible { outline: 2px solid #ffc77e; outline-offset: 3px; }
+.cert-pdf-links { display: flex; flex-wrap: wrap; gap: 5px 13px; margin-top: 9px; }
+.training-pdf-link { margin-top: 8px; }
+.certificate-library-hint {
+  color: #91a9b7;
+  font: 400 11px/1.5 Inter, Alexandria, sans-serif;
+  margin: 8px 0 0;
+}
+@media (max-width: 600px) {
+  .platform-ticker { margin: 19px 0 23px; }
+  .platform-ticker-head { padding: 13px 13px 6px; flex-direction: column; gap: 3px; }
+  .platform-ticker-head small { font-size: 10px; }
+  .platform-ticker-item { width: 89px; min-height: 91px; gap: 7px; }
+  .platform-ticker-icon { width: 44px; height: 44px; }
+  .platform-ticker-set { gap: 9px; padding-inline-end: 9px; }
+  .platform-ticker-label { font-size: 9px; }
+  .platform-ticker-track { animation-duration: 56s; }
+  .certificate-library-heading { flex-wrap: wrap; }
+  .certificate-document { flex-basis: 195px; min-height: 208px; }
+}
+@media print {
+  .platform-ticker-track { animation: none !important; }
+  .platform-ticker-set[aria-hidden="true"] { display: none; }
+  .certificate-library-rail { overflow: visible; flex-wrap: wrap; }
+}
