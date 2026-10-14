@@ -7,7 +7,7 @@ const INTRO_BOOTSTRAP =
   "try{s=!!sessionStorage.getItem('shams-portfolio-intro-v5')}catch(e){}" +
   "if(p||(!s&&!location.hash)){d.setAttribute('data-intro-play','');d.setAttribute('data-intro-t0',String(Date.now()));" +
   "d.classList.add('intro-lock');try{sessionStorage.setItem('shams-portfolio-intro-v5','seen')}catch(e){}" +
-  "setTimeout(function(){d.classList.remove('intro-lock')},3600)}}catch(e){}})();";
+  "setTimeout(function(){d.classList.remove('intro-lock');d.removeAttribute('data-intro-play')},3600)}}catch(e){}})();";
 export function generateStaticParams() {
   return [{ locale: "en" }, { locale: "ar" }];
 }
@@ -19,7 +19,7 @@ export async function generateMetadata({
   const { locale } = await params;
   return {
     metadataBase: new URL(
-      process.env.NEXT_PUBLIC_SITE_URL || "https://mohamed-shams.netlify.app",
+      process.env.NEXT_PUBLIC_SITE_URL || "https://shams-portfolio.mshams0174.workers.dev",
     ),
     title:
       locale === "ar"

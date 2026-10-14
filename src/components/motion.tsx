@@ -31,7 +31,7 @@ export function RevealManager() {
         .querySelectorAll<HTMLElement>(":scope > [data-reveal-item]")
         .forEach((el, i) => {
           /* Cap the cascade so very long lists do not feel sluggish. */
-          el.style.setProperty("--ri", String(Math.min(i, 11)));
+          el.style.setProperty("--ri", String(Math.min(i, 7)));
         });
     }
     if (!els.length && !groups.length) return;
@@ -40,11 +40,20 @@ export function RevealManager() {
       groups.forEach((g) => g.classList.add("in"));
       return;
     }
+    const settleTimers: number[] = [];
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            (entry.target as HTMLElement).classList.add("in");
+            const target = entry.target as HTMLElement;
+            target.classList.add("in");
+            // After the entrance settles, remove the stagger delay so
+            // pointer and keyboard feedback on cards responds immediately.
+            if (target.hasAttribute("data-reveal-group")) {
+              settleTimers.push(window.setTimeout(() => {
+                target.classList.add("reveal-settled");
+              }, 1300));
+            }
             io.unobserve(entry.target);
           }
         }
@@ -58,7 +67,10 @@ export function RevealManager() {
     );
     els.forEach((el) => io.observe(el));
     groups.forEach((g) => io.observe(g));
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      settleTimers.forEach(window.clearTimeout);
+    };
   }, []);
   return null;
 }
@@ -76,8 +88,6 @@ export function useCountUp(
 ): { ref: React.RefObject<HTMLSpanElement | null>; text: string } {
   const ref = useRef<HTMLSpanElement | null>(null);
   const [text, setText] = useState(target);
-  const started = useRef(false);
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -92,15 +102,20 @@ export function useCountUp(
     if (Number.isNaN(value)) return;
     const suffix = parse[2] ?? "";
 
+    let started = false;
+    let cancelled = false;
+    let raf = 0;
+    let timer: number | undefined;
     const io = new IntersectionObserver(
       (entries) => {
-        if (!entries.some((e) => e.isIntersecting) || started.current) return;
-        started.current = true;
+        if (!entries.some((e) => e.isIntersecting) || started || cancelled) return;
+        started = true;
         io.disconnect();
-        let raf = 0;
-        const timer = window.setTimeout(() => {
+        timer = window.setTimeout(() => {
+          if (cancelled) return;
           const t0 = performance.now();
           const tick = (now: number) => {
+            if (cancelled) return;
             const p = Math.min(1, (now - t0) / duration);
             const eased = 1 - Math.pow(1 - p, 3);
             const current =
@@ -113,18 +128,15 @@ export function useCountUp(
           };
           raf = requestAnimationFrame(tick);
         }, startDelay);
-        return () => {
-          window.clearTimeout(timer);
-          cancelAnimationFrame(raf);
-        };
       },
       { threshold: 0.5 },
     );
     io.observe(el);
     return () => {
+      cancelled = true;
       io.disconnect();
-      /* The timer/raf closures are owned by the IO callback; the `started`
-         ref guarantees a re-observed element never counts twice. */
+      if (timer !== undefined) window.clearTimeout(timer);
+      cancelAnimationFrame(raf);
     };
   }, [target, duration, startDelay]);
 

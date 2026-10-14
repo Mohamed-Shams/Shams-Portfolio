@@ -1441,8 +1441,12 @@
 .scroll-progress > div {
   height: 100%;
   background: linear-gradient(90deg, var(--amber), #f6b95d);
-  width: 0;
-  will-change: width;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+[dir="rtl"] .scroll-progress > div {
+  transform-origin: right center;
 }
 
 /* ---- Section reveals (one-shot, GPU-friendly) ---- */
@@ -1468,7 +1472,7 @@
   will-change: transform;
 }
 
-/* Hero copy entrance is owned by Framer Motion in Portfolio.tsx. */
+/* V5 Hero entrance is now owned by the CSS choreography at the end of this file. */
 @keyframes drift {
   0%   { transform: translate3d(0, 0, 0) scale(1); }
   50%  { transform: translate3d(-1.1%, -0.8%, 0) scale(1.03); }
@@ -3383,5 +3387,188 @@ html.intro-lock { overflow: hidden; }
   .hero-portrait {
     opacity: 1 !important;
     transform: none !important;
+  }
+}
+
+/* V5 motion identity: a clear first-visit Hero handoff, followed by compact,
+   readable reveals across the actual portfolio sections. No-JS and returning
+   visitors never enter an opacity-zero state. All entrance offsets are small
+   enough to avoid shifting document geometry. */
+:root {
+  --v5-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* The inline first-paint bootstrap sets this attribute synchronously. The
+   preloader covers the Hero until PortfolioIntro signals motion-ready.
+   .is-cinematic persists until route exit so the late CTA animation cannot
+   be cancelled when the intro attribute is removed. */
+html[data-intro-play] .hero:not(.motion-ready) [data-hero-item] {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+}
+html[data-intro-play] .hero:not(.motion-ready) .hero-portrait {
+  transform: translate3d(28px, 0, 0) scale(1.025);
+}
+html[dir="rtl"][data-intro-play] .hero:not(.motion-ready) .hero-portrait {
+  transform: translate3d(-28px, 0, 0) scale(1.025);
+}
+.hero.motion-ready.is-cinematic [data-hero-item] {
+  animation: v5-hero-arrive 0.82s var(--v5-ease) both;
+}
+.hero.motion-ready.is-cinematic .hero-portrait {
+  animation-name: v5-portrait-arrive;
+  animation-duration: 1.18s;
+  animation-delay: 0.05s;
+}
+html[dir="rtl"] .hero.motion-ready.is-cinematic .hero-portrait {
+  animation-name: v5-portrait-arrive-rtl;
+}
+.hero.motion-ready.is-cinematic [data-hero-item="1"] { animation-delay: 0.04s; }
+.hero.motion-ready.is-cinematic [data-hero-item="2"] { animation-delay: 0.13s; }
+.hero.motion-ready.is-cinematic [data-hero-item="3"] { animation-delay: 0.22s; }
+.hero.motion-ready.is-cinematic [data-hero-item="4"] { animation-delay: 0.3s; }
+.hero.motion-ready.is-cinematic [data-hero-item="5"] { animation-delay: 0.38s; }
+.hero.motion-ready.is-cinematic [data-hero-item="6"] { animation-delay: 0.46s; }
+.hero.motion-ready.is-cinematic [data-hero-item="7"] { animation-delay: 0.52s; }
+@keyframes v5-hero-arrive {
+  from { opacity: 0; transform: translate3d(0, 24px, 0); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes v5-portrait-arrive {
+  from { opacity: 0; transform: translate3d(28px, 0, 0) scale(1.025); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes v5-portrait-arrive-rtl {
+  from { opacity: 0; transform: translate3d(-28px, 0, 0) scale(1.025); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Returning visits and no-JS have a fully drawn SCADA trace immediately.
+   The first visit redraws it when the portrait and headings arrive. */
+.scada-trace { stroke-dashoffset: 0; }
+.hero.motion-ready:not(.is-cinematic) .scada-trace {
+  animation: none;
+  stroke-dashoffset: 0;
+}
+.hero.motion-ready.is-cinematic .scada-trace {
+  animation: v5-trace-draw 2s cubic-bezier(.18,.7,.25,1) .13s both;
+}
+@keyframes v5-trace-draw {
+  from { stroke-dashoffset: 260; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Stagger only immediate children. Existing project/cert/skill hover transforms
+   continue to work after the group enters, with no competing fill animation. */
+html.reveal-ready [data-reveal-group] > [data-reveal-item] {
+  transition:
+    opacity 0.64s var(--v5-ease),
+    transform 0.64s var(--v5-ease),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease;
+  transition-delay: calc(var(--ri, 0) * 0.055s), calc(var(--ri, 0) * 0.055s), 0s, 0s, 0s;
+}
+html.reveal-ready [data-reveal-group].reveal-settled > [data-reveal-item] {
+  transition-delay: 0s;
+}
+html.reveal-ready [data-reveal-group]:not(.in) > [data-reveal-item] {
+  opacity: 0;
+  transform: translate3d(0, 23px, 0);
+}
+html.reveal-ready [data-reveal="right"] {
+  opacity: 0;
+  transform: translate3d(24px, 0, 0);
+}
+html[dir="rtl"].reveal-ready [data-reveal="right"] {
+  transform: translate3d(-24px, 0, 0);
+}
+html.reveal-ready [data-reveal="right"].in {
+  opacity: 1;
+  transform: none;
+}
+
+/* The authentic signature writes across its reserved image box after the
+   About copy enters. The image is unchanged; the clip is purely visual. */
+.about-copy.in .signature img {
+  animation: v5-signature-write 1.2s var(--v5-ease) 0.23s both;
+}
+@keyframes v5-signature-write {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@supports (animation-timeline: view()) {
+  .about-image img {
+    animation: v5-about-depth linear both;
+    animation-timeline: view(block);
+    animation-range: entry 0% exit 100%;
+  }
+  @keyframes v5-about-depth {
+    from { transform: translate3d(0, -7px, 0) scale(1.025); }
+    to { transform: translate3d(0, 7px, 0) scale(1.025); }
+  }
+}
+
+/* The filter controls are actual buttons. Changing a category remounts the
+   selected tiles, so the entering set gets one short response to the action. */
+.skills-grid.in[data-filtered="true"] .skill-tile {
+  animation: v5-filter-tile 0.42s var(--v5-ease) both;
+  animation-delay: calc(var(--ri, 0) * 0.035s);
+}
+@keyframes v5-filter-tile {
+  from { opacity: 0.45; transform: translate3d(0, 12px, 0) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Progress is drawn over a neutral timeline rail. Scroll-driven animation
+   runs where supported; the static fallback keeps the full progress line. */
+.journey .timeline {
+  border-inline-start-color: #384a59;
+}
+.journey .timeline-progress {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: -2px;
+  width: 2px;
+  background: var(--amber);
+  transform-origin: center top;
+  pointer-events: none;
+}
+@supports (animation-timeline: view()) {
+  .journey .timeline-progress {
+    animation: v5-timeline-fill linear both;
+    animation-timeline: view(block);
+    animation-range: entry 10% cover 75%;
+  }
+  @keyframes v5-timeline-fill {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+}
+
+/* Contact previously waited for .contact.in, but only .contact-copy carries
+   reveal hooks. Start the existing network path when its copy enters. */
+.contact:has(.contact-copy.in) .globe-signal {
+  animation: trace-draw 1.7s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce), print {
+  html[data-intro-play] .hero [data-hero-item],
+  html.reveal-ready [data-reveal-group] > [data-reveal-item],
+  html.reveal-ready [data-reveal="right"] {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  .hero.motion-ready.is-cinematic [data-hero-item],
+  .about-copy.in .signature img,
+  .skills-grid.in[data-filtered="true"] .skill-tile,
+  .journey .timeline-progress,
+  .contact:has(.contact-copy.in) .globe-signal {
+    animation: none !important;
+  }
+  .scada-trace, .reveal-ready .globe-signal {
+    stroke-dashoffset: 0 !important;
   }
 }

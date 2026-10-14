@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { useLocale } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
@@ -237,7 +237,7 @@ function Stat({ value, label, index }: { value: string; label: string; index: nu
 
 /* Scroll progress hairline, fixed under the header. */
 function ScrollProgress() {
-  const [pct, setPct] = useState(0);
+  const progress = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let raf = 0;
@@ -246,7 +246,8 @@ function ScrollProgress() {
       raf = requestAnimationFrame(() => {
         const doc = document.documentElement;
         const max = doc.scrollHeight - window.innerHeight;
-        setPct(max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0);
+        const fraction = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+        if (progress.current) progress.current.style.transform = `scaleX(${fraction})`;
       });
     };
     onScroll();
@@ -258,7 +259,7 @@ function ScrollProgress() {
   }, []);
   return (
     <div className="scroll-progress" aria-hidden="true">
-      <div style={{ width: pct + "%" }} />
+      <div ref={progress} />
     </div>
   );
 }
@@ -273,6 +274,16 @@ export default function Portfolio() {
   const [category, setCategory] = useState("All");
   const [all, setAll] = useState(false);
   const [heroReady, setHeroReady] = useState(false);
+  const [heroCinematic, setHeroCinematic] = useState(false);
+  const [hasFiltered, setHasFiltered] = useState(false);
+  // A first visit animates during the intro handoff. Return visits and deep
+  // links render the complete Hero as soon as hydration finishes.
+  const onIntroFinished = useCallback((ready: boolean) => {
+    if (ready) {
+      setHeroCinematic(document.documentElement.hasAttribute("data-intro-play"));
+    }
+    setHeroReady(ready);
+  }, []);
   // Keep server and first client render identical. Reading the media query in
   // render would create different Framer Motion initial styles during hydration.
   const [reduced, setReduced] = useState(false);
@@ -292,11 +303,11 @@ export default function Portfolio() {
         {t("Skip to content", "انتقل إلى المحتوى")}
       </a>
       <Header />
-      <PortfolioIntro locale={locale} onFinished={setHeroReady} />
+      <PortfolioIntro locale={locale} onFinished={onIntroFinished} />
       <ScrollProgress />
       <RevealManager />
       <main id="main">
-        <section className={"hero" + (heroReady || reduced ? " motion-ready" : "")} id="home">
+        <section className={"hero" + (heroReady || reduced ? " motion-ready" : "") + (heroCinematic && !reduced ? " is-cinematic" : "")} id="home">
           <div className="hero-portrait" data-hero-item="0">
             <Image
               src="/assets/portrait.webp"
@@ -574,7 +585,12 @@ export default function Portfolio() {
                 <button
                   key={c}
                   aria-pressed={category === c}
-                  onClick={() => setCategory(c)}
+                  onClick={() => {
+                    if (category !== c) {
+                      setHasFiltered(true);
+                      setCategory(c);
+                    }
+                  }}
                   className={category === c ? "active" : ""}
                 >
                   {ar
@@ -590,13 +606,13 @@ export default function Portfolio() {
                 </button>
               ))}
             </div>
-            <div className="skills-grid" data-reveal-group="true">
+            <div className="skills-grid" data-reveal-group="true" data-filtered={hasFiltered ? "true" : "false"}>
               {[
                 ...skills.filter((s) => s[0] !== "Industrial IoT"),
                 ...skills.filter((s) => s[0] === "Industrial IoT"),
               ]
                 .filter((s) => category === "All" || s[3] === category)
-                .map((s) => (
+                .map((s, i) => (
                   /* The umbrella capability is already sorted last; letting it span
                      two columns makes 15 tools fill a 2- or 4-column grid exactly
                      instead of leaving a dangling cell. */
@@ -606,8 +622,9 @@ export default function Portfolio() {
                         ? "skill-tile umbrella"
                         : "skill-tile"
                     }
-                    key={s[0]}
+                    key={`${category}-${s[0]}`}
                     data-reveal-item="true"
+                    style={{ "--ri": Math.min(i, 7) } as React.CSSProperties}
                   >
                     <TechSymbol name={s[0]} />
                     <div>
@@ -631,6 +648,7 @@ export default function Portfolio() {
           </p>
           </div>
           <div className="timeline" data-reveal-group="true">
+            <span className="timeline-progress" aria-hidden="true" />
             <div className="employer" data-reveal-item="true">
               pulse<small>by solutions</small>
             </div>
