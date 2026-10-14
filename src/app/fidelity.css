@@ -3649,8 +3649,18 @@ html.reveal-ready .journey .career li[data-reveal="up"] {
   to { stroke-dashoffset: -140; }
 }
 .globe-beacon {
-  cursor: default;
+  cursor: pointer;
   outline: none;
+}
+.globe-art[tabindex] {
+  cursor: grab;
+  touch-action: none;
+}
+.globe-art[data-dragging="true"] { cursor: grabbing; }
+.globe-art:focus-visible {
+  outline: 2px solid #e5ad63;
+  outline-offset: -9px;
+  border-radius: 50%;
 }
 .globe-beacon-halo {
   opacity: .82;
@@ -3696,8 +3706,10 @@ html.reveal-ready .journey .career li[data-reveal="up"] {
   pointer-events: none;
   transition: opacity .24s ease;
 }
+.globe-beacon.is-selected .globe-beacon-label,
 .globe-beacon:hover .globe-beacon-label,
 .globe-beacon:focus-visible .globe-beacon-label { opacity: 1; }
+.globe-beacon.is-selected .globe-beacon-ring { stroke: #fff6d9; stroke-width: 2.6; }
 .globe-beacon:focus-visible .globe-beacon-ring {
   stroke: #fff6d9;
   stroke-width: 2.6;
@@ -3719,7 +3731,59 @@ html.reveal-ready .journey .career li[data-reveal="up"] {
   .globe-beacon-label { font-size: 13px; }
   .globe-region-trail { stroke-width: 2; }
 }
+/* Native buttons complement pointer dragging and offer keyboard/touch zoom.
+   All controls are positioned against Contact, without moving its layout. */
+.contact .globe-controls {
+  position: absolute;
+  z-index: 3;
+  right: 4px;
+  bottom: 20px;
+  display: flex;
+  gap: 6px;
+  direction: ltr;
+}
+.contact .globe-drag-hint {
+  position: absolute;
+  z-index: 2;
+  right: 8px;
+  bottom: 62px;
+  pointer-events: none;
+  font: 500 11px/1.4 Alexandria, Inter, sans-serif;
+  color: #91b5ca;
+  text-shadow: 0 1px 4px #07101a;
+}
+[dir="rtl"] .contact .globe-drag-hint { left: 8px; right: auto; }
+[dir="rtl"] .contact .globe-controls { left: 4px; right: auto; }
+.globe-controls button {
+  display: grid;
+  place-items: center;
+  width: 33px;
+  height: 33px;
+  border: 1px solid #337394b0;
+  border-radius: 8px;
+  color: #f7c77f;
+  background: #091d2de6;
+  cursor: pointer;
+  transition: border-color .22s, background-color .22s, transform .22s;
+}
+.globe-controls button:hover:not(:disabled) {
+  background: #14384a;
+  border-color: #f1a342;
+  transform: translateY(-2px);
+}
+.globe-controls button:focus-visible {
+  outline: 2px solid #f1a342;
+  outline-offset: 3px;
+}
+.globe-controls button:disabled { opacity: .32; cursor: not-allowed; }
+@media (max-width: 600px) {
+  .contact .globe-controls { bottom: 14px; right: 8px; }
+  [dir="rtl"] .contact .globe-controls { left: 8px; right: auto; }
+  .globe-controls button { width: 30px; height: 30px; }
+  .contact .globe-drag-hint { bottom: 52px; font-size: 10px; }
+}
 @media print {
+  .contact .globe-controls, .contact .globe-drag-hint { display: none; }
   .globe-region-trail, .globe-beacon-halo, .globe-beacon-ring,
   .globe-beacon-ripple { animation: none !important; }
   .globe-beacon-ripple { opacity: 0; }

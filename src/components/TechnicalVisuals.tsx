@@ -1,4 +1,6 @@
 "use client";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
 import {
   Activity,
   CircuitBoard,
@@ -15,10 +17,18 @@ import {
   Wrench,
   ShieldCheck,
   Gauge,
+  Plus,
+  Minus,
+  RotateCcw,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { BrandIcon, type BrandName } from "./BrandMarks";
 import { GLOBE_LAND, GLOBE_COAST, GLOBE_BORDERS } from "../lib/globe-geography";
+
+type GlobeEngine = {
+  geo: typeof import("d3-geo");
+  world: typeof import("../lib/globe-world.json");
+};
 
 /* Recognisable products get their real mark (Simple Icons, CC0) instead of a
    generic glyph; concepts and brands without a permission-compatible source
@@ -279,19 +289,20 @@ export function Scada() {
     </div>
   );
 }
-function point(lon: number, lat: number) {
-  const a = ((lon - 20) * Math.PI) / 180,
-    b = (lat * Math.PI) / 180;
+function point(lon: number, lat: number, centerLon = 20, centerLat = 0, zoom = 1) {
+  const a = ((lon - centerLon) * Math.PI) / 180,
+    b = (lat * Math.PI) / 180,
+    c = (centerLat * Math.PI) / 180;
   const x = Math.cos(b) * Math.sin(a),
-    y = -Math.sin(b),
-    z = Math.cos(b) * Math.cos(a);
+    y = -(Math.sin(b) * Math.cos(c) - Math.cos(b) * Math.sin(c) * Math.cos(a)),
+    z = Math.sin(b) * Math.sin(c) + Math.cos(b) * Math.cos(c) * Math.cos(a);
   const tilt = -0.25;
   return {
     x: Number(
-      (240 + 215 * (x * Math.cos(tilt) - y * Math.sin(tilt))).toFixed(3),
+      (240 + 215 * zoom * (x * Math.cos(tilt) - y * Math.sin(tilt))).toFixed(3),
     ),
     y: Number(
-      (240 + 215 * (x * Math.sin(tilt) + y * Math.cos(tilt))).toFixed(3),
+      (240 + 215 * zoom * (x * Math.sin(tilt) + y * Math.cos(tilt))).toFixed(3),
     ),
     z,
   };
@@ -305,27 +316,170 @@ const workLocations = [
 ] as const;
 
 export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
+  const ar = locale === "ar";
+  const svgRef = useRef<SVGSVGElement>(null);
+  const isMounted = useRef(true);
+  const enginePromise = useRef<Promise<GlobeEngine> | null>(null);
+  const [engine, setEngine] = useState<GlobeEngine | null>(null);
+  const [view, setView] = useState({ lon: 20, lat: 0, zoom: 1 });
+  const [dragging, setDragging] = useState(false);
+  const [activeCountry, setActiveCountry] = useState<string | null>(null);
+  const drag = useRef<{
+    id: number; x: number; y: number; lon: number; lat: number; lastFrame: number;
+  } | null>(null);
+  const loadEngine = useCallback(() => {
+    if (!enginePromise.current) {
+      enginePromise.current = Promise.all([
+        import("d3-geo"), import("../lib/globe-world.json"),
+      ]).then(([geo, world]) => {
+        const value = { geo, world: world.default };
+        if (isMounted.current) setEngine(value);
+        return value;
+      }).catch((error) => {
+        enginePromise.current = null; // allow a later retry on a transient failure
+        throw error;
+      });
+    }
+    // Preloading must not surface unhandled rejection errors in the browser.
+    void enginePromise.current.catch(() => {});
+    return enginePromise.current;
+  }, []);
+  useEffect(() => {
+    isMounted.current = true;
+    const el = svgRef.current;
+    if (!el) return;
+    // Network/code splitting: fetch the geographic engine only as visitors
+    // approach the Contact section. The static globe remains SSR-visible.
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries[0]?.isIntersecting) return;
+      void loadEngine();
+      observer.disconnect();
+    }, { rootMargin: "280px" });
+    observer.observe(el);
+    return () => {
+      isMounted.current = false;
+      observer.disconnect();
+    };
+  }, [loadEngine]);
+  const changed = view.lon !== 20 || view.lat !== 0 || view.zoom !== 1;
+  const projected = useMemo(() => {
+    if (!engine || !changed) return null;
+    const projection = engine.geo.geoOrthographic()
+      .rotate([-view.lon, -view.lat, 0])
+      .scale(215 * view.zoom).translate([240, 240])
+      .angle(0.25 * 180 / Math.PI).clipAngle(90).precision(.65);
+    const path = engine.geo.geoPath(projection).digits(1);
+    const geo = engine.world;
+    // GeometryCollections are sourced from Natural Earth 1:110m. They are
+    // reprojected together, clipping hidden back-side coastlines correctly.
+    return {
+      land: path(geo.land as import("d3-geo").GeoPermissibleObjects) ?? "",
+      coast: path(geo.coast as import("d3-geo").GeoPermissibleObjects) ?? "",
+      borders: path(geo.borders as import("d3-geo").GeoPermissibleObjects) ?? "",
+    };
+  }, [changed, engine, view]);
+  const rotate = (lon: number, lat: number) => setView((v) => ({
+    ...v, lon: ((lon + 540) % 360) - 180,
+    lat: Math.max(-65, Math.min(65, lat)),
+  }));
+  const zoomBy = (amount: number) => {
+    void loadEngine().then(() => {
+      if (isMounted.current) setView((v) => ({
+        ...v, zoom: Math.max(1, Math.min(1.65, +(v.zoom + amount).toFixed(2))),
+      }));
+    }).catch(() => {}); // retain the SSR globe if offline
+  };
+  const resetView = () => {
+    setView({ lon: 20, lat: 0, zoom: 1 });
+    setActiveCountry(null);
+  };
+  const pointerDown = (event: ReactPointerEvent<SVGSVGElement>) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if ((event.target as Element).closest(".globe-beacon")) return;
+    void loadEngine();
+    drag.current = {
+      id: event.pointerId, x: event.clientX, y: event.clientY,
+      lon: view.lon, lat: view.lat, lastFrame: 0,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDragging(true);
+  };
+  const pointerMove = (event: ReactPointerEvent<SVGSVGElement>) => {
+    const current = drag.current;
+    if (!current || current.id !== event.pointerId || !engine) return;
+    const time = performance.now();
+    if (time - current.lastFrame < 28) return; // ~30fps max while dragging
+    current.lastFrame = time;
+    const scale = 480 / event.currentTarget.getBoundingClientRect().width / view.zoom;
+    rotate(current.lon - (event.clientX - current.x) * .43 * scale,
+      current.lat + (event.clientY - current.y) * .35 * scale);
+  };
+  const pointerUp = (event: ReactPointerEvent<SVGSVGElement>) => {
+    if (drag.current?.id !== event.pointerId) return;
+    drag.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    setDragging(false);
+  };
+  const onGlobeKey = (event: ReactKeyboardEvent<SVGSVGElement>) => {
+    if (event.target !== event.currentTarget) return;
+    const increments: Record<string, [number, number]> = {
+      ArrowLeft: [-12, 0], ArrowRight: [12, 0],
+      ArrowUp: [0, 10], ArrowDown: [0, -10],
+    };
+    const delta = increments[event.key];
+    if (delta) {
+      event.preventDefault();
+      void loadEngine().then(() => {
+        if (isMounted.current) setView((v) => ({
+          ...v,
+          lon: ((v.lon + delta[0] + 540) % 360) - 180,
+          lat: Math.max(-65, Math.min(65, v.lat + delta[1])),
+        }));
+      }).catch(() => {});
+    } else if (event.key === "+" || event.key === "=") {
+      event.preventDefault(); zoomBy(.15);
+    } else if (event.key === "-") {
+      event.preventDefault(); zoomBy(-.15);
+    } else if (event.key === "Home") {
+      event.preventDefault(); resetView();
+    }
+  };
   const nodes = [];
   for (let lat = -60; lat <= 75; lat += 15)
-    for (let lon = -60; lon <= 105; lon += 15) {
-      const p = point(lon, lat);
+    for (let lon = -180; lon <= 180; lon += 15) {
+      const p = point(lon, lat, view.lon, view.lat, view.zoom);
       if (p.z > 0.05) nodes.push({ ...p, lat, lon });
     }
   const [egypt, saudi] = workLocations.map((location) => ({
     ...location,
-    ...point(location.lon, location.lat),
+    ...point(location.lon, location.lat, view.lon, view.lat, view.zoom),
   }));
+  const visibleMarkers = [egypt, saudi].filter((p) => p.z > 0.02);
   // Slight northward arc between the two geography-accurate beacons.
   const connection = `M${egypt.x} ${egypt.y} Q${((egypt.x + saudi.x) / 2).toFixed(2)} ${Math.min(egypt.y, saudi.y) - 35} ${saudi.x} ${saudi.y}`;
   return (
+    <>
     <svg
+      ref={svgRef}
       className="globe-art"
       viewBox="0 0 480 480"
       fill="none"
       role="group"
+      tabIndex={0}
+      data-interactive-ready={engine ? "true" : "false"}
+      data-dragging={dragging ? "true" : "false"}
+      data-rotation={`${view.lon.toFixed(1)},${view.lat.toFixed(1)}`}
+      data-zoom={view.zoom.toFixed(2)}
+      onPointerDown={pointerDown}
+      onPointerMove={pointerMove}
+      onPointerUp={pointerUp}
+      onPointerCancel={pointerUp}
+      onKeyDown={onGlobeKey}
       aria-label={locale === "ar"
-        ? "كرة أرضية متحركة تُبرز الخبرة في مصر والسعودية"
-        : "Animated professional experience globe highlighting Egypt and Saudi Arabia"}
+        ? "كرة أرضية تفاعلية. اسحب للتدوير، الأسهم للتحريك، وزائد أو ناقص للتكبير أو التصغير. مواقع مصر والسعودية."
+        : "Interactive globe. Drag to rotate, use arrow keys to turn and plus/minus to zoom. Egypt and Saudi Arabia experience markers."}
     >
       <defs>
         <radialGradient id="earth-glow">
@@ -352,11 +506,11 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
       />
       <g clipPath="url(#earth-disc)">
         {nodes.map((p, i) => (
-          <g key={i}>
+          <g key={`${p.lat}-${p.lon}`}>
             {[
-              point(p.lon + 15, p.lat),
-              point(p.lon, p.lat + 15),
-              point(p.lon + 15, p.lat + 15),
+              point(p.lon + 15, p.lat, view.lon, view.lat, view.zoom),
+              point(p.lon, p.lat + 15, view.lon, view.lat, view.zoom),
+              point(p.lon + 15, p.lat + 15, view.lon, view.lat, view.zoom),
             ]
               .filter((q) => q.z > 0)
               .map((q, j) => (
@@ -388,14 +542,14 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
             are horizon-clipped so no back-side zigzags cross the oceans. */}
         <path
           className="globe-land-fill"
-          d={GLOBE_LAND}
+          d={projected?.land ?? GLOBE_LAND}
           fill="#0b293c"
           fillOpacity=".48"
           fillRule="evenodd"
         />
         <path
           className="globe-coastline"
-          d={GLOBE_COAST}
+          d={projected?.coast ?? GLOBE_COAST}
           stroke="#3498c1"
           strokeWidth="1.25"
           strokeLinejoin="round"
@@ -404,7 +558,7 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
         />
         <path
           className="globe-country-borders"
-          d={GLOBE_BORDERS}
+          d={projected?.borders ?? GLOBE_BORDERS}
           stroke="#31738e"
           strokeWidth=".58"
           strokeLinecap="round"
@@ -412,7 +566,8 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
         />
         {/* A regional link, not one of the generic decorative signal arcs.
             Both ends share the precise land projection used above. */}
-        <g className="globe-region-connection" aria-hidden="true">
+        <g className="globe-region-connection" aria-hidden="true"
+          style={{ display: visibleMarkers.length === 2 ? undefined : "none" }}>
           <path className="globe-region-base" d={connection} />
           <path className="globe-region-trail" d={connection} />
           <circle className="globe-region-traveller" r="2.7" fill="#ffe4aa">
@@ -439,14 +594,22 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
         {/* Geo-anchored beacons: Cairo/Egypt and Riyadh/Saudi Arabia.
             A keyboard-focusable graphic gives non-mouse visitors the same
             unobtrusive label as pointer hover, without a fake button. */}
-        {[egypt, saudi].map((location) => (
+        {visibleMarkers.map((location) => (
           <g
             key={location.id}
-            className={`globe-beacon globe-beacon--${location.id}`}
+            className={`globe-beacon globe-beacon--${location.id}${activeCountry === location.id ? " is-selected" : ""}`}
             data-country={location.id}
             transform={`translate(${location.x} ${location.y})`}
-            role="img"
+            role="button"
             tabIndex={0}
+            aria-pressed={activeCountry === location.id}
+            onClick={() => setActiveCountry((current) => current === location.id ? null : location.id)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setActiveCountry((current) => current === location.id ? null : location.id);
+              }
+            }}
             aria-label={locale === "ar"
               ? `${location.arabic} — خبرة في المشروعات`
               : `${location.name} — project experience`}
@@ -485,5 +648,25 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
         />
       </g>
     </svg>
+    <div className="globe-controls" role="group"
+      aria-label={ar ? "التحكم في الكرة الأرضية" : "Globe controls"}>
+      <button type="button" onClick={() => zoomBy(.15)} disabled={view.zoom >= 1.65}
+        aria-label={ar ? "تكبير الكرة الأرضية" : "Zoom in globe"} title={ar ? "تكبير" : "Zoom in"}>
+        <Plus size={16}/>
+      </button>
+      <button type="button" onClick={() => zoomBy(-.15)} disabled={view.zoom <= 1}
+        aria-label={ar ? "تصغير الكرة الأرضية" : "Zoom out globe"} title={ar ? "تصغير" : "Zoom out"}>
+        <Minus size={16}/>
+      </button>
+      <button type="button" onClick={resetView}
+        aria-label={ar ? "إعادة الكرة الأرضية لوضعها الأول" : "Reset globe view"}
+        title={ar ? "إعادة ضبط" : "Reset view"}>
+        <RotateCcw size={16}/>
+      </button>
+    </div>
+    <span className="globe-drag-hint" aria-hidden="true">
+      {ar ? "اسحب الكرة لاستكشافها" : "Drag to explore"}
+    </span>
+    </>
   );
 }
