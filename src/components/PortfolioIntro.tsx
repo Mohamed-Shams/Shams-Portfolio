@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 /*
- * V5 cinematic intro — five scenes, ~2.05 s, starts at FIRST PAINT.
+ * Cinematic first-paint intro, inspired by the original portfolio's longer
+ * GSAP handoff. A deliberate ~3.4-second story is visible on each hard reload
+ * of the homepage, while client-side project navigation never remounts it.
  *
  * An inline bootstrap script in the root layout decides synchronously,
  * before the page paints, whether the intro plays at all and stamps
@@ -12,17 +14,17 @@ import { useEffect, useRef, useState } from "react";
  * first paint instead of waiting for hydration. React joins the running
  * timeline on mount: every timer is anchored to data-intro-t0, never to
  * "now", so late hydration continues the sequence instead of restarting
- * it. Decisions (session seen / reduced motion / URL hash / preview) all
+ * it. Decisions (homepage route / reduced motion / URL hash / preview) all
  * happen in the bootstrap script; this component only follows
  * `data-intro-play`.
  */
 
 const SESSION_KEY = "shams-portfolio-intro-v5";
-const HERO_MS = 1800; // hero starts under the still-visible overlay (seamless handoff)
-const EXIT_MS = 2050; // overlay exit animation begins
-const CLEANUP_MS = 2800; // overlay unmounted, scroll unlocked
-const GRACE_MS = 550; // minimum intro visibility before interaction may dismiss it
-const EXIT_FADE_MS = 750; // JS-side safety matching the CSS exit duration
+const HERO_MS = 2470; // hero begins while the title is still visible
+const EXIT_MS = 2750; // overlay lifts after the main intro scene has played
+const CLEANUP_MS = 3440; // graceful exit completes, scrolling unlocks
+const GRACE_MS = 1250; // window-focus clicks must not cancel the identity reveal
+const EXIT_FADE_MS = 690; // matches the CSS root exit timing
 
 export function PortfolioIntro({
   locale,
@@ -52,12 +54,12 @@ export function PortfolioIntro({
       html.classList.remove("intro-lock");
     };
 
-    // No intro (reduced motion, already seen, deep link, stale bfcache):
+    // No intro (reduced motion, deep link, stale bfcache):
     // reveal the page immediately and drop the SSR overlay.
     if (
       reduce ||
       !html.hasAttribute("data-intro-play") ||
-      Date.now() - t0Attr > 4000
+      Date.now() - t0Attr > 4500
     ) {
       cleanupDom();
       finish();
@@ -73,12 +75,12 @@ export function PortfolioIntro({
     const schedule = (fn: () => void, ms: number) =>
       timers.push(window.setTimeout(fn, ms));
 
-    // Honest decorative progress readout, synchronized with the CSS bar
-    // (both span 0.85s → 1.9s from first paint).
+    // Decorative progress is explicitly labelled "Preparing experience" and
+    // synchronized with its CSS sweep (0.95s → 2.6s from first paint).
     let raf = 0;
     const tick = () => {
       if (cancelled) return;
-      const p = Math.min(1, Math.max(0, (elapsed() - 850) / 1050));
+      const p = Math.min(1, Math.max(0, (elapsed() - 950) / 1650));
       setPct(Math.round(p * 100));
       if (p < 1) raf = requestAnimationFrame(tick);
     };
@@ -113,7 +115,8 @@ export function PortfolioIntro({
     };
     window.addEventListener("keydown", dismiss, true);
     window.addEventListener("pointerdown", dismiss, true);
-    window.addEventListener("wheel", dismiss, { capture: true, passive: true });
+    // A casual scroll attempt should not silently cancel the short intro.
+    // Keyboard/pointer intent can still dismiss after the grace period.
 
     return () => {
       cancelled = true;
@@ -122,7 +125,6 @@ export function PortfolioIntro({
       window.clearTimeout(armT);
       window.removeEventListener("keydown", dismiss, true);
       window.removeEventListener("pointerdown", dismiss, true);
-      window.removeEventListener("wheel", dismiss, true);
       html.classList.remove("intro-lock");
     };
   }, [onFinished]);

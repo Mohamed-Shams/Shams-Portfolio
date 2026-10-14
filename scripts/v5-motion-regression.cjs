@@ -143,23 +143,30 @@ async function verifyReveals(page, name) {
     name + " about statistics finish at their exact values", JSON.stringify(statValues));
   const projects = page.locator("#projects .projects-grid");
   await projects.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(1050);
-  check(await projects.evaluate(el => el.classList.contains("in") &&
-      [...el.querySelectorAll(".project-card")].every(card => getComputedStyle(card).opacity === "1")),
-    name + " project grid completes staggered card reveal");
+  const projectCards = projects.locator(".project-card");
+  await projectCards.first().scrollIntoViewIfNeeded();
+  await page.waitForTimeout(1250);
+  check(await projectCards.first().evaluate(el => el.classList.contains("in") &&
+      getComputedStyle(el).opacity === "1"), name + " first project card reveals when visible");
+  await projectCards.last().scrollIntoViewIfNeeded();
+  await page.waitForTimeout(1250);
+  check(await projectCards.last().evaluate(el => el.classList.contains("in") &&
+      getComputedStyle(el).opacity === "1"), name + " last project card reveals when scrolled into view");
   const timeline = page.locator("#experience .timeline");
   await timeline.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(1050);
+  // The stronger section entrance runs for .98s plus up to .7s stagger.
+  await page.waitForTimeout(1850);
   check(await timeline.evaluate(el => el.classList.contains("in") &&
       [...el.querySelectorAll("[data-reveal-item]")].every(item => getComputedStyle(item).opacity === "1") &&
       !!el.querySelector(".timeline-progress")),
     name + " experience milestones and progress rail appear");
   const certificates = page.locator("#certifications .cert-grid[data-reveal-group]");
   await certificates.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(1100);
-  check(await certificates.evaluate(el => el.classList.contains("in") &&
-      [...el.querySelectorAll(".cert-card")].every(card => getComputedStyle(card).opacity === "1")),
-    name + " certification cards reveal completely");
+  await certificates.locator(".cert-card").last().scrollIntoViewIfNeeded();
+  await page.waitForTimeout(1850);
+  check(await certificates.locator(".cert-card").last().evaluate(el =>
+      el.classList.contains("in") && getComputedStyle(el).opacity === "1"),
+    name + " last certification card reveals at viewport entry");
   const contact = page.locator("#contact");
   await contact.scrollIntoViewIfNeeded();
   // Globe arcs start when contact copy intersects; allow the last stroke
@@ -276,10 +283,10 @@ async function verifyJourney(browser, locale, size) {
     await page.waitForTimeout(300);
     const returning = await state(page);
     await screenshot(page, tag + "-returning");
-    check(!returning.play && !returning.introVisible && returning.session === "seen",
-      tag + " returning session skips intro", JSON.stringify(returning));
-    check(returning.hero === 1 && returning.overflow <= 1,
-      tag + " returning hero directly visible", JSON.stringify(returning));
+    check(returning.play && returning.introVisible && returning.session === "seen",
+      tag + " hard reload replays branded intro like old portfolio", JSON.stringify(returning));
+    check(returning.overflow <= 1,
+      tag + " hard reload has no horizontal overflow", JSON.stringify(returning));
     if (locale === "en" && size.name === "desktop") {
       await page.goto(BASE + "/en?motionPreview=1", { waitUntil: "commit" });
       await page.locator(".portfolio-intro").waitFor({ state: "attached" });
@@ -409,10 +416,10 @@ async function verifyDismiss(browser) {
     await page.locator(".portfolio-intro").waitFor({ state: "attached", timeout: 12000 });
     const elapsed = await page.evaluate(() =>
       Date.now() - Number(document.documentElement.getAttribute("data-intro-t0")));
-    await page.waitForTimeout(Math.max(0, 650 - elapsed));
+    await page.waitForTimeout(Math.max(0, 1450 - elapsed));
     await page.keyboard.press("Tab");
     await page.waitForFunction(() => !document.documentElement.hasAttribute("data-intro-play"),
-      null, { timeout: 1600 });
+      null, { timeout: 2000 });
     check(await page.locator(".hero.motion-ready").count() === 1,
       "keyboard interaction dismisses intro after grace period");
   } finally { await ctx.close(); }

@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 const INTRO_BOOTSTRAP =
   "(function(){try{var d=document.documentElement;if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;" +
-  "var p=new URLSearchParams(location.search).get('motionPreview')==='1',s=false;" +
-  "try{s=!!sessionStorage.getItem('shams-portfolio-intro-v5')}catch(e){}" +
-  "if(p||(!s&&!location.hash)){d.setAttribute('data-intro-play','');d.setAttribute('data-intro-t0',String(Date.now()));" +
+  "var p=new URLSearchParams(location.search).get('motionPreview')==='1';" +
+  "var home=['/en','/ar','/en/','/ar/'].includes(location.pathname);" +
+  "if(home&&(p||!location.hash)){d.setAttribute('data-intro-play','');d.setAttribute('data-intro-t0',String(Date.now()));" +
   "d.classList.add('intro-lock');try{sessionStorage.setItem('shams-portfolio-intro-v5','seen')}catch(e){}" +
-  "setTimeout(function(){d.classList.remove('intro-lock');d.removeAttribute('data-intro-play')},3600)}}catch(e){}})();";
+  "setTimeout(function(){d.classList.remove('intro-lock');d.removeAttribute('data-intro-play')},4500)}}catch(e){}})();";
 export function generateStaticParams() {
   return [{ locale: "en" }, { locale: "ar" }];
 }

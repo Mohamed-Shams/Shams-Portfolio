@@ -490,6 +490,7 @@ export default function Portfolio() {
             className="projects-grid"
             data-expanded={all ? "true" : undefined}
             data-reveal-group="true"
+            data-reveal-each="true"
           >
             {visibleProjects(all).map((p, i) => {
               const flagship = !all && i === 0;
@@ -606,7 +607,7 @@ export default function Portfolio() {
                 </button>
               ))}
             </div>
-            <div className="skills-grid" data-reveal-group="true" data-filtered={hasFiltered ? "true" : "false"}>
+            <div className="skills-grid" data-reveal-group="true" data-reveal-each="true" data-filtered={hasFiltered ? "true" : "false"}>
               {[
                 ...skills.filter((s) => s[0] !== "Industrial IoT"),
                 ...skills.filter((s) => s[0] === "Industrial IoT"),
@@ -662,7 +663,7 @@ export default function Portfolio() {
               </div>
               <ul>
                 {projects.map((p) => (
-                  <li key={p.slug}>
+                  <li key={p.slug} data-reveal="up">
                     <Link href={`/${locale}/projects/${p.slug}`}>
                       {tx(p.title)}
                     </Link>
@@ -701,7 +702,7 @@ export default function Portfolio() {
             )}
           </p>
           </div>
-          <div className="cert-grid" data-reveal-group="true">
+          <div className="cert-grid" data-reveal-group="true" data-reveal-each="true">
             {[...credentials, [...training[0], "SIEMENS"]].map((c) => (
               <article className="cert-card" key={c[0]} data-reveal-item="true">
                 <div className={`cert-brand ${c[4]?.toLowerCase()}`}>

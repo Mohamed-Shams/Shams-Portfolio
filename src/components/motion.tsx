@@ -26,21 +26,34 @@ export function RevealManager() {
     const groups = Array.from(
       document.querySelectorAll<HTMLElement>("[data-reveal-group]"),
     );
+    // Large grids span multiple viewports. Revealing a whole grid on its
+    // first intersection previously animated the lower cards offscreen.
+    // Observe individual cards so each row enters when the visitor sees it.
+    const eachGroups = groups.filter((group) => group.hasAttribute("data-reveal-each"));
+    const getItems = (group: HTMLElement) =>
+      Array.from(group.querySelectorAll<HTMLElement>(":scope > [data-reveal-item]"));
     for (const group of groups) {
-      group
-        .querySelectorAll<HTMLElement>(":scope > [data-reveal-item]")
-        .forEach((el, i) => {
-          /* Cap the cascade so very long lists do not feel sluggish. */
-          el.style.setProperty("--ri", String(Math.min(i, 7)));
-        });
+      getItems(group).forEach((el, i) => {
+        /* Stagger is local to a group and capped for long lists. */
+        el.style.setProperty("--ri", String(Math.min(i, 7)));
+      });
     }
     if (!els.length && !groups.length) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       els.forEach((el) => el.classList.add("in"));
       groups.forEach((g) => g.classList.add("in"));
+      eachGroups.forEach((group) => getItems(group).forEach((el) => el.classList.add("in")));
       return;
     }
     const settleTimers: number[] = [];
+    const cardIo = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const card = entry.target as HTMLElement;
+        card.classList.add("in");
+        cardIo.unobserve(card);
+      }
+    }, { threshold: 0.05, rootMargin: "0px 0px -11% 0px" });
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -67,8 +80,24 @@ export function RevealManager() {
     );
     els.forEach((el) => io.observe(el));
     groups.forEach((g) => io.observe(g));
+    eachGroups.forEach((group) => getItems(group).forEach((card) => cardIo.observe(card)));
+    // Expanding Projects and filtering Skills inserts new cards after mount.
+    // Keep these visible immediately if their parent has already revealed.
+    const mutationObservers = eachGroups.map((group) => {
+      const observer = new MutationObserver(() => {
+        getItems(group).forEach((card, i) => {
+          card.style.setProperty("--ri", String(Math.min(i, 7)));
+          if (group.classList.contains("in")) card.classList.add("in");
+          else cardIo.observe(card);
+        });
+      });
+      observer.observe(group, { childList: true });
+      return observer;
+    });
     return () => {
       io.disconnect();
+      cardIo.disconnect();
+      mutationObservers.forEach((observer) => observer.disconnect());
       settleTimers.forEach(window.clearTimeout);
     };
   }, []);
