@@ -2325,10 +2325,9 @@ summary:focus-visible {
   50% { opacity: 0.55; box-shadow: 0 0 0 5px #f1a34214; }
 }
 
-/* 5 · Contact globe: the signal arcs draw once the section has revealed
-   (`.contact.in` comes from the reveal system — scoped to .reveal-ready so
-   they still render without JavaScript), amber hub nodes pulse, a very slow
-   dashed orbit turns around the globe, and the pin floats gently. */
+/* 5 · Contact globe: the signal arcs draw as the contact copy enters;
+   amber hub nodes pulse and a very slow dashed orbit turns around the globe.
+   Geography-anchored regional beacons are styled in the final block. */
 .reveal-ready .globe-signal {
   stroke-dasharray: 620;
   stroke-dashoffset: 620;
@@ -2350,13 +2349,6 @@ summary:focus-visible {
 }
 @keyframes globe-orbit-spin {
   to { transform: rotate(360deg); }
-}
-.globe-pin {
-  animation: globe-pin-float 6.5s ease-in-out infinite;
-}
-@keyframes globe-pin-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
 }
 
 /* 6 · Buttons: lift shadow and a real press state (transform/shadow only;
@@ -3629,4 +3621,106 @@ html.reveal-ready .journey .career li[data-reveal="up"] {
     transform: none !important;
     transition: none !important;
   }
+}
+
+/* Contact globe — geography-anchored Egypt ↔ Saudi Arabia project beacons.
+   All animation lives inside the original SVG, without altering contact
+   layout, adding WebGL or moving the projected land under the markers. */
+.globe-region-base {
+  stroke: #f1a342;
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  opacity: .55;
+}
+.globe-region-trail {
+  stroke: #ffe0a1;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-dasharray: 3 11;
+  opacity: .92;
+  animation: globe-region-flow 5.4s linear infinite;
+}
+.globe-region-traveller {
+  opacity: .96;
+  filter: drop-shadow(0 0 4px #f1a342);
+}
+@keyframes globe-region-flow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -140; }
+}
+.globe-beacon {
+  cursor: default;
+  outline: none;
+}
+.globe-beacon-halo {
+  opacity: .82;
+  animation: globe-beacon-halo 3.3s ease-in-out infinite;
+}
+.globe-beacon--saudi .globe-beacon-halo { animation-delay: -1.65s; }
+.globe-beacon-ripple {
+  fill: none;
+  stroke: #f1a342;
+  stroke-width: 1.55;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: globe-beacon-ripple 3.4s ease-out infinite;
+}
+.globe-beacon-ripple--second { animation-delay: 1.7s; }
+.globe-beacon--saudi .globe-beacon-ripple { animation-delay: -.85s; }
+.globe-beacon--saudi .globe-beacon-ripple--second { animation-delay: .85s; }
+.globe-beacon-ring {
+  fill: #3b210e;
+  fill-opacity: .86;
+  stroke: #ffc879;
+  stroke-width: 1.3;
+  animation: globe-beacon-ring 3.4s ease-in-out infinite;
+}
+.globe-beacon--saudi .globe-beacon-ring { animation-delay: -1.7s; }
+.globe-beacon-core {
+  fill: #f1a342;
+  stroke: #ffe3ab;
+  stroke-width: 1;
+  filter: drop-shadow(0 0 4px #f1a342);
+}
+.globe-beacon-hotspot { fill: #fff4d8; }
+.globe-beacon-label {
+  fill: #ffe2ac;
+  font: 600 12px/1.3 Inter, Alexandria, sans-serif;
+  letter-spacing: .02em;
+  paint-order: stroke;
+  stroke: #081622;
+  stroke-width: 3;
+  stroke-linejoin: round;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .24s ease;
+}
+.globe-beacon:hover .globe-beacon-label,
+.globe-beacon:focus-visible .globe-beacon-label { opacity: 1; }
+.globe-beacon:focus-visible .globe-beacon-ring {
+  stroke: #fff6d9;
+  stroke-width: 2.6;
+}
+@keyframes globe-beacon-ripple {
+  0% { opacity: .84; transform: scale(.72); }
+  75%, 100% { opacity: 0; transform: scale(2.7); }
+}
+@keyframes globe-beacon-halo {
+  0%, 100% { opacity: .65; }
+  50% { opacity: 1; }
+}
+@keyframes globe-beacon-ring {
+  0%, 100% { stroke-opacity: .72; }
+  50% { stroke-opacity: 1; }
+}
+@media (max-width: 600px) {
+  /* Avoid crowding/cropping the mobile contact copy; ring/core remain visible. */
+  .globe-beacon-label { font-size: 13px; }
+  .globe-region-trail { stroke-width: 2; }
+}
+@media print {
+  .globe-region-trail, .globe-beacon-halo, .globe-beacon-ring,
+  .globe-beacon-ripple { animation: none !important; }
+  .globe-beacon-ripple { opacity: 0; }
 }

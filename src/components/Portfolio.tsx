@@ -776,7 +776,7 @@ export default function Portfolio() {
               <Download size={17} />
             </a>
           </div>
-          <GlobeArt />
+          <GlobeArt locale={locale} />
         </section>
       </main>
       <footer>

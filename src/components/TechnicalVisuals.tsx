@@ -353,19 +353,36 @@ function point(lon: number, lat: number) {
     z,
   };
 }
-export function GlobeArt() {
+// The contact globe uses a fixed orthographic projection centred on 20°E.
+// Use the very same projection for location beacons: arbitrary SVG positions
+// would drift off the countries whenever the artwork is resized or mirrored.
+const workLocations = [
+  { id: "egypt", name: "Egypt", arabic: "مصر", lon: 30.8, lat: 26.8 },
+  { id: "saudi", name: "Saudi Arabia", arabic: "السعودية", lon: 45.1, lat: 24.2 },
+] as const;
+
+export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
   const nodes = [];
   for (let lat = -60; lat <= 75; lat += 15)
     for (let lon = -60; lon <= 105; lon += 15) {
       const p = point(lon, lat);
       if (p.z > 0.05) nodes.push({ ...p, lat, lon });
     }
+  const [egypt, saudi] = workLocations.map((location) => ({
+    ...location,
+    ...point(location.lon, location.lat),
+  }));
+  // Slight northward arc between the two geography-accurate beacons.
+  const connection = `M${egypt.x} ${egypt.y} Q${((egypt.x + saudi.x) / 2).toFixed(2)} ${Math.min(egypt.y, saudi.y) - 35} ${saudi.x} ${saudi.y}`;
   return (
     <svg
       className="globe-art"
       viewBox="0 0 480 480"
       fill="none"
-      aria-hidden="true"
+      role="group"
+      aria-label={locale === "ar"
+        ? "كرة أرضية متحركة تُبرز الخبرة في مصر والسعودية"
+        : "Animated professional experience globe highlighting Egypt and Saudi Arabia"}
     >
       <defs>
         <radialGradient id="earth-glow">
@@ -376,6 +393,11 @@ export function GlobeArt() {
         <clipPath id="earth-disc">
           <circle cx="240" cy="240" r="216" />
         </clipPath>
+        <radialGradient id="work-beacon-glow">
+          <stop stopColor="#ffe4a8" stopOpacity=".52" />
+          <stop offset=".35" stopColor="#f1a342" stopOpacity=".24" />
+          <stop offset="1" stopColor="#f1a342" stopOpacity="0" />
+        </radialGradient>
       </defs>
       <circle
         cx="240"
@@ -433,6 +455,15 @@ export function GlobeArt() {
             fillOpacity=".2"
           />
         ))}
+        {/* A regional link, not one of the generic decorative signal arcs.
+            Both ends share the precise land projection used above. */}
+        <g className="globe-region-connection" aria-hidden="true">
+          <path className="globe-region-base" d={connection} />
+          <path className="globe-region-trail" d={connection} />
+          <circle className="globe-region-traveller" r="2.7" fill="#ffe4aa">
+            <animateMotion dur="5.4s" repeatCount="indefinite" path={connection} />
+          </circle>
+        </g>
         {/* The three signal arcs draw themselves once the contact section has
             revealed (`.contact.in`), then stay. One-shot, offset only. */}
         {[
@@ -450,6 +481,39 @@ export function GlobeArt() {
             opacity=".65"
           />
         ))}
+        {/* Geo-anchored beacons: Cairo/Egypt and Riyadh/Saudi Arabia.
+            A keyboard-focusable graphic gives non-mouse visitors the same
+            unobtrusive label as pointer hover, without a fake button. */}
+        {[egypt, saudi].map((location) => (
+          <g
+            key={location.id}
+            className={`globe-beacon globe-beacon--${location.id}`}
+            data-country={location.id}
+            transform={`translate(${location.x} ${location.y})`}
+            role="img"
+            tabIndex={0}
+            aria-label={locale === "ar"
+              ? `${location.arabic} — خبرة في المشروعات`
+              : `${location.name} — project experience`}
+          >
+            <title>{`${location.name} / ${location.arabic}`}</title>
+            <circle className="globe-beacon-halo" r="28" fill="url(#work-beacon-glow)" />
+            <circle className="globe-beacon-ripple" r="10" />
+            <circle className="globe-beacon-ripple globe-beacon-ripple--second" r="10" />
+            <circle className="globe-beacon-ring" r="8" />
+            <circle className="globe-beacon-core" r="4.5" />
+            <circle className="globe-beacon-hotspot" r="2" />
+            <text
+              className="globe-beacon-label"
+              x={location.id === "egypt" ? -18 : 18}
+              y="23"
+              textAnchor={location.id === "egypt" ? "end" : "start"}
+              direction={locale === "ar" ? "rtl" : "ltr"}
+            >
+              {locale === "ar" ? location.arabic : location.name}
+            </text>
+          </g>
+        ))}
       </g>
       {/* Slow dashed orbit ring around the globe (rotates, 90s/turn). */}
       <g className="globe-orbit">
@@ -464,18 +528,6 @@ export function GlobeArt() {
           strokeDasharray="3 7"
           opacity=".35"
         />
-      </g>
-      <g transform="translate(281 173)">
-        {/* The inner group carries the float so the CSS transform never
-            clobbers the outer translate attribute. */}
-        <g className="globe-pin">
-          <circle r="26" fill="#f1a342" opacity=".1" />
-          <path
-            d="M0 31C-12 13-17 7-17 0a17 17 0 0134 0c0 8-6 15-17 31Z"
-            fill="#f1a342"
-          />
-          <circle cy="-1" r="6" fill="#101820" />
-        </g>
       </g>
     </svg>
   );
