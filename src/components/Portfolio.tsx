@@ -55,6 +55,8 @@ const orderedProjects = [
 ];
 const visibleProjects = (all: boolean) =>
   orderedProjects.slice(0, all ? 7 : 6);
+const projectPeriod = (date: string, locale: "en" | "ar") =>
+  locale === "ar" ? date.replace(/\bPresent\b/g, "حتى الآن") : date;
 
 /* Platform marks: preserve sharp existing CC0 vectors and reuse the genuine
    issuer icons from the old portfolio for Ignition and AVEVA. */
@@ -71,6 +73,33 @@ export function Header() {
   const ar = locale === "ar";
   const path = usePathname();
   const [open, setOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const navigationRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setOpen(false);
+      menuButtonRef.current?.focus();
+    };
+    const handleOutside = (event: PointerEvent) => {
+      if (!headerRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    // On mobile the menu trigger follows the nav in the DOM. Move keyboard
+    // focus into the expanded menu so Tab visits its links, not the page body.
+    const focusFrame = window.requestAnimationFrame(() => {
+      navigationRef.current?.querySelector<HTMLAnchorElement>("a")?.focus();
+    });
+    document.addEventListener("keydown", handleKey);
+    document.addEventListener("pointerdown", handleOutside);
+    return () => {
+      cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", handleKey);
+      document.removeEventListener("pointerdown", handleOutside);
+    };
+  }, [open]);
   const labels = ar
     ? [
         "الرئيسية",
@@ -91,7 +120,15 @@ export function Header() {
         "Contact",
       ];
   return (
-    <header className="header">
+    <header
+      className="header"
+      ref={headerRef}
+      onBlurCapture={(event) => {
+        if (open && !event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setOpen(false);
+        }
+      }}
+    >
       <Link
         href={`/${locale}`}
         className="brand"
@@ -104,6 +141,8 @@ export function Header() {
         {ar ? "محمد أحمد شمس" : "Mohamed Ahmed Shams"}
       </span>
       <nav
+        ref={navigationRef}
+        id="portfolio-main-navigation"
         aria-label={ar ? "التنقل الرئيسي" : "Main navigation"}
         className={open ? "nav open" : "nav"}
       >
@@ -143,7 +182,10 @@ export function Header() {
         {ar ? "تواصل معي" : "Get in Touch"}
       </a>
       <button
+        ref={menuButtonRef}
         className="menu"
+        type="button"
+        aria-controls="portfolio-main-navigation"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         aria-label={
@@ -159,6 +201,35 @@ export function Header() {
         {open ? <X /> : <Menu />}
       </button>
     </header>
+  );
+}
+function PortfolioFooter({
+  locale,
+  caseStudy = false,
+}: {
+  locale: "en" | "ar";
+  caseStudy?: boolean;
+}) {
+  const ar = locale === "ar";
+  return (
+    <footer>
+      <Link
+        href={`/${locale}`}
+        className="brand"
+        aria-label={ar ? "العودة إلى الصفحة الرئيسية" : "Return to homepage"}
+      >
+        <b>MS</b>
+      </Link>
+      <span>
+        © {new Date().getFullYear()}{" "}
+        {ar ? "محمد أحمد شمس" : "Mohamed Ahmed Shams"}
+      </span>
+      <Link href={caseStudy ? `/${locale}#projects` : "#home"}>
+        {caseStudy
+          ? ar ? "العودة للمشاريع ↑" : "Back to Projects ↑"
+          : ar ? "العودة للأعلى ↑" : "Back to top ↑"}
+      </Link>
+    </footer>
   );
 }
 function Eyebrow({
@@ -667,9 +738,7 @@ export default function Portfolio() {
                     <Link href={`/${locale}/projects/${p.slug}`}>
                       {tx(p.title)}
                     </Link>
-                    <span dir="ltr">
-                      {ar ? p.date.replace("Present", "حتى الآن") : p.date}
-                    </span>
+                    <bdi dir={ar ? "auto" : "ltr"}>{projectPeriod(p.date, locale)}</bdi>
                   </li>
                 ))}
               </ul>
@@ -855,16 +924,7 @@ export default function Portfolio() {
           <GlobeArt locale={locale} />
         </section>
       </main>
-      <footer>
-        <Link href={`/${locale}`} className="brand">
-          <b>MS</b>
-        </Link>
-        <span>
-          © {new Date().getFullYear()}{" "}
-          {t("Mohamed Ahmed Shams", "محمد أحمد شمس")}
-        </span>
-        <a href="#home">{t("Back to top ↑", "العودة للأعلى ↑")}</a>
-      </footer>
+      <PortfolioFooter locale={locale} />
     </>
   );
 }
@@ -891,9 +951,12 @@ export function CaseStudy({ slug }: { slug: string }) {
   };
   return (
     <>
+      <a className="skip-link" href="#main">
+        {t("Skip to content", "انتقل إلى المحتوى")}
+      </a>
       <Header />
       <RevealManager />
-      <main className="case section">
+      <main id="main" className="case section">
         <Link className="back-link" href={`/${locale}#projects`}>
           {ar ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
           {t("Back to Projects", "العودة للمشاريع")}
@@ -909,7 +972,7 @@ export function CaseStudy({ slug }: { slug: string }) {
             </div>
           </div>
           <p className="case-meta">
-            <span dir="ltr">{p.date}</span>
+            <bdi dir={ar ? "auto" : "ltr"}>{projectPeriod(p.date, locale)}</bdi>
             <span>{p.sector[locale]}</span>
           </p>
         </div>
@@ -1036,7 +1099,7 @@ export function CaseStudy({ slug }: { slug: string }) {
             <dl>
               <div>
                 <dt>{t("Period", "الفترة")}</dt>
-                <dd dir="ltr">{p.date}</dd>
+                <dd><bdi dir={ar ? "auto" : "ltr"}>{projectPeriod(p.date, locale)}</bdi></dd>
               </div>
               <div>
                 <dt>{t("Sector", "القطاع")}</dt>
@@ -1131,6 +1194,7 @@ export function CaseStudy({ slug }: { slug: string }) {
           </Link>
         </div>
       </main>
+      <PortfolioFooter locale={locale} caseStudy />
     </>
   );
 }

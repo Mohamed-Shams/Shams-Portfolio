@@ -384,3 +384,20 @@ html[lang="ar"] .name-mark-subtitle {
 @media print {
   .about-copy.in .name-mark .name-mark-text { animation: none; }
 }
+/* Only visitors who explicitly request reduced motion see a static,
+   horizontally scrollable badge strip. Normal visitors retain the prominent
+   111px cards / 46s desktop marquee and its original mobile presentation. */
+@media (prefers-reduced-motion: reduce) {
+  .platform-ticker-window {
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    mask-image: none;
+  }
+  .platform-ticker-track {
+    animation: none !important;
+    transform: none !important;
+    will-change: auto;
+  }
+  .platform-ticker-set[aria-hidden="true"] { display: none; }
+}

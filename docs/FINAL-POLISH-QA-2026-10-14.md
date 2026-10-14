@@ -13,9 +13,12 @@ The pre-existing local `next-env.d.ts` difference was left untouched.
   The data-integration path is retained inside an optional disclosure,
   helping technically curious visitors without showing two competing skills
   presentations at the same time.
-- **Platform Ecosystem** remains a compact, continuous, 13-platform
-  scrolling strip, explicitly presented as a supporting visual within
-  Continuous Learning, rather than another skills directory.
+- **Platforms & Technologies** keeps the owner's preferred **prominent**
+  original horizontal slider. This is a 13-platform animated visual, not a
+  second filterable grid. The post-polish shrink was explicitly reverted:
+  desktop cards 111px with 55px icons (46-second loop), mobile cards 89px
+  with 44px icons (56-second loop). Its original heading and full visual
+  presence are preserved.
 - **Selected Credentials** now features four highlights (Ignition Core,
   AWS AI Practitioner, AVEVA Application Server, and Dataiku Core/Advanced).
   Dataiku ML Practitioner remains discoverable in the full document library;
@@ -26,6 +29,11 @@ The pre-existing local `next-env.d.ts` difference was left untouched.
 - The extra colloquial Arabic contact headline repeated the main CTA and
   appeared even on the English page. It has been removed to simplify the
   contact call to action and avoid unnecessary duplicate copy.
+- Project-detail pages now share the localized footer with the homepage and
+  offer a bottom link back to the project list; a skip-to-content link and
+  target are present on each case-study route.
+- Project dates localize the word `Present` as `حتى الآن` on the Arabic
+  case-study heading and quick facts, consistent with the homepage timeline.
 
 ## Signature provenance and treatment
 
@@ -51,6 +59,19 @@ original pen-on-paper scan or vector capture.
 - Footer uses RTL text direction and safe bidi behavior for mixed numerals.
 - Desktop, tablet, and mobile layouts were inspected in both languages.
 
+## Remaining production accessibility and navigation defects addressed
+
+- The hamburger menu now sends focus to its first link when opened; Tab moves
+  among menu links. Escape closes it and restores focus to the trigger.
+  Clicking/tapping outside or moving keyboard focus out of the header also
+  closes it. The button has an `aria-controls` target.
+- The full-size marquee runs normally for ordinary visitors. Only visitors
+  who explicitly request reduced motion in their OS/browser receive a
+  non-animated, horizontally scrollable presentation of the same 13 badges.
+  Duplicated decorative ticker items are hidden in that alternate mode.
+- All seven case-study pages now provide a skip link to their `main#main`
+  landmark as well as the shared localized footer.
+
 ## Validation gates
 
 These are checked against the Cloudflare/OpenNext production-preview Worker
@@ -69,6 +90,9 @@ and rechecked on live Cloudflare following successful automatic deployment:
   `scripts/globe-motion-continuity-qa.cjs` and
   `scripts/certificates-platforms-qa.cjs`. Their underlying features
   were not rewritten by this polish pass.
+- `node scripts/final-delivery-gaps-qa.cjs`: tests mobile keyboard menu,
+  escape/outside dismissal, all 14 localized case-page skip links/footers,
+  Arabic NCEC period, normal ticker dimensions and reduced-motion scrolling.
 
 ## Available and unavailable certificate PDFs
 
