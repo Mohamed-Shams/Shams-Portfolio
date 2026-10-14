@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { BrandIcon, type BrandName } from "./BrandMarks";
+import { GLOBE_LAND, GLOBE_COAST, GLOBE_BORDERS } from "../lib/globe-geography";
 
 /* Recognisable products get their real mark (Simple Icons, CC0) instead of a
    generic glyph; concepts and brands without a permission-compatible source
@@ -278,64 +279,6 @@ export function Scada() {
     </div>
   );
 }
-const land = [
-  [
-    [-17, 36],
-    [6, 37],
-    [25, 32],
-    [35, 31],
-    [43, 12],
-    [50, 10],
-    [42, -12],
-    [32, -29],
-    [18, -35],
-    [10, -18],
-    [2, 5],
-    [-15, 12],
-    [-17, 36],
-  ],
-  [
-    [-10, 36],
-    [-9, 44],
-    [0, 49],
-    [-7, 57],
-    [7, 59],
-    [13, 70],
-    [29, 71],
-    [36, 61],
-    [29, 52],
-    [40, 46],
-    [30, 40],
-    [18, 42],
-    [10, 37],
-    [-10, 36],
-  ],
-  [
-    [35, 31],
-    [49, 29],
-    [60, 24],
-    [72, 21],
-    [80, 7],
-    [90, 22],
-    [110, 22],
-    [123, 40],
-    [135, 48],
-    [155, 60],
-    [120, 70],
-    [75, 73],
-    [40, 60],
-  ],
-  [
-    [-80, 10],
-    [-66, 9],
-    [-48, -3],
-    [-35, -10],
-    [-47, -27],
-    [-67, -55],
-    [-73, -39],
-    [-80, 10],
-  ],
-];
 function point(lon: number, lat: number) {
   const a = ((lon - 20) * Math.PI) / 180,
     b = (lat * Math.PI) / 180;
@@ -440,21 +383,33 @@ export function GlobeArt({ locale = "en" }: { locale?: "en" | "ar" }) {
             />
           </g>
         ))}
-        {land.map((shape, i) => (
-          <path
-            key={i}
-            d={shape
-              .map(([lon, lat], j) => {
-                const p = point(lon, lat);
-                return `${j ? "L" : "M"}${p.x} ${p.y}`;
-              })
-              .join(" ")}
-            stroke="#3498c1"
-            strokeWidth="1"
-            fill="#0b293c"
-            fillOpacity=".2"
-          />
-        ))}
+        {/* Natural Earth 1:110m coastline and national boundaries projected
+            with the SAME orthographic globe geometry as the beacons. Lines
+            are horizon-clipped so no back-side zigzags cross the oceans. */}
+        <path
+          className="globe-land-fill"
+          d={GLOBE_LAND}
+          fill="#0b293c"
+          fillOpacity=".48"
+          fillRule="evenodd"
+        />
+        <path
+          className="globe-coastline"
+          d={GLOBE_COAST}
+          stroke="#3498c1"
+          strokeWidth="1.25"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          opacity=".93"
+        />
+        <path
+          className="globe-country-borders"
+          d={GLOBE_BORDERS}
+          stroke="#31738e"
+          strokeWidth=".58"
+          strokeLinecap="round"
+          opacity=".65"
+        />
         {/* A regional link, not one of the generic decorative signal arcs.
             Both ends share the precise land projection used above. */}
         <g className="globe-region-connection" aria-hidden="true">

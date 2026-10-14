@@ -7,7 +7,8 @@ const path = require('node:path');
 const assert = require('node:assert/strict');
 
 const BASE = (process.env.MOTION_URL || 'http://127.0.0.1:4322').replace(/\/$/, '');
-const OUT = path.resolve('screenshots/contact-globe-qa');
+const OUT = path.resolve(process.env.GLOBE_QA_OUT || 'screenshots/contact-globe-qa');
+const REQUIRE_ACCURATE_GEOGRAPHY = process.env.GLOBE_REQUIRE_GEO === '1';
 fs.mkdirSync(OUT, { recursive: true });
 
 async function sample(page) {
@@ -34,6 +35,10 @@ async function sample(page) {
       travellerCount: document.querySelectorAll('.globe-region-traveller animateMotion').length,
       traveller: { x: travellerPosition.x, y: travellerPosition.y },
       orbitAnimation: getComputedStyle(document.querySelector('.globe-orbit')).animationName,
+      geographicDetail: {
+        coast: document.querySelector('.globe-coastline')?.getAttribute('d')?.length || 0,
+        borders: document.querySelector('.globe-country-borders')?.getAttribute('d')?.length || 0,
+      },
       overflow: document.documentElement.scrollWidth - innerWidth,
       dir: document.documentElement.dir,
       svgWidth: svg.getBoundingClientRect().width,
@@ -82,6 +87,10 @@ async function sample(page) {
         assert(a.regionTrailAnimation.includes('globe-region-flow'), tag + ' connection flows');
         assert(a.orbitAnimation.includes('globe-orbit-spin'), tag + ' globe orbits');
         assert.equal(a.travellerCount, 1, tag + ' travelling signal');
+        if (REQUIRE_ACCURATE_GEOGRAPHY) {
+          assert(a.geographicDetail.coast > 10000, tag + ' has detailed projected coastline');
+          assert(a.geographicDetail.borders > 10000, tag + ' has national borders');
+        }
         assert(a.overflow <= 1 && b.overflow <= 1, tag + ' no horizontal overflow');
         assert.equal(a.dir, lang === 'ar' ? 'rtl' : 'ltr', tag + ' RTL direction');
         assert.equal(a.egypt.label, lang === 'ar' ? 'مصر' : 'Egypt');
