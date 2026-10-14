@@ -30,7 +30,7 @@ const stat = async page => page.evaluate(() => ({
   featured: document.querySelectorAll(".featured-credentials-grid > .cert-card").length,
   certificates: document.querySelectorAll(".certificate-document").length,
   tickerItems: document.querySelectorAll(".platform-ticker-set:first-child .platform-ticker-item").length,
-  flowDetails: document.querySelector(".integration-details")?.open,
+  flowVisible: !!document.querySelector(".flow-showcase:not(details) .flow-steps"),
   footer: document.querySelector("footer")?.textContent,
 }));
 (async () => {
@@ -61,7 +61,7 @@ const stat = async page => page.evaluate(() => ({
         assert.equal(intro.featured, 4, tag + " four featured credential highlights");
         assert.equal(intro.certificates, 10, tag + " ten actual PDF files remain");
         assert.equal(intro.tickerItems, 13, tag + " original platform ticker intact");
-        assert.equal(intro.flowDetails, false, tag + " diagram is secondary/collapsed");
+        assert.equal(intro.flowVisible, true, tag + " data path is permanently rendered");
         assert(intro.overflow <= 1, tag + " no initial overflow: " + intro.overflow);
         if(locale === "ar") {
           assert(intro.contactFont.includes("Alexandria"), tag + " Arabic contact font");
@@ -74,8 +74,10 @@ const stat = async page => page.evaluate(() => ({
         assert(await img.evaluate(e => e.complete && e.naturalWidth > 0), tag + " hero loaded");
         await focusSection(page, "#about", tag + "-about");
         await focusSection(page, "#skills", tag + "-skills");
-        await page.locator(".integration-details summary").click();
-        assert(await page.locator(".integration-details").evaluate(e => e.open), tag + " integration toggle works");
+        assert.equal(await page.locator(".flow-showcase summary").count(), 0,
+          tag + " data path not hidden behind disclosure");
+        assert(await page.locator(".flow-showcase-heading").isVisible(),
+          tag + " flow title always visible");
         const expandedOverflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
         assert(expandedOverflow <= 1, tag + " expanded data-flow does not overflow the page");
         await page.screenshot({ path: path.join(OUT, tag + "-integration.png") });

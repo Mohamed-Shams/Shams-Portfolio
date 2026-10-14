@@ -335,7 +335,7 @@ export const projects: Project[] = [
     title: l("Döhler Factory Cloudy Line", "خط كلاودي بمصنع دولر"),
     sector: l("Food & Beverage | Egypt", "الأغذية والمشروبات | مصر"),
     date: "10/2024 – 02/2026",
-    tags: ["Ignition", "SCADA", "HMI", "PostgreSQL"],
+    tags: ["Ignition", "SCADA", "HMI", "MSSQL"],
     overview: l(
       "Developed the complete Ignition SCADA system for Döhler Egypt’s new production line producing 65 Brix cloudy juice concentrate from orange peel waste—the first of its kind in the Middle East.",
       "تطوير نظام Ignition SCADA بالكامل لخط إنتاج دولر مصر الجديد لإنتاج مركز العصير العكر بتركيز 65 بريكس من مخلفات قشر البرتقال، وهو الأول من نوعه في الشرق الأوسط.",
@@ -367,7 +367,7 @@ export const projects: Project[] = [
         kind: "scene",
         caption: l(
           "Concentrate line: tanks, pumps and process skids",
-          "خط المركز: الخزائن والمضخات ووحدات العملية",
+          "خط المركز: الخزانات والمضخات ووحدات العملية",
         ),
       },
       {
@@ -492,7 +492,7 @@ export const projects: Project[] = [
       "البنية التحتية الذكية | السعودية",
     ),
     date: "06/2024 – 11/2024",
-    tags: ["Ignition", "IIoT", "10K+ Sensors"],
+    tags: ["Ignition", "IIoT", "MSSQL"],
     overview: l(
       "Assisted in developing a proof-of-concept Ignition platform to monitor over 10,000 smart sensors deployed across industrial cities.",
       "المساعدة في تطوير إثبات مفهوم لمنصة Ignition لمراقبة أكثر من 10,000 حساس ذكي في المدن الصناعية.",
@@ -698,7 +698,7 @@ export const projects: Project[] = [
     scale: [
       {
         value: "3",
-        label: l("Clusters: Madinah, Yanbu, Tabuk", "تجمعات: المدينة، ينبع، تبوك"),
+        label: l("Cities: Madinah, Yanbu, Tabuk", "مدن: المدينة، ينبع، تبوك"),
       },
       {
         value: "SOFREL",

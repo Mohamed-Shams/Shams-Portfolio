@@ -10,9 +10,10 @@ The pre-existing local `next-env.d.ts` difference was left untouched.
 ## Content and information architecture changes
 
 - **Tools & Technologies** remains the canonical filterable skills grid.
-  The data-integration path is retained inside an optional disclosure,
-  helping technically curious visitors without showing two competing skills
-  presentations at the same time.
+  At the owner's explicit request, the five-stage data-integration path is
+  now **always visible** as a premium animated schematic (not a collapsed
+  disclosure), with traveling SVG packets on desktop and animated, readable
+  real-text connections on tablet and mobile.
 - **Platform Ecosystem** remains a compact, continuous, 13-platform
   scrolling strip, explicitly presented as a supporting visual within
   Continuous Learning, rather than another skills directory.
