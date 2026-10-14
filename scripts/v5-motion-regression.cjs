@@ -193,6 +193,18 @@ async function verifyHomeInteractions(page, name) {
     "initial=" + initial + " filtered=" + selected);
   check(await skills.locator(".filters button").nth(3).getAttribute("aria-pressed") === "true",
     name + " skills selected state");
+  if (name.endsWith("-desktop")) {
+    // The filtered entrance must release its transform after the last frame,
+    // or the hover elevation silently stops working despite visible borders.
+    await page.waitForTimeout(900);
+    const firstTile = skills.locator(".skill-tile").first();
+    await firstTile.hover();
+    await page.waitForTimeout(350);
+    const lift = await firstTile.evaluate(el =>
+      new DOMMatrix(getComputedStyle(el).transform).m42);
+    check(lift < -0.5, name + " filtered skill tile retains hover elevation",
+      String(lift));
+  }
   await skills.locator(".filters button").first().click();
   check(await skills.locator(".skill-tile").count() === initial, name + " skills filter resets");
   const otherLocale = name.startsWith("ar-") ? "en" : "ar";
@@ -249,6 +261,15 @@ async function verifyJourney(browser, locale, size) {
     check(!end.locked && !end.intro, tag + " intro releases scroll");
     check(end.dir === (locale === "ar" ? "rtl" : "ltr") && end.lang === locale,
       tag + " locale and reading direction");
+    if (size.name === "desktop") {
+      const heroCTA = page.locator(".hero .actions a.button").first();
+      await heroCTA.hover();
+      await page.waitForTimeout(350);
+      const lift = await heroCTA.evaluate(el =>
+        new DOMMatrix(getComputedStyle(el).transform).m42);
+      check(lift < -0.5, tag + " Hero CTA retains hover after entrance",
+        String(lift));
+    }
     await verifyReveals(page, tag);
     await verifyHomeInteractions(page, tag);
     await page.reload({ waitUntil: "domcontentloaded", timeout: 60000 });

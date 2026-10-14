@@ -3413,7 +3413,9 @@ html[dir="rtl"][data-intro-play] .hero:not(.motion-ready) .hero-portrait {
   transform: translate3d(-28px, 0, 0) scale(1.025);
 }
 .hero.motion-ready.is-cinematic [data-hero-item] {
-  animation: v5-hero-arrive 0.82s var(--v5-ease) both;
+  /* Backwards keeps the delayed initial frame, then releases transforms to
+     hover/focus styles once each entrance is complete. */
+  animation: v5-hero-arrive 0.82s var(--v5-ease) backwards;
 }
 .hero.motion-ready.is-cinematic .hero-portrait {
   animation-name: v5-portrait-arrive;
@@ -3512,7 +3514,9 @@ html.reveal-ready [data-reveal="right"].in {
 /* The filter controls are actual buttons. Changing a category remounts the
    selected tiles, so the entering set gets one short response to the action. */
 .skills-grid.in[data-filtered="true"] .skill-tile {
-  animation: v5-filter-tile 0.42s var(--v5-ease) both;
+  /* Do not retain the last transform keyframe: the hover lift needs control
+     again as soon as the filter transition finishes. */
+  animation: v5-filter-tile 0.42s var(--v5-ease) backwards;
   animation-delay: calc(var(--ri, 0) * 0.035s);
 }
 @keyframes v5-filter-tile {
