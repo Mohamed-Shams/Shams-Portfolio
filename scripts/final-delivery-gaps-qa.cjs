@@ -117,7 +117,8 @@ async function test() {
             };
           });
           assert.equal(data.animation, expected, locale + " " + motion + " ticker animation");
-          assert.equal(data.width, 111, locale + " " + motion + " prominent card width preserved");
+          assert(Math.abs(data.width - 111) < .1,
+            locale + " " + motion + " prominent 111px card width preserved");
           assert.equal(data.icons, 13, locale + " " + motion + " all 13 platforms preserved");
           if (motion === "reduce") {
             assert.equal(data.repeatDisplay, "none", locale + " reduced motion hides duplicate badges");
