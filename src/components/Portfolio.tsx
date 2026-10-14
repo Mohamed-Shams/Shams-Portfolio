@@ -413,14 +413,14 @@ export default function Portfolio() {
                 "أنا مهندس أنظمة لدى pulse by solutions، ولدي خبرة عملية في SCADA وإنترنت الأشياء الصناعي ومشروعات التحول الرقمي في مصر والسعودية. أعمل على بناء أنظمة موثوقة وقابلة للتوسع تحوّل بيانات الواقع إلى رؤى مفيدة وعمليات أكثر ذكاءً.",
               )}
             </p>
-            <div className="signature" data-reveal-item="true">
-              <Image
-                src="/assets/signature.svg"
-                alt={t("Mohamed Shams signature", "توقيع محمد شمس")}
-                width={276}
-                height={66}
-                unoptimized
-              />
+            <div className="name-mark" data-reveal-item="true" aria-label={t("Mohamed Ahmed Shams", "محمد أحمد شمس")}>
+              <span className="name-mark-rule" aria-hidden="true" />
+              <span className="name-mark-text" lang={locale}>
+                {t("Mohamed Shams", "محمد أحمد شمس")}
+              </span>
+              <span className="name-mark-subtitle">
+                {t("Systems Engineer", "مهندس أنظمة")}
+              </span>
             </div>
           </div>
           <div className="about-image" data-reveal="right">
@@ -554,7 +554,9 @@ export default function Portfolio() {
               )}
             </p>
             </div>
-            <div className="flow-wrap" data-reveal="up">
+            <details className="integration-details" data-reveal="up">
+              <summary>{t("See how the technologies connect", "كيف تتكامل هذه التقنيات")}</summary>
+              <div className="flow-wrap">
               <FlowDiagram
                 labels={{
                   from: t("PLC / Sensors", "PLC / الحساسات"),
@@ -570,7 +572,8 @@ export default function Portfolio() {
                   "مثال توضيحي لمسار البيانات الذي أبنيه؛ لا يصف كل المشروعات.",
                 )}
               </small>
-            </div>
+              </div>
+            </details>
             <div className="filters">
               {[
                 "All",
@@ -700,8 +703,9 @@ export default function Portfolio() {
           </p>
           </div>
           <PlatformTicker locale={locale} />
-          <div className="cert-grid" data-reveal-group="true" data-reveal-each="true">
-            {[...credentials, [...training[0], "SIEMENS"]].map((c) => (
+          <h3 className="featured-credentials-heading">{t("Selected Credentials", "شهادات مختارة")}</h3>
+          <div className="cert-grid featured-credentials-grid" data-reveal-group="true" data-reveal-each="true">
+            {credentials.filter((c) => c[0] !== "Dataiku ML Practitioner Certified").map((c) => (
               <article className="cert-card" key={c[0]} data-reveal-item="true">
                 <div className={`cert-brand ${c[4]?.toLowerCase()}`}>
                   <Image
@@ -715,9 +719,6 @@ export default function Portfolio() {
                   <h3>{c[ar ? 1 : 0]}</h3>
                   <p>{c[2]}</p>
                   <time>{c[3]}</time>
-                  {c[4] === "SIEMENS" && (
-                    <small>{t("Training course", "دورة تدريبية")}</small>
-                  )}
                   {certificateLinksByCard[c[0]]?.length > 0 && (
                     <div className="cert-pdf-links">
                       {certificateLinksByCard[c[0]].map((id) => {
@@ -744,10 +745,10 @@ export default function Portfolio() {
           <div className="certificate-library" id="certificate-library">
             <div className="certificate-library-heading">
               <div>
-                <h3>{t("Certificate Documents", "ملفات الشهادات")}</h3>
+                <h3>{t("Certificate Library", "مكتبة الشهادات")}</h3>
                 <p>{t(
-                  "Original certificate PDFs from my previous portfolio, including earlier Ignition credentials and professional training.",
-                  "ملفات الشهادات الأصلية من موقعي السابق، بما في ذلك اعتمادات Ignition السابقة والدورات المهنية.",
+                  "Browse all 10 available original documents, including additional credentials and training.",
+                  "تصفّح ١٠ ملفات أصلية متاحة، تشمل اعتمادات ودورات تدريبية إضافية.",
                 )}</p>
               </div>
               <span className="certificate-library-count">
@@ -792,7 +793,7 @@ export default function Portfolio() {
               )}
             </summary>
             <div className="cert-grid">
-              {training.slice(1).map((c) => (
+              {training.map((c) => (
                 <article className="cert-card" key={c[0]}>
                   <div>
                     <h3>{c[ar ? 1 : 0]}</h3>
@@ -820,9 +821,6 @@ export default function Portfolio() {
                 "لنصنع معًا حلولًا أكثر ذكاءً.",
               )}
             </h2>
-            <h3 lang="ar" dir="rtl" data-reveal-item="true">
-              خلينا نبني حاجة ذكية مع بعض
-            </h3>
             <p data-reveal-item="true">
               {t(
                 "I’m always open to discussing new opportunities, interesting projects, or ideas related to SCADA, IIoT, and industrial systems.",

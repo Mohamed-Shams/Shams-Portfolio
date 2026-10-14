@@ -216,3 +216,195 @@
   .platform-ticker-set[aria-hidden="true"] { display: none; }
   .certificate-library-rail { overflow: visible; flex-wrap: wrap; }
 }
+
+/* Final editorial hierarchy: Tools remains the canonical skills directory.
+   The integration schematic is optional context, not a competing skills hero. */
+.integration-details {
+  margin: 12px 0 18px;
+  border: 1px solid #2841539c;
+  border-radius: 11px;
+  background: #0d1820a8;
+}
+.integration-details summary {
+  padding: 11px 17px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ddb378;
+  cursor: pointer;
+}
+.integration-details[open] summary { border-bottom: 1px solid #2841539c; }
+.integration-details .flow-wrap {
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+  padding: 14px;
+}
+.integration-details .flow-note { max-width: 100%; }
+.featured-credentials-heading {
+  font: 600 15px/1.45 Inter, Alexandria, sans-serif;
+  color: #d9e5ed;
+  margin: 8px 0 16px;
+}
+.featured-credentials-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+.featured-credentials-grid .cert-card {
+  min-height: 135px;
+  padding: 20px;
+}
+.featured-credentials-grid .cert-card h3 { font-size: 16px; }
+.featured-credentials-grid .cert-brand {
+  width: 57px;
+  height: 57px;
+}
+.certificate-library-heading p { max-width: 570px; }
+.certificate-document { min-height: 176px; flex-basis: 208px; }
+.certificate-library-rail { scroll-padding-inline: 4px; }
+
+/* The former signature was a traced version of a 138x33 JPEG-like raster
+   (signature.webp). Do not invent an autograph. Use a clearly typeset name
+   signature until a genuine high-resolution handwritten source is provided. */
+.about .name-mark {
+  width: max-content;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  margin-top: 30px;
+  padding-top: 13px;
+  position: relative;
+}
+.name-mark-rule {
+  display: block;
+  width: 56px;
+  height: 2px;
+  background: linear-gradient(90deg, #f1a342, transparent);
+  margin-bottom: 10px;
+}
+.name-mark-text {
+  color: #edf1f4;
+  font: italic 400 clamp(25px, 2.5vw, 34px)/1.25 Georgia, "Times New Roman", serif;
+  letter-spacing: -.045em;
+  white-space: normal;
+  text-wrap: pretty;
+}
+.name-mark-subtitle {
+  color: #c28f55;
+  font: 500 10px/1.5 Inter, Alexandria, sans-serif;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  margin-top: 7px;
+}
+.about-copy.in .name-mark .name-mark-text {
+  animation: name-mark-appear 1s cubic-bezier(.18,.78,.23,1) .18s both;
+}
+@keyframes name-mark-appear {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+/* The source platform row is an identity accent, NOT another skills grid. */
+.platform-ticker { margin: 14px 0 24px; border-color: #263b4a72; }
+.platform-ticker-head { padding: 11px 17px 4px; }
+.platform-ticker-head > span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+.platform-ticker-head small { font-size: 10px; }
+.platform-ticker-window { padding: 5px 0 12px; }
+.platform-ticker-item {
+  width: 90px;
+  min-height: 81px;
+  padding: 8px 6px;
+  gap: 5px;
+  background: #10202a55;
+}
+.platform-ticker-icon { width: 39px; height: 39px; }
+.platform-ticker-label { font-size: 9px; }
+.platform-ticker-track { animation-duration: 49s; }
+
+/* Scoped Arabic typesetting: no global resets that alter SVG icons, Latin
+   acronyms, or mixed-script links. Alexandria is already requested in CSS. */
+html[lang="ar"] .hero-copy h1,
+html[lang="ar"] .hero-copy h2,
+html[lang="ar"] .section h2,
+html[lang="ar"] .section h3,
+html[lang="ar"] .section p,
+html[lang="ar"] .section summary,
+html[lang="ar"] footer,
+html[lang="ar"] .certificate-document h4 {
+  font-family: Alexandria, Tahoma, sans-serif;
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-transform: none;
+}
+html[lang="ar"] .contact-copy {
+  direction: rtl;
+  text-align: start;
+  max-width: 720px;
+}
+html[lang="ar"] .contact-copy h2 {
+  line-height: 1.55;
+  letter-spacing: normal;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+html[lang="ar"] .contact-copy p {
+  line-height: 2.05;
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-align: start;
+  text-wrap: pretty;
+}
+html[lang="ar"] .contact-copy > a:not(.button) {
+  direction: rtl;
+  gap: 9px;
+  line-height: 1.8;
+  font-family: Alexandria, Tahoma, sans-serif;
+  letter-spacing: normal;
+}
+html[lang="ar"] .contact-copy > a[href^="mailto"] > span {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: Inter, Arial, sans-serif;
+  font-size: .94em;
+  overflow-wrap: anywhere;
+}
+html[lang="ar"] footer {
+  direction: rtl;
+  line-height: 1.85;
+}
+html[lang="ar"] footer > span { unicode-bidi: plaintext; }
+html[lang="ar"] .name-mark-text {
+  font: 500 clamp(22px, 2.5vw, 30px)/1.7 Alexandria, Tahoma, sans-serif;
+  letter-spacing: normal;
+}
+html[lang="ar"] .name-mark-subtitle {
+  letter-spacing: normal;
+  text-transform: none;
+}
+@media (max-width: 850px) {
+  .featured-credentials-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .featured-credentials-grid .cert-card { padding: 14px; }
+  .featured-credentials-grid .cert-card h3 { font-size: 13px; }
+}
+@media (max-width: 600px) {
+  .featured-credentials-grid { grid-template-columns: 1fr; }
+  .featured-credentials-grid .cert-card {
+    min-height: 0;
+    display: flex;
+    gap: 12px;
+  }
+  .platform-ticker-item { width: 77px; min-height: 75px; }
+  .platform-ticker-icon { width: 36px; height: 36px; }
+  .platform-ticker-head { padding: 10px 12px 4px; }
+  .about .name-mark { margin-top: 20px; }
+  html[lang="ar"] .contact-copy h2 { font-size: clamp(25px, 7vw, 32px); }
+  html[lang="ar"] footer { gap: 10px; }
+}
+@media print {
+  .about-copy.in .name-mark .name-mark-text { animation: none; }
+}
