@@ -3172,9 +3172,18 @@ footer a:hover {
   transform-origin: left;
   animation: portfolio-intro-progress 0.9s ease-out both;
 }
+[dir="rtl"] .portfolio-intro-line i {
+  transform-origin: right;
+  background: linear-gradient(270deg, transparent, var(--amber), #f7d6a7);
+}
 @keyframes portfolio-intro-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .hero-instrument .scada { pointer-events: none; }
 @media (prefers-reduced-motion: reduce) {
   .portfolio-intro { display: none; }
   .portfolio-intro-line i { animation: none; }
+  .hero-copy > *,
+  .hero-portrait {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

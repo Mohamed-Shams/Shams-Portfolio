@@ -40,9 +40,16 @@ async function capture(browser, locale, device, revision) {
     if (response.status() >= 400) requests.push(response.status() + " " + response.url());
   });
   await page.goto(`http://127.0.0.1:${browsers[revision]}/${locale}`, {
-    waitUntil: "domcontentloaded",
+    // A streaming Next.js response can hydrate before DOMContentLoaded.
+    // Anchor the intro capture to its appearance, not to document parsing.
+    waitUntil: revision === "after" ? "commit" : "domcontentloaded",
   });
-  await page.waitForTimeout(450);
+  if (revision === "after") {
+    await page.locator(".portfolio-intro").waitFor({ state: "attached", timeout: 7000 });
+    await page.waitForTimeout(250);
+  } else {
+    await page.waitForTimeout(450);
+  }
   const intro = await page.locator(".portfolio-intro").count();
   const earlyHeroOpacity = await page.locator(".hero h1").evaluate(el => getComputedStyle(el).opacity);
   await page.screenshot({ path: path.join(dir, `${locale}-${device}-${revision}-early.png`) });
@@ -101,6 +108,8 @@ async function regression(browser, locale, device) {
   const reduced = await browser.newContext({ viewport: sizes[device], reducedMotion: "reduce" });
   const reducedPage = await reduced.newPage();
   await reducedPage.goto(`http://127.0.0.1:3147/${locale}`, { waitUntil: "domcontentloaded" });
+  // The reduced-motion state must be visible before effects run or timers fire.
+  assert.equal(await reducedPage.locator(".hero h1").evaluate(el => getComputedStyle(el).opacity), "1");
   await reducedPage.waitForTimeout(350);
   assert.equal(await reducedPage.locator(".portfolio-intro:visible").count(), 0, "reduced motion intro visible");
   assert.equal(await reducedPage.locator(".hero h1").evaluate(el => getComputedStyle(el).opacity), "1");
@@ -112,6 +121,26 @@ async function regression(browser, locale, device) {
   const noJsVisibility = await noJsPage.locator(".hero h1").evaluate(el => getComputedStyle(el).opacity);
   assert.equal(noJsVisibility, "1", "Hero hidden without JavaScript");
   await noJs.close();
+
+  // The overlay is decorative and must yield instantly when a visitor interacts.
+  for (const method of ["keyboard", "pointer"]) {
+    const interactive = await browser.newContext({ viewport: sizes[device] });
+    const interactivePage = await interactive.newPage();
+    await interactivePage.goto(`http://127.0.0.1:3147/${locale}`, { waitUntil: "domcontentloaded" });
+    await interactivePage.locator(".portfolio-intro").waitFor({ state: "attached" });
+    const origin = await interactivePage.locator(".portfolio-intro-line i").evaluate(el => getComputedStyle(el).transformOrigin);
+    const expectedOrigin = locale === "ar" ? "160px" : "0px";
+    assert(origin.startsWith(expectedOrigin), `${locale} intro progress direction ${origin}`);
+    if (method === "keyboard") {
+      await interactivePage.keyboard.press("Tab");
+      assert.equal(await interactivePage.evaluate(() => document.activeElement?.tagName), "A", "Tab focus not visible");
+    } else {
+      await interactivePage.mouse.click(sizes[device].width - 8, sizes[device].height - 8);
+    }
+    await interactivePage.waitForTimeout(350);
+    assert.equal(await interactivePage.locator(".portfolio-intro").count(), 0, `${locale} ${method} failed to dismiss intro`);
+    await interactive.close();
+  }
 }
 
 function writeReview() {

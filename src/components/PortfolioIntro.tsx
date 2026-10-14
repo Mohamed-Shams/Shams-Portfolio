@@ -38,11 +38,31 @@ export function PortfolioIntro({
     setVisible(true);
     // Overlap the Hero entrance with the final fraction of the intro.
     // Otherwise its own stagger produces a dark gap after the overlay fades.
-    const heroTimer = window.setTimeout(() => onFinished(true), 710);
-    const dismissTimer = window.setTimeout(() => setVisible(false), 950);
+    let heroStarted = false;
+    let dismissed = false;
+    const revealHero = () => {
+      if (heroStarted) return;
+      heroStarted = true;
+      onFinished(true);
+    };
+    const dismiss = () => {
+      if (dismissed) return;
+      dismissed = true;
+      revealHero();
+      setVisible(false);
+    };
+    const heroTimer = window.setTimeout(revealHero, 710);
+    const dismissTimer = window.setTimeout(dismiss, 950);
+
+    // The greeting is decorative: anyone who tries to use the page should
+    // immediately see the action and its focus indicator instead of the overlay.
+    window.addEventListener("pointerdown", dismiss, true);
+    window.addEventListener("keydown", dismiss, true);
     return () => {
       window.clearTimeout(heroTimer);
       window.clearTimeout(dismissTimer);
+      window.removeEventListener("pointerdown", dismiss, true);
+      window.removeEventListener("keydown", dismiss, true);
     };
   }, [onFinished]);
 
