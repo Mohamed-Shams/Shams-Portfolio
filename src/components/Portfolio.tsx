@@ -286,19 +286,23 @@ export default function Portfolio() {
   const tx = (v: Localized) => v[locale];
   const [category, setCategory] = useState("All");
   const [all, setAll] = useState(false);
+  const [heroReady, setHeroReady] = useState(false);
   const reduced = useReducedMotion();
   return (
     <>
+      <noscript>
+        <style>{".hero-copy > *, .hero-portrait { opacity: 1 !important; transform: none !important; }"}</style>
+      </noscript>
       <a className="skip-link" href="#main">
         {t("Skip to content", "انتقل إلى المحتوى")}
       </a>
       <Header />
-      <PortfolioIntro locale={locale} />
+      <PortfolioIntro locale={locale} onFinished={setHeroReady} />
       <ScrollProgress />
       <RevealManager />
       <main id="main">
         <section className="hero" id="home">
-          <motion.div className="hero-portrait" initial={reduced ? false : { opacity: 0, x: ar ? -20 : 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, ease: heroEase }}>
+          <motion.div className="hero-portrait" initial={reduced ? false : { opacity: 0, x: ar ? -20 : 20 }} animate={heroReady || reduced ? { opacity: 1, x: 0 } : { opacity: 0, x: ar ? -20 : 20 }} transition={{ duration: 0.9, ease: heroEase }}>
             <Image
               src="/assets/portrait.webp"
               alt={t("Mohamed Ahmed Shams", "محمد أحمد شمس")}
@@ -315,7 +319,7 @@ export default function Portfolio() {
             className="hero-copy"
             variants={heroStagger}
             initial={reduced ? false : "hidden"}
-            animate="show"
+            animate={heroReady || reduced ? "show" : "hidden"}
           >
             <motion.div className="eyebrow" variants={heroItem}>
               {t("Systems Engineer", "مهندس أنظمة")}
