@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
 import {
   Activity,
   CircuitBoard,
@@ -113,7 +113,7 @@ export function FlowDiagram({
   labels: { from: string; via: string; to: string; db: string; dash: string };
 }) {
   const node = (x: number, y: number, w: number, label: string, accent: boolean) => (
-    <g key={label}>
+    <g key={label} className={accent ? "flow-svg-node is-active" : "flow-svg-node"}>
       <rect
         x={x}
         y={y}
@@ -137,7 +137,7 @@ export function FlowDiagram({
     </g>
   );
   const arrow = (x1: number, x2: number, y: number, key: string) => (
-    <g key={key}>
+    <g key={key} className="flow-svg-link">
       <line
         x1={x1}
         y1={y}
@@ -147,10 +147,29 @@ export function FlowDiagram({
         strokeWidth="1"
         strokeDasharray="4 4"
       />
+      <line
+        className="flow-svg-stream"
+        x1={x1}
+        y1={y}
+        x2={x2 - 8}
+        y2={y}
+        stroke="#3ec9ef"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeDasharray="4 11"
+      />
       <path
         d={`M${x2} ${y} l-7 -4 v8 z`}
         fill="#2a8bb8"
       />
+      <circle className="flow-svg-packet" r="3.4" fill="#ffc573">
+        <animateMotion
+          path={`M${x1} ${y} L${x2 - 8} ${y}`}
+          dur="3.8s"
+          begin={`-${({ a: 0, b: .95, c: 1.9, d: 2.85 } as Record<string, number>)[key]}s`}
+          repeatCount="indefinite"
+        />
+      </circle>
     </g>
   );
   /* The SVG labels are viewBox units: below the wide desktop the drawing is
@@ -165,6 +184,7 @@ export function FlowDiagram({
           <li
             key={label}
             className={"flow-step" + (i === 2 ? " accent" : "")}
+            style={{ "--flow-sequence": i } as CSSProperties}
           >
             {i > 0 && <span className="flow-link" aria-hidden="true" />}
             <span className="flow-chip">{label}</span>
@@ -188,10 +208,6 @@ export function FlowDiagram({
         {node(648, 28, 149, labels.db, false)}
         {arrow(805, 851, 48, "d")}
         {node(855, 28, 150, labels.dash, false)}
-        <circle className="flow-dot dot-a" r="3" fill="#f1a342" />
-        <circle className="flow-dot dot-b" r="3" fill="#278bb2" />
-        <circle className="flow-dot dot-c" r="3" fill="#f1a342" />
-        <circle className="flow-dot dot-d" r="3" fill="#278bb2" />
       </svg>
     </>
   );

@@ -554,9 +554,16 @@ export default function Portfolio() {
               )}
             </p>
             </div>
-            <details className="integration-details" data-reveal="up">
-              <summary>{t("See how the technologies connect", "كيف تتكامل هذه التقنيات")}</summary>
-              <div className="flow-wrap">
+            <div className="flow-wrap flow-showcase" data-reveal="up"
+              role="region"
+              aria-label={t("Industrial data flow", "مسار البيانات الصناعية")}>
+              <div className="flow-showcase-heading">
+                <span className="flow-showcase-indicator" aria-hidden="true" />
+                <span>{t("INDUSTRIAL DATA FLOW", "مسار البيانات الصناعية")}</span>
+                <span className="flow-showcase-caption">
+                  {t("A live illustration of system integration", "تصوّر متحرك لتكامل الأنظمة")}
+                </span>
+              </div>
               <FlowDiagram
                 labels={{
                   from: t("PLC / Sensors", "PLC / الحساسات"),
@@ -572,8 +579,7 @@ export default function Portfolio() {
                   "مثال توضيحي لمسار البيانات الذي أبنيه؛ لا يصف كل المشروعات.",
                 )}
               </small>
-              </div>
-            </details>
+            </div>
             <div className="filters">
               {[
                 "All",
