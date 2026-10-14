@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 const SESSION_KEY = "shams-portfolio-intro-v4";
+const HERO_REVEAL_MS = 1030;
+const INTRO_DISMISS_MS = 1430;
 
 /** Decorative first-visit greeting. The real page is always rendered and usable. */
 export function PortfolioIntro({
@@ -51,8 +53,8 @@ export function PortfolioIntro({
       revealHero();
       setVisible(false);
     };
-    const heroTimer = window.setTimeout(revealHero, 710);
-    const dismissTimer = window.setTimeout(dismiss, 950);
+    const heroTimer = window.setTimeout(revealHero, HERO_REVEAL_MS);
+    const dismissTimer = window.setTimeout(dismiss, INTRO_DISMISS_MS);
 
     // The greeting is decorative: anyone who tries to use the page should
     // immediately see the action and its focus indicator instead of the overlay.
@@ -74,19 +76,39 @@ export function PortfolioIntro({
           aria-hidden="true"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.24, ease: "easeOut" }}
+          exit={{ opacity: 0, y: -24 }}
+          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
         >
           <div className="portfolio-intro-rings" />
+          <svg className="portfolio-intro-signals" viewBox="0 0 840 520" preserveAspectRatio="xMidYMid meet">
+            <path d="M0 156H224L272 204H342M840 365H627L590 328H496" />
+            <path d="M0 318H174L222 270H310M840 168H688L624 232H540" />
+            <circle cx="342" cy="204" r="3" />
+            <circle cx="496" cy="328" r="3" />
+            <circle cx="310" cy="270" r="3" />
+            <circle cx="540" cy="232" r="3" />
+          </svg>
           <motion.div
             className="portfolio-intro-content"
-            initial={{ opacity: 0, y: 16, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            initial="hidden"
+            animate="show"
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.17, delayChildren: 0.12 } } }}
           >
-            <div className="portfolio-intro-mark">MS</div>
-            <strong>{locale === "ar" ? "محمد أحمد شمس" : "Mohamed Ahmed Shams"}</strong>
-            <span>{locale === "ar" ? "مهندس أنظمة / إنترنت الأشياء الصناعي" : "Systems Engineer / Industrial IoT"}</span>
+            <motion.div
+              className="portfolio-intro-mark"
+              variants={{
+                hidden: { opacity: 0, scale: 0.78, y: 20, filter: "blur(6px)" },
+                show: { opacity: 1, scale: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.67, ease: [0.16, 1, 0.3, 1] } },
+              }}
+            >MS</motion.div>
+            <motion.strong variants={{
+              hidden: { opacity: 0, y: 22 },
+              show: { opacity: 1, y: 0, transition: { duration: 0.56, ease: [0.16, 1, 0.3, 1] } },
+            }}>{locale === "ar" ? "محمد أحمد شمس" : "Mohamed Ahmed Shams"}</motion.strong>
+            <motion.span variants={{
+              hidden: { opacity: 0, y: 14 },
+              show: { opacity: 1, y: 0, transition: { duration: 0.42, ease: "easeOut" } },
+            }}>{locale === "ar" ? "مهندس أنظمة / إنترنت الأشياء الصناعي" : "Systems Engineer / Industrial IoT"}</motion.span>
             <div className="portfolio-intro-line"><i /></div>
           </motion.div>
         </motion.div>

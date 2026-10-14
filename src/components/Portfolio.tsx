@@ -4,7 +4,7 @@ import { useLocale } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   ArrowLeft,
@@ -177,12 +177,16 @@ function Eyebrow({
    `useReducedMotion` short-circuits it to the final state. */
 const heroEase: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
 const heroItem = {
-  hidden: { opacity: 0, y: 22 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: heroEase } },
+  hidden: { opacity: 0, y: 29 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.72, ease: heroEase } },
+};
+const heroHeadline = {
+  hidden: { opacity: 0, y: 42, scale: 0.975 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.86, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
 };
 const heroStagger = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.12 } },
+  show: { transition: { staggerChildren: 0.14, delayChildren: 0.07 } },
 };
 const heroActions = {
   hidden: {},
@@ -287,11 +291,20 @@ export default function Portfolio() {
   const [category, setCategory] = useState("All");
   const [all, setAll] = useState(false);
   const [heroReady, setHeroReady] = useState(false);
-  const reduced = useReducedMotion();
+  // Keep server and first client render identical. Reading the media query in
+  // render would create different Framer Motion initial styles during hydration.
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduced(preference.matches);
+    sync();
+    preference.addEventListener("change", sync);
+    return () => preference.removeEventListener("change", sync);
+  }, []);
   return (
     <>
       <noscript>
-        <style>{".hero-copy > *, .hero-portrait { opacity: 1 !important; transform: none !important; }"}</style>
+        <style>{".hero-copy > *, .hero-portrait { opacity: 1 !important; transform: none !important; } .scada-trace { stroke-dashoffset: 0 !important; }"}</style>
       </noscript>
       <a className="skip-link" href="#main">
         {t("Skip to content", "انتقل إلى المحتوى")}
@@ -301,7 +314,7 @@ export default function Portfolio() {
       <ScrollProgress />
       <RevealManager />
       <main id="main">
-        <section className="hero" id="home">
+        <section className={"hero" + (heroReady || reduced ? " motion-ready" : "")} id="home">
           <motion.div className="hero-portrait" initial={reduced ? false : { opacity: 0, x: ar ? -20 : 20 }} animate={heroReady || reduced ? { opacity: 1, x: 0 } : { opacity: 0, x: ar ? -20 : 20 }} transition={{ duration: 0.9, ease: heroEase }}>
             <Image
               src="/assets/portrait.webp"
@@ -324,7 +337,7 @@ export default function Portfolio() {
             <motion.div className="eyebrow" variants={heroItem}>
               {t("Systems Engineer", "مهندس أنظمة")}
             </motion.div>
-            <motion.h1 variants={heroItem}>
+            <motion.h1 variants={heroHeadline}>
               {ar ? (
                 <>محمد أحمد شمس</>
               ) : (
