@@ -305,27 +305,6 @@
   to { opacity: 1; transform: none; }
 }
 
-/* The source platform row is an identity accent, NOT another skills grid. */
-.platform-ticker { margin: 14px 0 24px; border-color: #263b4a72; }
-.platform-ticker-head { padding: 11px 17px 4px; }
-.platform-ticker-head > span {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .02em;
-}
-.platform-ticker-head small { font-size: 10px; }
-.platform-ticker-window { padding: 5px 0 12px; }
-.platform-ticker-item {
-  width: 90px;
-  min-height: 81px;
-  padding: 8px 6px;
-  gap: 5px;
-  background: #10202a55;
-}
-.platform-ticker-icon { width: 39px; height: 39px; }
-.platform-ticker-label { font-size: 9px; }
-.platform-ticker-track { animation-duration: 49s; }
-
 /* Scoped Arabic typesetting: no global resets that alter SVG icons, Latin
    acronyms, or mixed-script links. Alexandria is already requested in CSS. */
 html[lang="ar"] .hero-copy h1,
@@ -398,9 +377,6 @@ html[lang="ar"] .name-mark-subtitle {
     display: flex;
     gap: 12px;
   }
-  .platform-ticker-item { width: 77px; min-height: 75px; }
-  .platform-ticker-icon { width: 36px; height: 36px; }
-  .platform-ticker-head { padding: 10px 12px 4px; }
   .about .name-mark { margin-top: 20px; }
   html[lang="ar"] .contact-copy h2 { font-size: clamp(25px, 7vw, 32px); }
   html[lang="ar"] footer { gap: 10px; }

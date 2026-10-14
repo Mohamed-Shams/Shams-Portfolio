@@ -31,7 +31,7 @@ export function PlatformTicker({ locale }: { locale: "en" | "ar" }) {
       data-platform-ticker
     >
       <div className="platform-ticker-head">
-        <span>{ar ? "لمحة عن المنصات" : "Platform Ecosystem"}</span>
+        <span>{ar ? "المنصات والتقنيات" : "Platforms & Technologies"}</span>
         <small>{ar ? "مرّر أو أوقف الحركة لاستكشاف الأدوات" : "Hover or focus to pause • Explore the platforms"}</small>
       </div>
       <div className="platform-ticker-window" dir="ltr">
