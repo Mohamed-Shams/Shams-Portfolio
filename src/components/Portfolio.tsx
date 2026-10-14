@@ -4,7 +4,6 @@ import { useLocale } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
 import {
   ArrowRight,
   ArrowLeft,
@@ -156,42 +155,24 @@ export function Header() {
 }
 function Eyebrow({
   children,
-  reveal,
-  delay,
 }: {
   children: React.ReactNode;
-  reveal?: boolean;
-  delay?: "1" | "2" | "3";
 }) {
   return (
     <div
       className="eyebrow"
-      {...(reveal ? { "data-reveal": "up", "data-reveal-delay": delay } : {})}
+      data-reveal-item="true"
     >
       {children}
     </div>
   );
 }
 
-/* One-shot hero entrance: opacity/transform only, so nothing shifts layout.
-   `useReducedMotion` short-circuits it to the final state. */
-const heroEase: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
-const heroItem = {
-  hidden: { opacity: 0, y: 29 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.72, ease: heroEase } },
-};
-const heroHeadline = {
-  hidden: { opacity: 0, y: 42, scale: 0.975 },
-  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.86, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
-};
-const heroStagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.14, delayChildren: 0.07 } },
-};
-const heroActions = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
-};
+/* Hero entrance choreography lives in CSS (see fidelity.css “Hero entrance”):
+   the hidden pre-state applies only while the intro plays
+   (html[data-intro-play]), and .motion-ready releases a staggered
+   transform/opacity sequence — so it starts with the first-paint clock,
+   never at hydration, and returning visitors always see the final hero. */
 
 /* CopyEmail: small ghost CTA beside the contact mailto link. Writes the
    address to the clipboard (with a legacy fallback) and flips to a "Copied"
@@ -240,11 +221,12 @@ function CopyEmail({
   );
 }
 
-/* Animated stat: counts up once when visible, final string preserved exactly. */
-function Stat({ value, label }: { value: string; label: string }) {
-  const { ref, text } = useCountUp(value);
+/* Animated stat: counts up once when visible, final string preserved exactly.
+   Staggered start per index so the three counters do not tick in unison. */
+function Stat({ value, label, index }: { value: string; label: string; index: number }) {
+  const { ref, text } = useCountUp(value, 1200, index * 160);
   return (
-    <div>
+    <div data-reveal-item="true">
       <strong>
         <span ref={ref}>{text}</span>
       </strong>
@@ -315,7 +297,7 @@ export default function Portfolio() {
       <RevealManager />
       <main id="main">
         <section className={"hero" + (heroReady || reduced ? " motion-ready" : "")} id="home">
-          <motion.div className="hero-portrait" initial={reduced ? false : { opacity: 0, x: ar ? -20 : 20 }} animate={heroReady || reduced ? { opacity: 1, x: 0 } : { opacity: 0, x: ar ? -20 : 20 }} transition={{ duration: 0.9, ease: heroEase }}>
+          <div className="hero-portrait" data-hero-item="0">
             <Image
               src="/assets/portrait.webp"
               alt={t("Mohamed Ahmed Shams", "محمد أحمد شمس")}
@@ -323,21 +305,16 @@ export default function Portfolio() {
               priority
               sizes="(max-width: 700px) 100vw, 75vw"
             />
-          </motion.div>
+          </div>
           <div className="industrial" aria-hidden="true" />
           <div className="refinery" aria-hidden="true" />
           <div className="hero-shade" />
           <div className="hero-instrument"><Scada /></div>
-          <motion.div
-            className="hero-copy"
-            variants={heroStagger}
-            initial={reduced ? false : "hidden"}
-            animate={heroReady || reduced ? "show" : "hidden"}
-          >
-            <motion.div className="eyebrow" variants={heroItem}>
+          <div className="hero-copy">
+            <div className="eyebrow" data-hero-item="1">
               {t("Systems Engineer", "مهندس أنظمة")}
-            </motion.div>
-            <motion.h1 variants={heroHeadline}>
+            </div>
+            <h1 data-hero-item="2">
               {ar ? (
                 <>محمد أحمد شمس</>
               ) : (
@@ -346,13 +323,13 @@ export default function Portfolio() {
                   Ahmed Shams
                 </>
               )}
-            </motion.h1>
-            <motion.h2 variants={heroItem}>
+            </h1>
+            <h2 data-hero-item="3">
               {t("Engineering Intelligent", "أطوّر أنظمة صناعية ذكية")}
               <br />
               {t("Industrial Systems.", "تربط الواقع بالتكنولوجيا.")}
-            </motion.h2>
-            <motion.p className="roles" variants={heroItem} aria-label={heroRoles.join(" | ")}>
+            </h2>
+            <p className="roles" data-hero-item="4" aria-label={heroRoles.join(" | ")}>
               {heroRoles.map((role, i) => (
                 <span className="role" key={role}>
                   <bdi>{role}</bdi>
@@ -361,29 +338,29 @@ export default function Portfolio() {
                   )}
                 </span>
               ))}
-            </motion.p>
-            <motion.p className="hero-description" variants={heroItem}>
+            </p>
+            <p className="hero-description" data-hero-item="5">
               {t(
                 "I design, develop, and integrate intelligent industrial platforms — connecting real-world operations with reliable software, data, and modern digital technologies.",
                 "أصمم وأطور وأكامل منصات صناعية ذكية تربط العمليات الفعلية بالمستشعرات والبيانات وأحدث التقنيات الرقمية.",
               )}
-            </motion.p>
-            <motion.div className="actions" variants={heroActions}>
-              <motion.a className="button" href="#projects" variants={heroItem}>
+            </p>
+            <div className="actions">
+              <a className="button" href="#projects" data-hero-item="6">
                 {t("Explore My Work", "استكشف أعمالي")}
                 <ArrowRight size={17} />
-              </motion.a>
-              <motion.a
+              </a>
+              <a
                 className="button outline"
                 href={cv}
                 download
-                variants={heroItem}
+                data-hero-item="7"
               >
                 {t("Download CV", "تحميل السيرة الذاتية")}
                 <Download size={17} />
-              </motion.a>
-            </motion.div>
-          </motion.div>
+              </a>
+            </div>
+          </div>
           <div className="micro">
             REAL OPERATIONS
             <br />
@@ -413,22 +390,22 @@ export default function Portfolio() {
           </svg>
         </section>
         <section id="about" className="section about">
-          <div className="about-copy">
-            <Eyebrow reveal>{t("About me", "نبذة عني")}</Eyebrow>
-            <h2 data-reveal="up" data-reveal-delay="1">
+          <div className="about-copy" data-reveal-group="true">
+            <Eyebrow>{t("About me", "نبذة عني")}</Eyebrow>
+            <h2 data-reveal-item="true">
               {t("From Industrial", "من الأنظمة الصناعية")}
               <br />
               {t("Systems to Smarter", "إلى حلول أكثر")}
               <br />
               {t("Solutions.", "ذكاءً.")}
             </h2>
-            <p data-reveal="up" data-reveal-delay="2">
+            <p data-reveal-item="true">
               {t(
                 "I’m a Systems Engineer at pulse by solutions with hands-on experience in SCADA, Industrial IoT, and digital transformation projects across Egypt and Saudi Arabia. I enjoy building reliable, scalable systems that turn real-world data into meaningful insights and smarter operations.",
                 "أنا مهندس أنظمة لدى pulse by solutions، ولدي خبرة عملية في SCADA وإنترنت الأشياء الصناعي ومشروعات التحول الرقمي في مصر والسعودية. أعمل على بناء أنظمة موثوقة وقابلة للتوسع تحوّل بيانات الواقع إلى رؤى مفيدة وعمليات أكثر ذكاءً.",
               )}
             </p>
-            <div className="signature" data-reveal="up" data-reveal-delay="3">
+            <div className="signature" data-reveal-item="true">
               <Image
                 src="/assets/signature.svg"
                 alt={t("Mohamed Shams signature", "توقيع محمد شمس")}
@@ -438,7 +415,7 @@ export default function Portfolio() {
               />
             </div>
           </div>
-          <div className="about-image" data-reveal="up">
+          <div className="about-image" data-reveal="right">
             <Image
               src="/assets/about-real.webp"
               alt={t(
@@ -456,7 +433,7 @@ export default function Portfolio() {
               {t("Into Real Impact.", "إلى أثر حقيقي.")}
             </div>
           </div>
-          <div className="stats" data-reveal="up">
+          <div className="stats" data-reveal-group="true">
             {[
               ["7K+", t("Underground Wells", "بئر مياه جوفية")],
               [
@@ -464,8 +441,8 @@ export default function Portfolio() {
                 t("Industrial Sensors (POC)", "حساس صناعي (إثبات مفهوم)"),
               ],
               ["1.3K+", t("Drilling Equipment Assets", "أصل من معدات الحفر")],
-            ].map(([n, label]) => (
-              <Stat key={n} value={n} label={label} />
+            ].map(([n, label], i) => (
+              <Stat key={n} value={n} label={label} index={i} />
             ))}
             <p>
               {t(
@@ -477,10 +454,10 @@ export default function Portfolio() {
         </section>
         <section id="projects" className="section">
           <div className="section-heading">
-            <div data-reveal="up">
+            <div data-reveal-group="true">
               <Eyebrow>{t("Featured projects", "مشاريع مختارة")}</Eyebrow>
-              <h2>{t("Selected Work", "أعمال مختارة")}</h2>
-              <p>
+              <h2 data-reveal-item="true">{t("Selected Work", "أعمال مختارة")}</h2>
+              <p data-reveal-item="true">
                 {t(
                   "A selection of industrial and government projects I’ve contributed to.",
                   "مجموعة من المشروعات الصناعية والحكومية التي ساهمت فيها.",
@@ -501,7 +478,7 @@ export default function Portfolio() {
           <div
             className="projects-grid"
             data-expanded={all ? "true" : undefined}
-            data-reveal="up"
+            data-reveal-group="true"
           >
             {visibleProjects(all).map((p, i) => {
               const flagship = !all && i === 0;
@@ -511,6 +488,7 @@ export default function Portfolio() {
                   className={"project-card" + (flagship ? " featured" : "")}
                   key={p.slug}
                   href={`/${locale}/projects/${p.slug}`}
+                  data-reveal-item="true"
                 >
                   <div className="card-image">
                     <Image
@@ -557,14 +535,16 @@ export default function Portfolio() {
         </section>
         <section id="skills" className="section">
           <div className="tech-panel">
-            <Eyebrow reveal>{t("Technical expertise", "الخبرات التقنية")}</Eyebrow>
-            <h2 data-reveal="up" data-reveal-delay="1">{t("Tools & Technologies", "الأدوات والتقنيات")}</h2>
-            <p data-reveal="up" data-reveal-delay="2">
+            <div data-reveal-group="true">
+            <Eyebrow>{t("Technical expertise", "الخبرات التقنية")}</Eyebrow>
+            <h2 data-reveal-item="true">{t("Tools & Technologies", "الأدوات والتقنيات")}</h2>
+            <p data-reveal-item="true">
               {t(
                 "The technologies and tools I work with to build industrial and digital solutions.",
                 "التقنيات والأدوات التي أستخدمها لبناء الحلول الصناعية والرقمية.",
               )}
             </p>
+            </div>
             <div className="flow-wrap" data-reveal="up">
               <FlowDiagram
                 labels={{
@@ -610,7 +590,7 @@ export default function Portfolio() {
                 </button>
               ))}
             </div>
-            <div className="skills-grid" data-reveal="up">
+            <div className="skills-grid" data-reveal-group="true">
               {[
                 ...skills.filter((s) => s[0] !== "Industrial IoT"),
                 ...skills.filter((s) => s[0] === "Industrial IoT"),
@@ -627,6 +607,7 @@ export default function Portfolio() {
                         : "skill-tile"
                     }
                     key={s[0]}
+                    data-reveal-item="true"
                   >
                     <TechSymbol name={s[0]} />
                     <div>
@@ -639,19 +620,21 @@ export default function Portfolio() {
           </div>
         </section>
         <section id="experience" className="section journey">
-          <Eyebrow reveal>{t("Professional experience", "الخبرة المهنية")}</Eyebrow>
-          <h2 data-reveal="up" data-reveal-delay="1">{t("My Journey", "مسيرتي المهنية")}</h2>
-          <p data-reveal="up" data-reveal-delay="2">
+          <div data-reveal-group="true">
+          <Eyebrow>{t("Professional experience", "الخبرة المهنية")}</Eyebrow>
+          <h2 data-reveal-item="true">{t("My Journey", "مسيرتي المهنية")}</h2>
+          <p data-reveal-item="true">
             {t(
               "Key projects and responsibilities throughout my career.",
               "أبرز المشروعات والمسؤوليات خلال مسيرتي المهنية.",
             )}
           </p>
-          <div className="timeline" data-reveal="up">
-            <div className="employer">
+          </div>
+          <div className="timeline" data-reveal-group="true">
+            <div className="employer" data-reveal-item="true">
               pulse<small>by solutions</small>
             </div>
-            <div className="career">
+            <div className="career" data-reveal-item="true">
               <div className="career-title">
                 <div>
                   <h3>{t("Systems Engineer", "مهندس أنظمة")}</h3>
@@ -690,17 +673,19 @@ export default function Portfolio() {
           </details>
         </section>
         <section id="certifications" className="section">
-          <Eyebrow reveal>{t("Certifications", "الشهادات")}</Eyebrow>
-          <h2 data-reveal="up" data-reveal-delay="1">{t("Continuous Learning", "تعلّم مستمر")}</h2>
-          <p data-reveal="up" data-reveal-delay="2">
+          <div data-reveal-group="true">
+          <Eyebrow>{t("Certifications", "الشهادات")}</Eyebrow>
+          <h2 data-reveal-item="true">{t("Continuous Learning", "تعلّم مستمر")}</h2>
+          <p data-reveal-item="true">
             {t(
               "Professional certifications and key training courses.",
               "شهادات مهنية ودورات تدريبية متخصصة.",
             )}
           </p>
-          <div className="cert-grid" data-reveal="up">
+          </div>
+          <div className="cert-grid" data-reveal-group="true">
             {[...credentials, [...training[0], "SIEMENS"]].map((c) => (
-              <article className="cert-card" key={c[0]}>
+              <article className="cert-card" key={c[0]} data-reveal-item="true">
                 <div className={`cert-brand ${c[4]?.toLowerCase()}`}>
                   <Image
                     src={certMark(c[4]!)}
@@ -740,42 +725,45 @@ export default function Portfolio() {
             </div>
           </details>
         </section>
-        <section id="contact" className="section contact" data-reveal="fade">
-          <div className="contact-copy">
+        <section id="contact" className="section contact">
+          <div className="contact-copy" data-reveal-group="true">
             <Eyebrow>{t("Contact", "تواصل معي")}</Eyebrow>
-            <h2>
+            <h2 data-reveal-item="true">
               {t(
                 "Let’s Build Something Intelligent.",
                 "لنصنع معًا حلولًا أكثر ذكاءً.",
               )}
             </h2>
-            <h3 lang="ar" dir="rtl">
+            <h3 lang="ar" dir="rtl" data-reveal-item="true">
               خلينا نبني حاجة ذكية مع بعض
             </h3>
-            <p>
+            <p data-reveal-item="true">
               {t(
                 "I’m always open to discussing new opportunities, interesting projects, or ideas related to SCADA, IIoT, and industrial systems.",
                 "يسعدني مناقشة الفرص الجديدة والمشروعات والأفكار المتعلقة بأنظمة SCADA وإنترنت الأشياء الصناعي والأنظمة الصناعية.",
               )}
             </p>
-            <a href="mailto:mohamed.ah.shams@gmail.com">
+            <a href="mailto:mohamed.ah.shams@gmail.com" data-reveal-item="true">
               <Mail size={19} />
               <span dir="ltr">mohamed.ah.shams@gmail.com</span>
             </a>
+            <div data-reveal-item="true">
             <CopyEmail
               email="mohamed.ah.shams@gmail.com"
               copy={t("Copy", "نسخ")}
               copied={t("Copied", "تم النسخ")}
             />
+            </div>
             <a
               href="https://github.com/Mohamed-Shams"
               target="_blank"
               rel="noreferrer"
+              data-reveal-item="true"
             >
               <Github size={19} />
               {t("GitHub profile", "ملف GitHub")}
             </a>
-            <a href={cv} download className="button outline">
+            <a href={cv} download className="button outline" data-reveal-item="true">
               {t("Download CV", "تحميل السيرة الذاتية")}
               <Download size={17} />
             </a>
