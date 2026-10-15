@@ -115,6 +115,19 @@ export function FlowDiagram({
 }) {
   const { reduced, override, ready, setMotionOverride } = usePortfolioMotion();
   const ar = /[\u0600-\u06ff]/.test(labels.from);
+  const flowSvgRef = useRef<SVGSVGElement>(null);
+
+  // Chromium suspends SVG animateMotion under prefers-reduced-motion even after
+  // CSS re-displays its target. Explicitly restart both packets when the visitor
+  // chooses motion; merely removing display:none leaves them frozen at the PLC.
+  useEffect(() => {
+    if (!ready || !override || !reduced) return;
+    const svg = flowSvgRef.current;
+    if (!svg) return;
+    for (const motion of svg.querySelectorAll<SVGAnimateMotionElement>("animateMotion")) {
+      motion.beginElement();
+    }
+  }, [ready, reduced, override]);
   const node = (x: number, y: number, w: number, label: string, accent: boolean, index: number) => (
     <g key={label} className={accent ? "flow-svg-node is-active" : "flow-svg-node"}
       style={{ "--flow-sequence": index } as CSSProperties}>
@@ -200,6 +213,7 @@ export function FlowDiagram({
         ))}
       </ol>
       <svg
+        ref={flowSvgRef}
         className="flow-diagram"
         viewBox="0 0 1080 96"
         role="img"
