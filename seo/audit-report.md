@@ -45,9 +45,9 @@ Worker redirect. None were invented or changed in external accounts.
 
 ## Local validation results
 
-- `npm run lint`: passed with no errors; three nonblocking warnings
-  (pre-existing unused `SESSION_KEY`, unused ProjectArt index, and Next.js
-  font stylesheet placement advisory).
+- `npm run lint`: passed with no errors; four nonblocking warnings
+  (pre-existing unused `SESSION_KEY`, unused ProjectArt index, and two Next.js
+  font stylesheet placement advisories).
 - `npm run build:next`: passed; all pages statically generated.
 - `npm run seo:check`: **18/18** generated pages passed, including the
   intentionally noindex draft Notes indexes. The sitemap excludes these drafts.
@@ -58,11 +58,13 @@ Worker redirect. None were invented or changed in external accounts.
   desktop/tablet/mobile checks passed; video thumbnails, links and contacts
   unaffected by SEO modifications.
 - Lighthouse 12 mobile (local production Next build, lab conditions):
-  SEO **100**, accessibility **100**, performance **89**,
-  CLS approximately **0.001**, TBT approximately **35 ms**,
-  LCP approximately **3.6 seconds**. LCP remains **above** the 2.5-second
-  target despite hero image priority and mobile compositing optimizations.
-  Real-user field INP cannot be proven by Lighthouse.
+  after non-render-blocking Google Fonts, SEO **100**, accessibility **100**,
+  performance **92**, CLS approximately **0.00035**, TBT approximately
+  **130 ms**, LCP approximately **3.13 seconds**. LCP improved from the
+  previous approximately 3.6-second lab reading but remains above 2.5 seconds.
+  English and Arabic fonts were confirmed loaded after page render, with no
+  mobile horizontal overflow or browser errors. Real-user field INP cannot
+  be proven by Lighthouse.
 
 ### Limitations
 

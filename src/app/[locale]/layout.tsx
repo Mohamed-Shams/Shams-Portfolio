@@ -18,6 +18,10 @@ const INTRO_BOOTSTRAP =
   "if(home&&p){d.setAttribute('data-intro-play','');d.setAttribute('data-intro-t0',String(Date.now()));" +
   "d.classList.add('intro-lock');try{sessionStorage.setItem('shams-portfolio-intro-v5','seen')}catch(e){}" +
   "setTimeout(function(){d.classList.remove('intro-lock');d.removeAttribute('data-intro-play')},4500)}}catch(e){}})();";
+const FONT_BOOTSTRAP =
+  "(function(){var l=document.getElementById('portfolio-font-styles');if(!l)return;" +
+  "function ready(){l.media='all'};l.addEventListener('load',ready,{once:true});" +
+  "if(l.sheet)ready()})();";
 export function generateStaticParams() {
   return [{ locale: "en" }, { locale: "ar" }];
 }
@@ -40,12 +44,18 @@ export default async function Layout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
+          id="portfolio-font-styles"
           rel="stylesheet"
+          media="print"
           href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
         />
+        <noscript>
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" />
+        </noscript>
       </head>
       <body suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: INTRO_BOOTSTRAP }} />
+        <script dangerouslySetInnerHTML={{ __html: FONT_BOOTSTRAP }} />
         {seoConfig.analyticsToken && (
           <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
             data-cf-beacon={JSON.stringify({ token: seoConfig.analyticsToken })} />
