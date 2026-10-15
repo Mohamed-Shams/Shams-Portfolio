@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Pause, Play } from "lucide-react";
 import Image from "next/image";
 import type { CSSProperties } from "react";
-import { usePortfolioMotion } from "./usePortfolioMotion";
 
 /** Original platform icons from the read-only shams-systems portfolio.
  * Additional OPC UA and PostgreSQL badges from the same source are included
@@ -28,7 +27,6 @@ const platformBadges = [
 export function PlatformTicker({ locale }: { locale: "en" | "ar" }) {
   const ar = locale === "ar";
   const [paused, setPaused] = useState(false);
-  const { blockedBySystem, setMotionOverride } = usePortfolioMotion();
   return (
     <div
       className="platform-ticker"
@@ -40,29 +38,20 @@ export function PlatformTicker({ locale }: { locale: "en" | "ar" }) {
       <div className="platform-ticker-head">
         <span>{ar ? "لمحة عن المنصات" : "Platform Ecosystem"}</span>
         <div className="platform-ticker-actions">
-          <small>{blockedBySystem
-            ? (ar ? "الحركة متوقفة حسب إعدادات الجهاز" : "Motion disabled by device setting")
+          <small>{paused
+            ? (ar ? "التمرير متوقف مؤقتًا" : "Scrolling paused")
             : (ar ? "المنصات تتحرك تلقائيًا" : "Auto-scrolling platforms")}</small>
           <button
             className="platform-ticker-toggle"
             type="button"
-            aria-pressed={blockedBySystem ? false : paused}
-            aria-label={blockedBySystem
-              ? (ar ? "تفعيل التمرير التلقائي" : "Enable automatic platform scrolling")
-              : paused
+            aria-pressed={paused}
+            aria-label={paused
               ? (ar ? "تشغيل حركة المنصات" : "Resume platform scrolling")
               : (ar ? "إيقاف حركة المنصات مؤقتًا" : "Pause platform scrolling")}
-            onClick={() => {
-              if (blockedBySystem) {
-                setMotionOverride(true);
-                setPaused(false);
-              } else setPaused(value => !value);
-            }}
+            onClick={() => setPaused(value => !value)}
           >
-            {paused || blockedBySystem ? <Play size={13} aria-hidden="true" /> : <Pause size={13} aria-hidden="true" />}
-            <span>{blockedBySystem
-              ? (ar ? "تفعيل الحركة" : "Enable animation")
-              : paused ? (ar ? "تشغيل" : "Play") : (ar ? "إيقاف" : "Pause")}</span>
+            {paused ? <Play size={13} aria-hidden="true" /> : <Pause size={13} aria-hidden="true" />}
+            <span>{paused ? (ar ? "تشغيل" : "Play") : (ar ? "إيقاف" : "Pause")}</span>
           </button>
         </div>
       </div>

@@ -83,26 +83,16 @@ async function probe(page) {
           });
           try {
             await page.goto(`${BASE}/${locale}#skills`, { waitUntil: "domcontentloaded", timeout: 60000 });
-            await page.waitForFunction(() => document.documentElement.dataset.portfolioMotion !== undefined);
             const initial = await probe(page);
             assert.equal(initial.reduced, reduced);
             assert.equal(initial.items, 13, tag + " 13 unique icons");
-            if (!reduced) {
-              assert(Math.abs(initial.tickerFirstWidth - initial.tickerSecondWidth) < 1,
-                tag + " equal-width duplicated ticker sets for seamless loop");
-            }
+            assert(Math.abs(initial.tickerFirstWidth - initial.tickerSecondWidth) < 1,
+              tag + " equal-width duplicated ticker sets for seamless loop");
             assert(initial.horizontalOverflow <= 1, tag + " no horizontal page overflow");
-            if (reduced) {
-              assert.equal(initial.animation, "none", tag + " respects reduced motion initially");
-              assert.equal(initial.motion.visible, false, tag + " signal off until opt-in");
-              assert.equal(initial.scrollMode, "auto", tag + " manual scrolling accessible");
-              const useFlow = locale === "en" && width === 1440;
-              const control = useFlow
-                ? page.locator(".flow-motion-control button")
-                : page.locator(".platform-ticker-toggle");
-              await control.click();
-              await page.waitForFunction(() => document.documentElement.dataset.portfolioMotion === "on");
-            } else assert.equal(initial.animation, "platform-marquee", tag + " autoplays on fresh visit");
+            assert.equal(initial.animation, "platform-marquee",
+              tag + " must autoplay without clicking, regardless of device setting");
+            assert.equal(initial.scrollMode, "hidden", tag + " not a manual-scroll-only rail");
+            assert(initial.motion.visible, tag + " signal is visible without opt-in");
 
             const active = await probe(page);
             assert(Math.abs(active.tickerFirstWidth - active.tickerSecondWidth) < 1,
@@ -121,6 +111,19 @@ async function probe(page) {
               tag + " real time-based moving signal, delta=" + delta);
             const flowPixels = await changedPixels(shot1, shot2);
             assert(flowPixels.changed > 80, tag + " flow visible pixels changed");
+            const flowToggle = flow.locator(".flow-showcase-toggle");
+            await flowToggle.click();
+            const pausedFlow1 = await probe(page);
+            await page.waitForTimeout(400);
+            const pausedFlow2 = await probe(page);
+            assert(Math.abs(pausedFlow2.motion.position - pausedFlow1.motion.position) < 1,
+              tag + " flow Pause freezes moving signal");
+            await flowToggle.click();
+            const resumedFlow1 = await probe(page);
+            await page.waitForTimeout(650);
+            const resumedFlow2 = await probe(page);
+            assert(Math.abs(resumedFlow2.motion.position - resumedFlow1.motion.position) > 4,
+              tag + " flow Play restarts signal movement");
             // Allow a complete 9-second cycle to run in real time (no
             // SVG.setCurrentTime). Verify the packet visits the far-right
             // Dashboards end and wraps to the PLC end for the next cycle.
@@ -173,20 +176,14 @@ async function probe(page) {
             assert(Math.abs(resumed.trackX - resumedLater.trackX) > 5,
               tag + " Play resumes visible movement");
 
-            if (reduced) {
-              await page.reload({ waitUntil: "domcontentloaded" });
-              await page.waitForFunction(() => document.documentElement.dataset.portfolioMotion === "on");
+            await page.reload({ waitUntil: "domcontentloaded" });
+            assert.equal((await probe(page)).animation, "platform-marquee",
+              tag + " autoplay restarts without interaction on refresh");
+            if (locale === "en" && width === 1440) {
+              await page.goto(`${BASE}/en/projects/dohler-cloudy-line`, { waitUntil: "domcontentloaded" });
+              await page.goBack({ waitUntil: "domcontentloaded" });
               assert.equal((await probe(page)).animation, "platform-marquee",
-                tag + " opt-in persists on refresh");
-              if (locale === "en" && width === 1440) {
-                await page.goto(`${BASE}/en/projects/dohler-cloudy-line`, { waitUntil: "domcontentloaded" });
-                await page.goBack({ waitUntil: "domcontentloaded" });
-                await page.waitForFunction(() => document.documentElement.dataset.portfolioMotion === "on");
-                assert.equal((await probe(page)).animation, "platform-marquee",
-                  tag + " opt-in survives project navigation");
-              }
-              await page.locator(".flow-motion-control button").click();
-              assert.equal((await probe(page)).animation, "none", tag + " reset respects device");
+                tag + " autoplay survives navigation");
             }
             assert.deepEqual(errors, [], tag + " no browser, network or hydration errors");
             results.push({ tag, passed: true,

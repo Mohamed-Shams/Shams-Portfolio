@@ -68,25 +68,26 @@
   font: 400 10px/1.5 Inter, Alexandria, sans-serif;
   letter-spacing: 0;
 }
-.flow-motion-control {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-  font: 11px/1.5 Inter, Alexandria, sans-serif;
-  color: #a9c6d6;
-}
-.flow-motion-control button {
+.flow-showcase-toggle {
   padding: 6px 11px;
   border: 1px solid #e4a555;
   border-radius: 7px;
   color: #ffd19a;
   background: #3d302448;
-  font-weight: 600;
+  font: 600 11px/1.5 Inter, Alexandria, sans-serif;
 }
-.flow-motion-control button:hover { background: #4d39296b; }
+.flow-showcase-toggle:hover { background: #4d39296b; }
+.flow-showcase[data-paused="true"]::after,
+.flow-showcase[data-paused="true"] .flow-svg-node,
+.flow-showcase[data-paused="true"] .flow-svg-node rect,
+.flow-showcase[data-paused="true"] .flow-svg-stream,
+.flow-showcase[data-paused="true"] .flow-svg-packet,
+.flow-showcase[data-paused="true"] .flow-chip,
+.flow-showcase[data-paused="true"] .flow-link,
+.flow-showcase[data-paused="true"] .flow-steps::after,
+.flow-showcase[data-paused="true"] .flow-showcase-indicator {
+  animation-play-state: paused !important;
+}
 .flow-showcase .flow-diagram {
   display: block;
   margin-top: 12px;
@@ -253,20 +254,9 @@
   5%, 95% { opacity: 1; }
   100% { top: calc(100% - 9px); opacity: .2; }
 }
-@media (prefers-reduced-motion: reduce) {
-  html:not([data-portfolio-motion="on"]) .flow-showcase::after,
-  html:not([data-portfolio-motion="on"]) .flow-showcase .flow-svg-stream,
-  html:not([data-portfolio-motion="on"]) .flow-showcase .flow-svg-packet,
-  html:not([data-portfolio-motion="on"]) .flow-showcase .flow-svg-node,
-  html:not([data-portfolio-motion="on"]) .flow-showcase .flow-svg-node.is-active rect,
-  html:not([data-portfolio-motion="on"]) .flow-showcase .flow-chip,
-  html:not([data-portfolio-motion="on"]) .flow-showcase .flow-link,
-  html:not([data-portfolio-motion="on"]) .flow-showcase-indicator,
-  html:not([data-portfolio-motion="on"]) .flow-showcase .flow-steps::after { animation: none !important; }
-  html:not([data-portfolio-motion="on"]) .flow-showcase .flow-svg-packet,
-  html:not([data-portfolio-motion="on"]) .flow-showcase .flow-svg-halo { display: none; }
-  html:not([data-portfolio-motion="on"]) .flow-showcase .flow-steps::after { display: none; }
-}
+/* These two requested demonstrations autoplay independently of OS reduced
+   motion; the always-visible Pause buttons provide direct per-section control.
+   All other portfolio animation retains its normal system preference. */
 @media print {
   .flow-showcase::after,
   .flow-showcase .flow-svg-packet,

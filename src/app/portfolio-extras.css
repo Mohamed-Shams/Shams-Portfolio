@@ -387,19 +387,5 @@ html[lang="ar"] .name-mark-subtitle {
 @media print {
   .about-copy.in .name-mark .name-mark-text { animation: none; }
 }
-/* Respect OS-level reduced motion unless the visitor explicitly opts in to
-   demo animation. Normal 111px/55px/46s presentation is unchanged. */
-@media (prefers-reduced-motion: reduce) {
-  html:not([data-portfolio-motion="on"]) .platform-ticker-window {
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    scrollbar-width: thin;
-    mask-image: none;
-  }
-  html:not([data-portfolio-motion="on"]) .platform-ticker-track {
-    animation: none !important;
-    transform: none !important;
-    will-change: auto;
-  }
-  html:not([data-portfolio-motion="on"]) .platform-ticker-set[aria-hidden="true"] { display: none; }
-}
+/* Deliberately autoplay this requested showcase even when OS reduced-motion
+   is on. Visitors can freeze it with its always-visible Pause button. */

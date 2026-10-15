@@ -103,7 +103,7 @@ async function test() {
       } finally { await context.close(); }
     }
     for (const locale of ["en", "ar"]) {
-      for (const [motion, expected] of [["no-preference", "platform-marquee"], ["reduce", "none"]]) {
+      for (const motion of ["no-preference", "reduce"]) {
         const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: motion });
         const page = await ctx.newPage();
         try {
@@ -127,15 +127,14 @@ async function test() {
               overflow: getComputedStyle(win).overflowX,
             };
           });
-          assert.equal(data.animation, expected, locale + " " + motion + " ticker animation");
+          assert.equal(data.animation, "platform-marquee", locale + " " + motion + " ticker autoplay");
           assert(Math.abs(data.width - 111) < .1,
             locale + " " + motion + " prominent 111px card width preserved");
           assert.equal(data.icons, 13, locale + " " + motion + " all 13 platforms preserved");
-          if (motion === "reduce") {
-            assert.equal(data.repeatDisplay, "none", locale + " reduced motion hides duplicate badges");
-            assert(data.scrollWidth > data.clientWidth && data.overflow === "auto",
-              locale + " reduced motion keeps all badges scrollable");
-          }
+          assert.notEqual(data.repeatDisplay, "none",
+            locale + " " + motion + " duplicate row visible for uninterrupted marquee");
+          assert.equal(data.overflow, "hidden",
+            locale + " " + motion + " automatic marquee, not manual scroll");
           records.push({ test: locale + "-ticker-" + motion, passed: true, data });
         } finally { await ctx.close(); }
       }

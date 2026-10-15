@@ -334,6 +334,7 @@ export default function Portfolio() {
     : ["SCADA Developer", "Industrial IoT Engineer", "Systems Engineer"];
   const tx = (v: Localized) => v[locale];
   const [category, setCategory] = useState("All");
+  const [flowPaused, setFlowPaused] = useState(false);
   const [all, setAll] = useState(false);
   const [heroReady, setHeroReady] = useState(false);
   const [heroCinematic, setHeroCinematic] = useState(false);
@@ -610,6 +611,7 @@ export default function Portfolio() {
             </p>
             </div>
             <div className="flow-wrap flow-showcase" data-reveal="up"
+              data-paused={flowPaused ? "true" : "false"}
               role="region"
               aria-label={t("Industrial data flow", "مسار البيانات الصناعية")}>
               <div className="flow-showcase-heading">
@@ -618,8 +620,17 @@ export default function Portfolio() {
                 <span className="flow-showcase-caption">
                   {t("A live illustration of system integration", "تصوّر متحرك لتكامل الأنظمة")}
                 </span>
+                <button type="button" className="flow-showcase-toggle"
+                  aria-pressed={flowPaused}
+                  aria-label={flowPaused
+                    ? t("Resume industrial data flow", "استئناف حركة تدفق البيانات")
+                    : t("Pause industrial data flow", "إيقاف حركة تدفق البيانات مؤقتًا")}
+                  onClick={() => setFlowPaused(value => !value)}>
+                  {flowPaused ? t("Play", "تشغيل") : t("Pause", "إيقاف")}
+                </button>
               </div>
               <FlowDiagram
+                paused={flowPaused}
                 labels={{
                   from: t("PLC / Sensors", "PLC / الحساسات"),
                   via: t("OPC UA · MQTT", "OPC UA · MQTT"),

@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { BrandIcon, type BrandName } from "./BrandMarks";
-import { usePortfolioMotion } from "./usePortfolioMotion";
 import { GLOBE_LAND, GLOBE_COAST, GLOBE_BORDERS } from "../lib/globe-geography";
 
 type GlobeEngine = {
@@ -110,24 +109,22 @@ export function TechSymbol({ name }: { name: string }) {
 }
 export function FlowDiagram({
   labels,
+  paused = false,
 }: {
   labels: { from: string; via: string; to: string; db: string; dash: string };
+  paused?: boolean;
 }) {
-  const { reduced, override, ready, setMotionOverride } = usePortfolioMotion();
-  const ar = /[\u0600-\u06ff]/.test(labels.from);
   const flowSvgRef = useRef<SVGSVGElement>(null);
 
-  // Chromium suspends SVG animateMotion under prefers-reduced-motion even after
-  // CSS re-displays its target. Explicitly restart both packets when the visitor
-  // chooses motion; merely removing display:none leaves them frozen at the PLC.
+  // The signal runs by default even if the OS requests reduced motion.
+  // Visitors can pause it explicitly, including the native SVG timeline.
   useEffect(() => {
-    if (!ready || !override || !reduced) return;
     const svg = flowSvgRef.current;
     if (!svg) return;
-    for (const motion of svg.querySelectorAll<SVGAnimateMotionElement>("animateMotion")) {
-      motion.beginElement();
-    }
-  }, [ready, reduced, override]);
+    if (paused) svg.pauseAnimations();
+    else svg.unpauseAnimations();
+    return () => svg.unpauseAnimations();
+  }, [paused]);
   const node = (x: number, y: number, w: number, label: string, accent: boolean, index: number) => (
     <g key={label} className={accent ? "flow-svg-node is-active" : "flow-svg-node"}
       style={{ "--flow-sequence": index } as CSSProperties}>
@@ -188,18 +185,6 @@ export function FlowDiagram({
   const steps = [labels.from, labels.via, labels.to, labels.db, labels.dash];
   return (
     <>
-      {ready && reduced && (
-        <div className="flow-motion-control">
-          <span>{override
-            ? (ar ? "الرسوم المتحركة مفعّلة لهذا العرض" : "Animation enabled for this demo")
-            : (ar ? "تم إيقاف الحركة حسب إعدادات جهازك" : "Motion is off in your device settings")}</span>
-          <button type="button" onClick={() => setMotionOverride(!override)}>
-            {override
-              ? (ar ? "استخدام إعدادات الجهاز" : "Use device setting")
-              : (ar ? "تفعيل حركة التدفق" : "Enable flow animation")}
-          </button>
-        </div>
-      )}
       <ol className="flow-steps">
         {steps.map((label, i) => (
           <li
