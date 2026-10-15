@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { BrandIcon, type BrandName } from "./BrandMarks";
+import { usePortfolioMotion } from "./usePortfolioMotion";
 import { GLOBE_LAND, GLOBE_COAST, GLOBE_BORDERS } from "../lib/globe-geography";
 
 type GlobeEngine = {
@@ -112,6 +113,8 @@ export function FlowDiagram({
 }: {
   labels: { from: string; via: string; to: string; db: string; dash: string };
 }) {
+  const { reduced, override, ready, setMotionOverride } = usePortfolioMotion();
+  const ar = /[\u0600-\u06ff]/.test(labels.from);
   const node = (x: number, y: number, w: number, label: string, accent: boolean, index: number) => (
     <g key={label} className={accent ? "flow-svg-node is-active" : "flow-svg-node"}
       style={{ "--flow-sequence": index } as CSSProperties}>
@@ -172,6 +175,18 @@ export function FlowDiagram({
   const steps = [labels.from, labels.via, labels.to, labels.db, labels.dash];
   return (
     <>
+      {ready && reduced && (
+        <div className="flow-motion-control">
+          <span>{override
+            ? (ar ? "الرسوم المتحركة مفعّلة لهذا العرض" : "Animation enabled for this demo")
+            : (ar ? "تم إيقاف الحركة حسب إعدادات جهازك" : "Motion is off in your device settings")}</span>
+          <button type="button" onClick={() => setMotionOverride(!override)}>
+            {override
+              ? (ar ? "استخدام إعدادات الجهاز" : "Use device setting")
+              : (ar ? "تفعيل حركة التدفق" : "Enable flow animation")}
+          </button>
+        </div>
+      )}
       <ol className="flow-steps">
         {steps.map((label, i) => (
           <li
@@ -205,7 +220,11 @@ export function FlowDiagram({
         {node(648, 28, 149, labels.db, false, 3)}
         {arrow(805, 851, 48, "d")}
         {node(855, 28, 150, labels.dash, false, 4)}
-        <circle className="flow-svg-packet" r="4" fill="#ffc573">
+        <circle className="flow-svg-halo" r="11" fill="#24cfff" opacity=".28" aria-hidden="true">
+          <animateMotion path="M81 48 L279 48 L495 42 L722.5 48 L930 48"
+            dur="9s" calcMode="linear" repeatCount="indefinite" />
+        </circle>
+        <circle className="flow-svg-packet" r="5.5" fill="#fff0be" aria-hidden="true">
           <animateMotion path="M81 48 L279 48 L495 42 L722.5 48 L930 48"
             dur="9s" calcMode="linear" repeatCount="indefinite" />
         </circle>
