@@ -49,7 +49,7 @@ fs.mkdirSync(OUT, { recursive: true });
         assert.equal(await flow.locator(".flow-step").count(), 5);
         if (desktop) {
           const packets = flow.locator(".flow-svg-packet");
-          assert.equal(await packets.count(), 4, tag + " 4 signal packets");
+          assert.equal(await packets.count(), 1, tag + " a single end-to-end signal packet");
           const before = await packets.first().evaluate(e => e.getScreenCTM()?.e);
           await page.waitForTimeout(750);
           const after = await packets.first().evaluate(e => e.getScreenCTM()?.e);
@@ -67,13 +67,13 @@ fs.mkdirSync(OUT, { recursive: true });
               return {
                 width: rect.width,
                 height: rect.height,
-                motion: getComputedStyle(el, "::after").animationName,
+                motion: getComputedStyle(el.closest(".flow-steps"), "::after").animationName,
               };
             });
             assert(connector.width >= 2 && connector.height >= 17,
               tag + " mobile flow connector visible");
-            assert(connector.motion.includes("flow-vertical-packet"),
-              tag + " mobile packet visibly travels");
+            assert(connector.motion.includes("flow-mobile-throughline"),
+              tag + " one mobile packet traverses the full five-stage flow");
           }
         }
         await page.screenshot({ path: path.join(OUT, tag + ".png") });

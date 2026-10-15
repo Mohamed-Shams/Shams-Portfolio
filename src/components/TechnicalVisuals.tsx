@@ -112,8 +112,9 @@ export function FlowDiagram({
 }: {
   labels: { from: string; via: string; to: string; db: string; dash: string };
 }) {
-  const node = (x: number, y: number, w: number, label: string, accent: boolean) => (
-    <g key={label} className={accent ? "flow-svg-node is-active" : "flow-svg-node"}>
+  const node = (x: number, y: number, w: number, label: string, accent: boolean, index: number) => (
+    <g key={label} className={accent ? "flow-svg-node is-active" : "flow-svg-node"}
+      style={{ "--flow-sequence": index } as CSSProperties}>
       <rect
         x={x}
         y={y}
@@ -162,14 +163,6 @@ export function FlowDiagram({
         d={`M${x2} ${y} l-7 -4 v8 z`}
         fill="#2a8bb8"
       />
-      <circle className="flow-svg-packet" r="3.4" fill="#ffc573">
-        <animateMotion
-          path={`M${x1} ${y} L${x2 - 8} ${y}`}
-          dur="3.8s"
-          begin={`-${({ a: 0, b: .95, c: 1.9, d: 2.85 } as Record<string, number>)[key]}s`}
-          repeatCount="indefinite"
-        />
-      </circle>
     </g>
   );
   /* The SVG labels are viewBox units: below the wide desktop the drawing is
@@ -199,15 +192,23 @@ export function FlowDiagram({
           (labels.from + " → " + labels.via + " → " + labels.to + " → " + labels.db + " → " + labels.dash)
         }
       >
-        {node(6, 28, 150, labels.from, false)}
+        {/* One packet travels through ALL five nodes, not four unrelated loops.
+            The path stays left-to-right in both EN and AR: actual signal
+            direction represents PLC -> SCADA -> dashboards. */}
+        <path className="flow-throughline" d="M81 48 L279 48 L495 42 L722.5 48 L930 48" />
+        {node(6, 28, 150, labels.from, false, 0)}
         {arrow(164, 210, 48, "a")}
-        {node(214, 28, 130, labels.via, false)}
+        {node(214, 28, 130, labels.via, false, 1)}
         {arrow(352, 396, 48, "b")}
-        {node(400, 22, 190, labels.to, true)}
+        {node(400, 22, 190, labels.to, true, 2)}
         {arrow(598, 644, 48, "c")}
-        {node(648, 28, 149, labels.db, false)}
+        {node(648, 28, 149, labels.db, false, 3)}
         {arrow(805, 851, 48, "d")}
-        {node(855, 28, 150, labels.dash, false)}
+        {node(855, 28, 150, labels.dash, false, 4)}
+        <circle className="flow-svg-packet" r="4" fill="#ffc573">
+          <animateMotion path="M81 48 L279 48 L495 42 L722.5 48 L930 48"
+            dur="9s" calcMode="linear" repeatCount="indefinite" />
+        </circle>
       </svg>
     </>
   );

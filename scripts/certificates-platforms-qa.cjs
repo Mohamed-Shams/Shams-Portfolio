@@ -49,7 +49,17 @@ async function run() {
         await page.waitForTimeout(170);
         const playState = await ticker.locator(".platform-ticker-track")
           .evaluate(e => getComputedStyle(e).animationPlayState);
-        assert.equal(playState, "paused", tag + " hover pauses ticker");
+        assert.equal(playState, "running", tag + " ticker keeps scrolling on hover");
+        await ticker.getByRole("button", { name: lang === "en"
+          ? "Pause platform scrolling" : "إيقاف حركة المنصات مؤقتًا" }).click();
+        assert.equal(await ticker.locator(".platform-ticker-track")
+          .evaluate(e => getComputedStyle(e).animationPlayState), "paused",
+          tag + " explicit pause control works");
+        await ticker.getByRole("button", { name: lang === "en"
+          ? "Resume platform scrolling" : "تشغيل حركة المنصات" }).click();
+        assert.equal(await ticker.locator(".platform-ticker-track")
+          .evaluate(e => getComputedStyle(e).animationPlayState), "running",
+          tag + " scrolling resumes after Play");
         const logos = await ticker.locator(".platform-ticker-set:first-child img").evaluateAll(
           els => els.map(e => {
             const box = e.getBoundingClientRect();
@@ -99,7 +109,7 @@ async function run() {
         assert(overflow <= 1, tag + " no horizontal page overflow " + overflow);
         assert.deepEqual(errors, [], tag + " no browser/hydration/network errors");
         results.push({ tag, pass: true, uniqueCertificates: pdfUrls.length, badgeCount: 13, overflow, errors });
-        console.log("PASS", tag, "ticker moves/pauses, assets, 10 PDF documents, shelf, layout, no errors");
+        console.log("PASS", tag, "ticker autoscrolls and pause/play works, assets, 10 PDF documents, shelf, layout, no errors");
       } finally {
         await context.close();
       }

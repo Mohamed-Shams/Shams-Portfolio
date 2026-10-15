@@ -25,6 +25,30 @@
   color: #8ba8b9;
   font: 400 11px/1.4 Inter, Alexandria, sans-serif;
 }
+.platform-ticker-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.platform-ticker-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 10px;
+  flex: none;
+  border: 1px solid #5f78905e;
+  border-radius: 7px;
+  background: #1a2b3788;
+  color: #f2c27d;
+  font: 600 11px/1.4 Inter, Alexandria, sans-serif;
+  cursor: pointer;
+}
+.platform-ticker-toggle:is(:hover, :focus-visible) {
+  border-color: #edb875;
+  background: #2a3845;
+}
+.platform-ticker-toggle:focus-visible { outline: 2px solid #edb875; outline-offset: 2px; }
 .platform-ticker-window {
   padding: 9px 0 17px;
   overflow: hidden;
@@ -36,7 +60,8 @@
   animation: platform-marquee 46s linear infinite;
   will-change: transform;
 }
-.platform-ticker:is(:hover, :focus-within) .platform-ticker-track {
+.platform-ticker[data-paused="true"] .platform-ticker-track,
+.platform-ticker:has(.platform-ticker-item:focus-visible) .platform-ticker-track {
   animation-play-state: paused;
 }
 .platform-ticker-set {
@@ -203,6 +228,7 @@
   .platform-ticker { margin: 19px 0 23px; }
   .platform-ticker-head { padding: 13px 13px 6px; flex-direction: column; gap: 3px; }
   .platform-ticker-head small { font-size: 10px; }
+  .platform-ticker-actions { width: 100%; justify-content: space-between; gap: 6px; }
   .platform-ticker-item { width: 89px; min-height: 91px; gap: 7px; }
   .platform-ticker-icon { width: 44px; height: 44px; }
   .platform-ticker-set { gap: 9px; padding-inline-end: 9px; }
