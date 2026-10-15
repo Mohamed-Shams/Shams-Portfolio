@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   Mail,
-  Github,
+  Linkedin,
+  Youtube,
   ChevronDown,
   Copy,
   Check,
@@ -42,6 +43,7 @@ import {
 import { ProjectArt } from "./ProjectArt";
 import { PortfolioIntro } from "./PortfolioIntro";
 import { PlatformTicker } from "./PlatformTicker";
+import { YoutubeShowcase } from "./YoutubeShowcase";
 import { useCountUp, RevealManager } from "./motion";
 const cv = "/assets/MohamedAhmedShams_CV.pdf";
 
@@ -101,6 +103,7 @@ export function Header() {
         "الرئيسية",
         "نبذة عني",
         "المشاريع",
+        "الفيديوهات",
         "المهارات",
         "الخبرات",
         "الشهادات",
@@ -110,6 +113,7 @@ export function Header() {
         "Home",
         "About",
         "Projects",
+        "Videos",
         "Skills",
         "Experience",
         "Certifications",
@@ -146,6 +150,7 @@ export function Header() {
           "home",
           "about",
           "projects",
+          "videos",
           "skills",
           "experience",
           "certifications",
@@ -597,6 +602,7 @@ export default function Portfolio() {
             })}
           </div>
         </section>
+        <YoutubeShowcase locale={locale} />
         <section id="skills" className="section">
           <div className="tech-panel">
             <div data-reveal-group="true">
@@ -899,15 +905,21 @@ export default function Portfolio() {
               copied={t("Copied", "تم النسخ")}
             />
             </div>
-            <a
-              href="https://github.com/Mohamed-Shams"
-              target="_blank"
-              rel="noreferrer"
-              data-reveal-item="true"
-            >
-              <Github size={19} />
-              {t("GitHub profile", "ملف GitHub")}
-            </a>
+            <div className="social-connection-links" data-reveal-item="true"
+              aria-label={t("Connect on social media", "تواصل عبر وسائل التواصل الاجتماعي")}>
+              <a href="https://www.linkedin.com/in/mashams"
+                target="_blank" rel="noopener noreferrer">
+                <Linkedin size={19} aria-hidden="true" />
+                LinkedIn
+                <ExternalLink size={13} aria-hidden="true" />
+              </a>
+              <a href="https://www.youtube.com/@MAShams1"
+                target="_blank" rel="noopener noreferrer">
+                <Youtube size={19} aria-hidden="true" />
+                YouTube
+                <ExternalLink size={13} aria-hidden="true" />
+              </a>
+            </div>
             <a href={cv} download className="button outline" data-reveal-item="true">
               {t("Download CV", "تحميل السيرة الذاتية")}
               <Download size={17} />
