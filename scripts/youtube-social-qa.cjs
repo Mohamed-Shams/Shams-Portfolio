@@ -58,6 +58,9 @@ fs.mkdirSync(output, { recursive: true });
             const loaded = await video.locator("img").evaluate(image =>
               image.complete && image.naturalWidth > 0 && image.naturalHeight > 0);
             assert(loaded, tag + " local thumbnail loaded: " + ids[i]);
+            const imgSrc = await video.locator("img").evaluate(image => new URL(image.currentSrc).pathname);
+            assert.equal(imgSrc, "/assets/youtube/" + ids[i] + ".jpg",
+              tag + " source JPEG served directly without Cloudflare optimizer: " + ids[i]);
             if (locale === "en" && width === 1440) {
               const img = await page.request.get(base + "/assets/youtube/" + ids[i] + ".jpg");
               assert.equal(img.status(), 200, ids[i] + " publicly served from portfolio");

@@ -116,7 +116,10 @@ export function YoutubeShowcase({ locale }: { locale: "en" | "ar" }) {
                 alt=""
                 fill
                 sizes="(max-width: 650px) 92vw, (max-width: 1000px) 46vw, 360px"
-                quality={88}
+                /* These small source thumbnails are already optimized JPEGs.
+                   Direct delivery avoids Cloudflare's /_next/image quality
+                   restrictions and keeps all six cards reliable in production. */
+                unoptimized
               />
               <span className="youtube-video-number" aria-hidden="true">
                 {String(index + 1).padStart(2, "0")}
