@@ -13,10 +13,9 @@ export async function generateMetadata({ params }: {params: Promise<{locale: Seo
 }
 const INTRO_BOOTSTRAP =
   "(function(){try{var d=document.documentElement;" +
-  "var p=new URLSearchParams(location.search).get('motionPreview')==='1';" +
   "var home=['/en','/ar','/en/','/ar/'].includes(location.pathname);" +
-  "if(home&&p){d.setAttribute('data-intro-play','');d.setAttribute('data-intro-t0',String(Date.now()));" +
-  "d.classList.add('intro-lock');try{sessionStorage.setItem('shams-portfolio-intro-v5','seen')}catch(e){}" +
+  "if(home){d.setAttribute('data-intro-play','');d.setAttribute('data-intro-t0',String(Date.now()));" +
+  "d.classList.add('intro-lock');" +
   "setTimeout(function(){d.classList.remove('intro-lock');d.removeAttribute('data-intro-play')},4500)}}catch(e){}})();";
 const FONT_BOOTSTRAP =
   "(function(){var l=document.getElementById('portfolio-font-styles');if(!l)return;" +
