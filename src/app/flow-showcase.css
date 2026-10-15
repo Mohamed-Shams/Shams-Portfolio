@@ -1,8 +1,6 @@
-/* Always-visible industrial architecture path.
- * Scoped exclusively to Tools & Technologies; it does not modify the
- * Platforms & Technologies logo ticker or other portfolio animations.
- * Uses low-cost CSS line animation and native SVG animateMotion packets.
- */
+/* Industrial data path. Only the FOUR connector segments carry animation:
+   no signal line, glow, or moving packet ever crosses a technology card.
+   Sequence: PLC -> protocols -> SCADA -> database -> dashboard, then loop. */
 .flow-showcase {
   position: relative;
   isolation: isolate;
@@ -29,17 +27,6 @@
   background-size: 37px 37px;
   mask-image: linear-gradient(to bottom, #0009, transparent 98%);
 }
-.flow-showcase::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: 25%;
-  height: 100%;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, #6fd9ee0b, transparent);
-  transform: translateX(-160%);
-  animation: flow-environment-scan 12s ease-in-out infinite;
-}
 .flow-showcase > * {
   position: relative;
   z-index: 1;
@@ -59,8 +46,7 @@
   flex: 0 0 7px;
   border-radius: 50%;
   background: #efb35b;
-  box-shadow: 0 0 0 3px #edb35b15, 0 0 13px #eea94d;
-  animation: flow-status-pulse 3.4s ease-in-out infinite;
+  box-shadow: 0 0 0 3px #edb35b15, 0 0 10px #eea94d90;
 }
 .flow-showcase-caption {
   margin-inline-start: auto;
@@ -68,66 +54,36 @@
   font: 400 10px/1.5 Inter, Alexandria, sans-serif;
   letter-spacing: 0;
 }
-.flow-showcase-toggle {
-  padding: 6px 11px;
-  border: 1px solid #e4a555;
-  border-radius: 7px;
-  color: #ffd19a;
-  background: #3d302448;
-  font: 600 11px/1.5 Inter, Alexandria, sans-serif;
-}
-.flow-showcase-toggle:hover { background: #4d39296b; }
-.flow-showcase[data-paused="true"]::after,
-.flow-showcase[data-paused="true"] .flow-svg-node,
-.flow-showcase[data-paused="true"] .flow-svg-node rect,
-.flow-showcase[data-paused="true"] .flow-svg-stream,
-.flow-showcase[data-paused="true"] .flow-svg-packet,
-.flow-showcase[data-paused="true"] .flow-chip,
-.flow-showcase[data-paused="true"] .flow-link,
-.flow-showcase[data-paused="true"] .flow-steps::after,
-.flow-showcase[data-paused="true"] .flow-showcase-indicator {
-  animation-play-state: paused !important;
-}
 .flow-showcase .flow-diagram {
   display: block;
   margin-top: 12px;
   overflow: visible;
   direction: ltr;
 }
-.flow-showcase .flow-svg-node rect {
-  transition: stroke .3s, fill .3s;
-}
-.flow-showcase .flow-svg-node {
-  animation: flow-stage-arrival 9s linear infinite;
-  animation-delay: calc(var(--flow-sequence, 0) * -7.2s);
-}
-.flow-showcase .flow-throughline {
-  fill: none;
-  stroke: #42bce8;
-  stroke-width: 1;
-  stroke-dasharray: 4 13;
-  opacity: .4;
-}
+/* The nodes are entirely static; only the small gaps between them animate. */
 .flow-showcase .flow-svg-node.is-active rect {
-  filter: drop-shadow(0 0 8px #f1a34274);
-  animation: flow-core-breathe 4s ease-in-out infinite;
-  transform-box: fill-box;
-  transform-origin: center;
+  filter: drop-shadow(0 0 4px #f1a34238);
 }
 .flow-showcase .flow-svg-node.is-active text {
   fill: #ffc776;
-  filter: drop-shadow(0 0 5px #ffa73377);
 }
-.flow-showcase .flow-svg-stream {
-  animation: flow-connector-charge 1.5s linear infinite;
-  filter: drop-shadow(0 0 3px #3ec9ef9c);
+.flow-showcase .flow-svg-link .flow-svg-stream {
+  opacity: .55;
+  filter: drop-shadow(0 0 2px #3ec9ef73);
 }
-.flow-showcase .flow-svg-packet {
-  filter: drop-shadow(0 0 6px #ffc573) drop-shadow(0 0 11px #e5a444);
-  animation: flow-packet-glimmer 9s linear infinite;
+.flow-showcase .flow-svg-energy {
+  opacity: 0;
+  filter: drop-shadow(0 0 3px #5fe4ff) drop-shadow(0 0 5px #2abdee);
+  /* One packet at a time. Each 1.44s travel stays fully inside its ~40px
+     connector; 1.65s stagger hands the signal to the next connection. */
+  animation: flow-segment-travel 8s linear infinite;
+  animation-delay: calc(var(--flow-link-index, 0) * 1.65s);
 }
-.flow-showcase .flow-svg-halo {
-  filter: drop-shadow(0 0 8px #3dcffa);
+@keyframes flow-segment-travel {
+  0% { opacity: 0; stroke-dashoffset: 12; }
+  2% { opacity: 1; stroke-dashoffset: 7; }
+  15% { opacity: 1; stroke-dashoffset: -40; }
+  18%, 100% { opacity: 0; stroke-dashoffset: -52; }
 }
 .flow-showcase .flow-note {
   margin: 0;
@@ -141,49 +97,14 @@
 .flow-showcase .flow-chip {
   background: linear-gradient(160deg, #133040c7, #0b2230);
   box-shadow: inset 0 1px #a7e3ff17;
-  animation: flow-chip-activate 9s linear infinite;
-  animation-delay: calc(var(--flow-sequence, 0) * -7.2s);
 }
 .flow-showcase .flow-step.accent .flow-chip {
   background: linear-gradient(160deg, #352a1f, #1e231f);
   box-shadow: 0 0 17px -10px #f1a342;
 }
-.flow-showcase .flow-link {
-  filter: drop-shadow(0 0 3px #3ec9ef9c);
-  animation-duration: 1.35s;
-}
-@keyframes flow-environment-scan {
-  0%, 20% { transform: translateX(-160%); opacity: 0; }
-  45% { opacity: 1; }
-  72%, 100% { transform: translateX(600%); opacity: 0; }
-}
-@keyframes flow-core-breathe {
-  0%, 100% { stroke-width: 1.1; }
-  50% { stroke-width: 2.4; }
-}
-@keyframes flow-connector-charge {
-  to { stroke-dashoffset: -30; }
-}
-@keyframes flow-packet-glimmer {
-  0%, 100% { opacity: 1; }
-  95% { opacity: 1; }
-}
-@keyframes flow-stage-arrival {
-  0%, 8%, 100% { filter: drop-shadow(0 0 10px #55c9ed); }
-  14%, 97% { filter: none; }
-}
-@keyframes flow-status-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 3px #edb35b15, 0 0 13px #eea94d; }
-  50% { opacity: .62; box-shadow: 0 0 0 6px #edb35b09, 0 0 20px #eea94d88; }
-}
-@keyframes flow-chip-activate {
-  0%, 8%, 100% { border-color: #83d6ee; box-shadow: 0 0 21px -7px #4dbdeb, inset 0 1px #c2f0fa24; }
-  14%, 97% { border-color: #2a8bb8; box-shadow: inset 0 1px #a7e3ff17; }
-}
 @media (max-width: 1150px) {
   .flow-showcase .flow-diagram { display: none; }
   .flow-showcase .flow-steps {
-    position: relative;
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -191,7 +112,6 @@
     width: 100%;
     max-width: 550px;
     margin-inline: auto;
-    isolation: isolate;
   }
   .flow-showcase .flow-step {
     flex-direction: column;
@@ -205,37 +125,42 @@
   }
   .flow-showcase .flow-link {
     position: relative;
-    width: 2px;
-    min-width: 2px;
+    display: block;
+    width: 14px;
+    min-width: 14px;
     height: 19px;
-    margin-inline-start: calc(50% - 1px);
-    background: repeating-linear-gradient(180deg, #44b5da 0 5px, transparent 5px 9px);
-    background-size: 2px 9px;
-    animation: flow-shimmer-y 1.35s linear infinite;
+    flex: 0 0 19px;
+    margin-inline-start: calc(50% - 7px);
+    border: 0;
+    background: repeating-linear-gradient(180deg, #44b5da 0 5px, transparent 5px 9px) center / 2px 9px repeat-y;
+    animation: none;
+    overflow: hidden;
   }
-  /* A SINGLE light traverses the complete responsive signal chain.
-     Chips sit above the light; it appears on the connectors between them. */
-  .flow-showcase .flow-steps::after {
+  /* A short packet travels only within the vertical GAP, never behind chips. */
+  .flow-showcase .flow-link::after {
     content: "";
     position: absolute;
-    z-index: 1;
+    top: -7px;
     left: 50%;
-    top: 0;
-    width: 9px;
-    height: 9px;
-    margin-left: -4.5px;
-    border-radius: 50%;
-    background: #ffd28a;
-    box-shadow: 0 0 12px #f1a342e5, 0 0 5px #fff1d4;
-    pointer-events: none;
-    animation: flow-mobile-throughline 9s linear infinite;
+    width: 6px;
+    height: 7px;
+    border-radius: 4px;
+    transform: translateX(-50%);
+    background: #d3fbff;
+    box-shadow: 0 0 6px 2px #53dff3;
+    opacity: 0;
+    animation: flow-vertical-segment 8s linear infinite;
+    animation-delay: calc(var(--flow-link-index, 0) * 1.65s);
   }
 }
+@keyframes flow-vertical-segment {
+  0% { top: -7px; opacity: 0; }
+  2% { top: -3px; opacity: 1; }
+  15% { top: 15px; opacity: 1; }
+  18%, 100% { top: 20px; opacity: 0; }
+}
 @media (max-width: 600px) {
-  .flow-showcase {
-    margin: 20px 0;
-    padding: 14px;
-  }
+  .flow-showcase { margin: 20px 0; padding: 14px; }
   .flow-showcase-heading { font-size: 10px; }
   .flow-showcase-caption {
     flex-basis: 100%;
@@ -243,24 +168,12 @@
     font-size: 10px;
   }
   .flow-showcase .flow-steps { margin: 12px 0 6px; }
-  .flow-showcase .flow-chip {
-    font-size: 12px;
-    padding: 11px 12px;
-  }
+  .flow-showcase .flow-chip { font-size: 12px; padding: 11px 12px; }
   .flow-showcase .flow-note { font-size: 10px; }
 }
-@keyframes flow-mobile-throughline {
-  0% { top: 0; opacity: .2; }
-  5%, 95% { opacity: 1; }
-  100% { top: calc(100% - 9px); opacity: .2; }
-}
-/* These two requested demonstrations autoplay independently of OS reduced
-   motion; the always-visible Pause buttons provide direct per-section control.
-   All other portfolio animation retains its normal system preference. */
+/* Showcase animation intentionally follows the request to run regardless
+   of OS reduced-motion. It is localized strictly to connection gaps. */
 @media print {
-  .flow-showcase::after,
-  .flow-showcase .flow-svg-packet,
-  .flow-showcase .flow-svg-halo { display: none; }
-  .flow-showcase .flow-svg-node.is-active rect,
-  .flow-showcase .flow-svg-stream { animation: none; }
+  .flow-showcase .flow-svg-energy,
+  .flow-showcase .flow-link::after { animation: none !important; opacity: 0; }
 }

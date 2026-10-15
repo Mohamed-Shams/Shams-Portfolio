@@ -1,5 +1,5 @@
-/* Production-like motion validation for the always-open integration path.
- * Checks genuine packet movement and animated real-text mobile connectors.
+/* Production-like validation for the connector-only industrial path.
+ * No moving light or highlighted animation should cross the five cards.
  * Usage: MOTION_URL=http://127.0.0.1:4322 node scripts/flow-showcase-qa.cjs
  */
 const { chromium } = require("@playwright/test");
@@ -47,33 +47,40 @@ fs.mkdirSync(OUT, { recursive: true });
         assert.equal(await svg.isVisible(), desktop, tag + " correct SVG/text responsive mode");
         assert.equal(await steps.isVisible(), !desktop, tag + " readable responsive steps");
         assert.equal(await flow.locator(".flow-step").count(), 5);
+        assert.equal(await flow.locator("button, .flow-throughline, .flow-svg-packet, .flow-svg-halo").count(),
+          0, tag + " no pause button or moving elements crossing cards");
         if (desktop) {
-          const packets = flow.locator(".flow-svg-packet");
-          assert.equal(await packets.count(), 1, tag + " a single end-to-end signal packet");
-          const before = await packets.first().evaluate(e => e.getScreenCTM()?.e);
-          await page.waitForTimeout(750);
-          const after = await packets.first().evaluate(e => e.getScreenCTM()?.e);
-          assert.notEqual(before, after, tag + " real SVG packet motion");
-          const css = await flow.locator(".flow-svg-stream").first().evaluate(e => getComputedStyle(e).animationName);
-          assert(css.includes("flow-connector-charge"), tag + " connectors visibly flow");
+          assert.equal(await flow.locator(".flow-svg-energy").count(), 4);
+          const energy = flow.locator(".flow-svg-energy");
+          const before = await energy.evaluateAll(nodes =>
+            nodes.map(node => getComputedStyle(node).strokeDashoffset));
+          await page.waitForTimeout(520);
+          const after = await energy.evaluateAll(nodes =>
+            nodes.map(node => getComputedStyle(node).strokeDashoffset));
+          assert(before.some((value, i) => value !== after[i]),
+            tag + " one of four energized connector pulses travels");
+          assert.equal(await energy.first().evaluate(e => getComputedStyle(e).animationName),
+            "flow-segment-travel", tag + " connector-only animation");
         } else {
-          const css = await flow.locator(".flow-link").first().evaluate(e => getComputedStyle(e).animationName);
-          assert(css.includes("flow-shimmer"), tag + " small screen moving connector");
-          const state = await flow.locator(".flow-step.accent .flow-chip").evaluate(e => getComputedStyle(e).animationName);
-          assert(state.includes("flow-chip-activate"), tag + " highlighted Ignition node breathes");
+          const css = await flow.locator(".flow-link").first()
+            .evaluate(e => getComputedStyle(e, "::after").animationName);
+          assert.equal(css, "flow-vertical-segment", tag + " vertical connection signal");
+          const state = await flow.locator(".flow-step.accent .flow-chip")
+            .evaluate(e => getComputedStyle(e).animationName);
+          assert.equal(state, "none", tag + " cards do not animate");
           if (width === 390 && process.env.FLOW_CHECK_MOBILE_CONNECTORS === "1") {
             const connector = await flow.locator(".flow-link").first().evaluate(el => {
               const rect = el.getBoundingClientRect();
               return {
                 width: rect.width,
                 height: rect.height,
-                motion: getComputedStyle(el.closest(".flow-steps"), "::after").animationName,
+                motion: getComputedStyle(el, "::after").animationName,
               };
             });
             assert(connector.width >= 2 && connector.height >= 17,
               tag + " mobile flow connector visible");
-            assert(connector.motion.includes("flow-mobile-throughline"),
-              tag + " one mobile packet traverses the full five-stage flow");
+            assert.equal(connector.motion, "flow-vertical-segment",
+              tag + " packet is confined to a connection gap");
           }
         }
         await page.screenshot({ path: path.join(OUT, tag + ".png") });

@@ -109,25 +109,11 @@ export function TechSymbol({ name }: { name: string }) {
 }
 export function FlowDiagram({
   labels,
-  paused = false,
 }: {
   labels: { from: string; via: string; to: string; db: string; dash: string };
-  paused?: boolean;
 }) {
-  const flowSvgRef = useRef<SVGSVGElement>(null);
-
-  // The signal runs by default even if the OS requests reduced motion.
-  // Visitors can pause it explicitly, including the native SVG timeline.
-  useEffect(() => {
-    const svg = flowSvgRef.current;
-    if (!svg) return;
-    if (paused) svg.pauseAnimations();
-    else svg.unpauseAnimations();
-    return () => svg.unpauseAnimations();
-  }, [paused]);
-  const node = (x: number, y: number, w: number, label: string, accent: boolean, index: number) => (
-    <g key={label} className={accent ? "flow-svg-node is-active" : "flow-svg-node"}
-      style={{ "--flow-sequence": index } as CSSProperties}>
+  const node = (x: number, y: number, w: number, label: string, accent: boolean) => (
+    <g key={label} className={accent ? "flow-svg-node is-active" : "flow-svg-node"}>
       <rect
         x={x}
         y={y}
@@ -150,8 +136,9 @@ export function FlowDiagram({
       </text>
     </g>
   );
-  const arrow = (x1: number, x2: number, y: number, key: string) => (
-    <g key={key} className="flow-svg-link">
+  const arrow = (x1: number, x2: number, y: number, index: number) => (
+    <g key={index} className="flow-svg-link"
+      style={{ "--flow-link-index": index } as CSSProperties}>
       <line
         x1={x1}
         y1={y}
@@ -172,6 +159,20 @@ export function FlowDiagram({
         strokeLinecap="round"
         strokeDasharray="4 11"
       />
+      {/* A single luminous packet traverses this CONNECTOR ONLY. Four
+          staggered timelines repeat as a PLC -> Dashboards sequence.
+          Nothing bright is ever drawn over the technology cards. */}
+      <line
+        className="flow-svg-energy"
+        x1={x1}
+        y1={y}
+        x2={x2 - 8}
+        y2={y}
+        stroke="#b8f6ff"
+        strokeWidth="3.2"
+        strokeLinecap="round"
+        strokeDasharray="12 100"
+      />
       <path
         d={`M${x2} ${y} l-7 -4 v8 z`}
         fill="#2a8bb8"
@@ -190,15 +191,14 @@ export function FlowDiagram({
           <li
             key={label}
             className={"flow-step" + (i === 2 ? " accent" : "")}
-            style={{ "--flow-sequence": i } as CSSProperties}
           >
-            {i > 0 && <span className="flow-link" aria-hidden="true" />}
+            {i > 0 && <span className="flow-link" aria-hidden="true"
+              style={{ "--flow-link-index": i - 1 } as CSSProperties} />}
             <span className="flow-chip">{label}</span>
           </li>
         ))}
       </ol>
       <svg
-        ref={flowSvgRef}
         className="flow-diagram"
         viewBox="0 0 1080 96"
         role="img"
@@ -206,27 +206,15 @@ export function FlowDiagram({
           (labels.from + " → " + labels.via + " → " + labels.to + " → " + labels.db + " → " + labels.dash)
         }
       >
-        {/* One packet travels through ALL five nodes, not four unrelated loops.
-            The path stays left-to-right in both EN and AR: actual signal
-            direction represents PLC -> SCADA -> dashboards. */}
-        <path className="flow-throughline" d="M81 48 L279 48 L495 42 L722.5 48 L930 48" />
-        {node(6, 28, 150, labels.from, false, 0)}
-        {arrow(164, 210, 48, "a")}
-        {node(214, 28, 130, labels.via, false, 1)}
-        {arrow(352, 396, 48, "b")}
-        {node(400, 22, 190, labels.to, true, 2)}
-        {arrow(598, 644, 48, "c")}
-        {node(648, 28, 149, labels.db, false, 3)}
-        {arrow(805, 851, 48, "d")}
-        {node(855, 28, 150, labels.dash, false, 4)}
-        <circle className="flow-svg-halo" r="11" fill="#24cfff" opacity=".28" aria-hidden="true">
-          <animateMotion path="M81 48 L279 48 L495 42 L722.5 48 L930 48"
-            dur="9s" calcMode="linear" repeatCount="indefinite" />
-        </circle>
-        <circle className="flow-svg-packet" r="5.5" fill="#fff0be" aria-hidden="true">
-          <animateMotion path="M81 48 L279 48 L495 42 L722.5 48 L930 48"
-            dur="9s" calcMode="linear" repeatCount="indefinite" />
-        </circle>
+        {node(6, 28, 150, labels.from, false)}
+        {arrow(164, 210, 48, 0)}
+        {node(214, 28, 130, labels.via, false)}
+        {arrow(352, 396, 48, 1)}
+        {node(400, 22, 190, labels.to, true)}
+        {arrow(598, 644, 48, 2)}
+        {node(648, 28, 149, labels.db, false)}
+        {arrow(805, 851, 48, 3)}
+        {node(855, 28, 150, labels.dash, false)}
       </svg>
     </>
   );

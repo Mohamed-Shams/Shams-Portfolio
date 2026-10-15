@@ -53,29 +53,19 @@ async function run() {
         await page.waitForTimeout(380);
         assert.equal(await flow.locator("summary").count(), 0, tag + " always visible");
         assert.equal(await flow.locator(".flow-step").count(), 5, tag + " five stages");
+        assert.equal(await flow.locator("button, .flow-svg-packet, .flow-svg-halo, .flow-throughline").count(),
+          0, tag + " no controls or glowing overlay over technology cards");
         if (width === 1440) {
           const svg = flow.locator("svg.flow-diagram");
           assert(await svg.isVisible(), tag + " desktop vector");
-          assert.equal(await svg.locator(".flow-svg-packet").count(), 1,
-            tag + " exactly ONE sequential packet");
-          const positions = await svg.evaluate(node => {
-            const packet = node.querySelector(".flow-svg-packet");
-            return [0, 2.2, 4.4, 6.6, 8.85].map(t => {
-              node.setCurrentTime(t);
-              return packet.getCTM()?.e;
-            });
-          });
-          assert(positions.every((v, i) => Number.isFinite(v) &&
-            (i === 0 || v > positions[i - 1] + 100)),
-            tag + " packet moves from PLC to Dashboards in order: " + positions);
+          assert.equal(await svg.locator(".flow-svg-energy").count(), 4,
+            tag + " four short glowing connector segments");
+          assert.equal(await svg.locator(".flow-svg-energy").first().evaluate(
+            node => getComputedStyle(node).animationName), "flow-segment-travel");
         } else {
           assert(await flow.locator(".flow-steps").isVisible(), tag + " readable mobile steps");
-          const before = await flow.locator(".flow-steps").evaluate(e =>
-            parseFloat(getComputedStyle(e, "::after").top));
-          await page.waitForTimeout(850);
-          const after = await flow.locator(".flow-steps").evaluate(e =>
-            parseFloat(getComputedStyle(e, "::after").top));
-          assert(after > before + 5, tag + " one mobile packet goes from top to bottom");
+          assert.equal(await flow.locator(".flow-link").first().evaluate(
+            e => getComputedStyle(e, "::after").animationName), "flow-vertical-segment");
           const vertical = await flow.locator(".flow-link").first().evaluate(e => ({
             height: e.getBoundingClientRect().height,
             width: e.getBoundingClientRect().width,
@@ -87,10 +77,9 @@ async function run() {
         const ticker = page.locator("[data-platform-ticker]");
         await ticker.evaluate(el => el.scrollIntoView({ behavior: "instant", block: "center" }));
         await page.waitForTimeout(180);
-        const box = await ticker.boundingBox();
-        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+        await page.mouse.move(2, 2);
         const moving = await status(ticker);
-        assert.equal(moving.play, "running", tag + " AUTOPLAY even while mouse hovers");
+        assert.equal(moving.play, "running", tag + " AUTOPLAY unhovered");
         assert.equal(moving.name, "platform-marquee", tag + " marquee defined");
         const next = await (async () => {
           await page.waitForTimeout(840);
@@ -98,16 +87,23 @@ async function run() {
         })();
         assert.notEqual(moving.matrix, next.matrix, tag + " actually scrolls by itself");
         assert.equal(await ticker.locator(".platform-ticker-set:first-child a").count(), 13);
-        await ticker.getByRole("button", { name: lang === "en" ?
-          "Pause platform scrolling" : "إيقاف حركة المنصات مؤقتًا" }).click();
+        assert.equal(await ticker.locator("button").count(), 0, tag + " button removed");
+        const card = await ticker.locator(".platform-ticker-item").evaluateAll(els => {
+          const area = document.querySelector(".platform-ticker-window").getBoundingClientRect();
+          const found = els.map(el => el.getBoundingClientRect())
+            .find(r => r.left >= area.left + 25 && r.right <= area.right - 25);
+          return found ? { x: found.left + found.width / 2, y: found.top + found.height / 2 } : null;
+        });
+        assert(card, tag + " visible card exists");
+        await page.mouse.move(card.x, card.y);
+        await page.waitForTimeout(100);
         const paused = await status(ticker);
-        assert.equal(paused.play, "paused", tag + " pause button pauses");
+        assert.equal(paused.play, "paused", tag + " hover pauses");
         await page.waitForTimeout(350);
         assert.equal((await status(ticker)).matrix, paused.matrix, tag + " stays paused");
-        await ticker.getByRole("button", { name: lang === "en" ?
-          "Resume platform scrolling" : "تشغيل حركة المنصات" }).click();
+        await page.mouse.move(2, 2);
         await page.waitForTimeout(650);
-        assert.equal((await status(ticker)).play, "running", tag + " play button resumes");
+        assert.equal((await status(ticker)).play, "running", tag + " mouse leave resumes");
         assert.notEqual((await status(ticker)).matrix, paused.matrix, tag + " resumes moving");
         await page.screenshot({ path: path.join(out, tag + "-ticker.png") });
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
@@ -115,7 +111,7 @@ async function run() {
         assert.equal(await page.locator(".certificate-document").count(), 10,
           tag + " certificate files preserved");
         assert.deepEqual(errors, [], tag + " no hydration/network/runtime errors");
-        console.log("PASS", tag, "end-to-end data flow, autoplay hover, pause/play, 13 icons, 10 PDFs");
+        console.log("PASS", tag, "connector-only data flow, auto-scroll + hover pause, 13 icons, 10 PDFs");
         results.push({ tag, pass: true });
       } finally {
         const video = page.video();
