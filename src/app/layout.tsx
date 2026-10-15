@@ -3,6 +3,7 @@ import "./fidelity.css";
 import "./portfolio-extras.css";
 import "./flow-showcase.css";
 import "./youtube-showcase.css";
+import "./seo-styles.css";
 export default function RootLayout({
   children,
 }: {

@@ -4,7 +4,7 @@ import { ArrowUpRight, Play, Youtube } from "lucide-react";
 /* Video links, titles and durations migrated from the original portfolio.
    Thumbnails are local copies of the original assets: visiting this section
    does not contact YouTube until the visitor chooses to watch a video. */
-const videos = [
+export const videos = [
   {
     id: "GE4CouSUliU",
     title: "AI-Driven SCADA Alarms",
@@ -14,6 +14,7 @@ const videos = [
       ar: "تكامل وكلاء الذكاء الاصطناعي مع إنذارات Ignition SCADA باستخدام Docker.",
     },
     duration: "1:57",
+    uploadDate: "2025-06-14",
   },
   {
     id: "2ppJlu0Q-Xc",
@@ -24,6 +25,7 @@ const videos = [
       ar: "لوحة Ignition متكاملة لمراقبة ماكينة بيع الطعام الساخن الآلية.",
     },
     duration: "6:16",
+    uploadDate: "2024-08-25",
   },
   {
     id: "ZLcIaFrONpU",
@@ -34,6 +36,7 @@ const videos = [
       ar: "تحويل وسوم Siemens PLC إلى صيغة JSON قابلة للاستخدام في Ignition.",
     },
     duration: "1:11",
+    uploadDate: "2024-08-11",
   },
   {
     id: "JfH1uBpWu-I",
@@ -44,6 +47,7 @@ const videos = [
       ar: "الواجهة الرئيسية لإدارة مشروع ماكينة البيع باستخدام Ignition SCADA.",
     },
     duration: "2:44",
+    uploadDate: "2024-08-05",
   },
   {
     id: "piYA62DbKOo",
@@ -54,6 +58,7 @@ const videos = [
       ar: "مراقبة وعرض بيانات ماكينة بيع ذكية لحظيًا باستخدام Node-RED وIIoT.",
     },
     duration: "5:08",
+    uploadDate: "2024-07-26",
   },
   {
     id: "HRTRF1iY6Xw",
@@ -64,6 +69,7 @@ const videos = [
       ar: "تحليل تقارير PDF وCSV المؤرشفة بالذكاء الاصطناعي عبر Node-RED.",
     },
     duration: "3:09",
+    uploadDate: "2024-07-20",
   },
 ] as const;
 
@@ -131,6 +137,7 @@ export function YoutubeShowcase({ locale }: { locale: "en" | "ar" }) {
             </div>
             <div className="youtube-video-details">
               <span className="youtube-video-topic">{video.topic}</span>
+              <time className="youtube-video-upload" dateTime={video.uploadDate}>{video.uploadDate}</time>
               <h3>{video.title}</h3>
               <p>{video.description[locale]}</p>
               <span className="youtube-video-action">

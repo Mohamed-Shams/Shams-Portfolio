@@ -154,6 +154,7 @@
   color: #e9ab63;
   font: 500 11px/1.5 "JetBrains Mono", monospace;
 }
+.youtube-video-upload { color: #8da7ba; font-size: 11px; }
 .youtube-video-details h3 {
   font-size: 18px;
   line-height: 1.35;

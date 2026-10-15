@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { seoConfig } from "@/seo/config";
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: "*", allow: "/" },
-    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || "https://mohamed-shams.netlify.app"}/sitemap.xml`,
+    sitemap: `${seoConfig.origin}/sitemap.xml`,
   };
 }

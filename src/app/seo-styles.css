@@ -1,0 +1,72 @@
+/* Visible, useful crawler-readable content. Keep the editorial additions
+   separate from the established animated portfolio's design system. */
+.seo-about-biography { max-width: 710px !important; }
+.seo-subtitle { margin-top: 5px; font-size: 13px; color: #dcb886; }
+.seo-skill-links { margin-top: 28px; }
+.seo-skill-links h3 { font-size: 18px; font-weight: 500; }
+.seo-case-keyword {
+  font-size: .48em;
+  font-weight: 500;
+  line-height: 1.4;
+  display: block;
+  margin-top: 12px;
+  color: #eab66e;
+}
+.seo-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  color: #b6c2cb;
+  font-size: 12px;
+  margin: 6px 0 22px;
+}
+.seo-breadcrumbs a { color: #eeb86e; }
+.seo-breadcrumbs a:hover, .seo-footer-profiles a:hover { text-decoration: underline; }
+.seo-case-intro { padding: 9px 0 26px; max-width: 920px; }
+.seo-case-intro h2, .seo-related-projects h2 { font-size: clamp(20px, 2.1vw, 28px); }
+.seo-case-intro p { font-size: 14px; line-height: 1.85; margin-top: 14px; color: #b7c8d2; }
+.seo-related-projects { border-top: 1px solid #283742; padding-top: 27px; margin-top: 30px; }
+.seo-related-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+.seo-related-links a {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 12px; border-radius: 8px;
+  border: 1px solid #4e6c797d; background: #0d212c;
+  font-size: 12px; color: #d9e5eb;
+}
+.seo-related-links a:hover { border-color: #f1a342; }
+.seo-faq-list { margin-top: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.seo-faq h2 { margin-top: 15px; }
+.seo-faq-list details {
+  align-self: start;
+  background: #101c26;
+  border: 1px solid #243d4c;
+  border-radius: 9px;
+  padding: 16px 18px;
+}
+.seo-faq-list summary { font-weight: 550; font-size: 14px; cursor: pointer; color: #f0f3f7; }
+.seo-faq-list details[open] { border-color: #edb56c66; }
+.seo-faq-list p { font-size: 13px; line-height: 1.8; margin-top: 11px; }
+.seo-footer-profiles { display: flex; gap: 14px; font-size: 12px; }
+.seo-footer-profiles a { color: #e7b578; }
+.seo-notes-page, .seo-not-found {
+  max-width: 1020px; margin: 0 auto; padding: 95px 28px 120px; min-height: 100vh;
+}
+.seo-notes-page h1, .seo-not-found h1 { font-size: clamp(28px, 4vw, 48px); }
+.seo-notes-page p, .seo-not-found p { margin: 18px 0 25px; max-width: 750px; }
+.seo-notes-page h2 { font-size: 23px; margin-bottom: 15px; }
+.seo-notes-page li { margin-bottom: 12px; color: #d0dbe2; }
+.seo-notes-page > a, .seo-not-found a { color: #f1bb76; text-decoration: underline; }
+.seo-not-found nav { display: flex; flex-wrap: wrap; gap: 18px; }
+@media (max-width: 720px) {
+  .seo-faq-list { grid-template-columns: 1fr; }
+  .seo-case-intro { padding-top: 16px; }
+  .seo-footer-profiles { flex-wrap: wrap; }
+}
+/* Mobile LCP: avoid GPU-intensive multi-mask compositing and CSS color
+   filters on the priority portrait. The existing shade overlay retains the
+   dark visual treatment without delaying image painting. */
+@media (max-width: 600px) {
+  .hero .hero-portrait { mask-image: none; mask-composite: initial; }
+  .hero .hero-portrait img { filter: none; }
+}

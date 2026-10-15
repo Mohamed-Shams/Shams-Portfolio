@@ -44,6 +44,9 @@ import { ProjectArt } from "./ProjectArt";
 import { PortfolioIntro } from "./PortfolioIntro";
 import { PlatformTicker } from "./PlatformTicker";
 import { YoutubeShowcase } from "./YoutubeShowcase";
+import { biography, faqs, projectIntros } from "@/seo/content";
+import { projectKeywords, type SeoProjectSlug } from "@/seo/keywords";
+import { seoConfig } from "@/seo/config";
 import { useCountUp, RevealManager } from "./motion";
 const cv = "/assets/MohamedAhmedShams_CV.pdf";
 
@@ -213,7 +216,11 @@ function PortfolioFooter({ locale, caseStudy = false }: { locale: "en" | "ar"; c
         aria-label={ar ? "العودة إلى الصفحة الرئيسية" : "Return to homepage"}>
         <b>MS</b>
       </Link>
-      <span>© {new Date().getFullYear()} {ar ? "محمد أحمد شمس" : "Mohamed Ahmed Shams"}</span>
+      <span>© {new Date().getFullYear()} {ar ? "محمد أحمد شمس" : "Mohamed Ahmed Shams"} · {ar ? "مهندس أنظمة · مصر والسعودية" : "Systems Engineer · Egypt & Saudi Arabia"}</span>
+      <span className="seo-footer-profiles">
+        <a href={seoConfig.profiles.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href={seoConfig.profiles.youtube} target="_blank" rel="noopener noreferrer">YouTube</a>
+      </span>
       <Link href={caseStudy ? `/${locale}#projects` : "#home"}>
         {caseStudy ? (ar ? "العودة للمشاريع ↑" : "Back to Projects ↑")
           : (ar ? "العودة للأعلى ↑" : "Back to top ↑")}
@@ -371,6 +378,8 @@ export default function Portfolio() {
               alt={t("Mohamed Ahmed Shams", "محمد أحمد شمس")}
               fill
               priority
+              fetchPriority="high"
+              decoding="sync"
               sizes="(max-width: 700px) 100vw, 75vw"
             />
           </div>
@@ -467,12 +476,7 @@ export default function Portfolio() {
               <br />
               {t("Solutions.", "ذكاءً.")}
             </h2>
-            <p data-reveal-item="true">
-              {t(
-                "I’m a Systems Engineer at pulse by solutions with hands-on experience in SCADA, Industrial IoT, and digital transformation projects across Egypt and Saudi Arabia. I enjoy building reliable, scalable systems that turn real-world data into meaningful insights and smarter operations.",
-                "أنا مهندس أنظمة لدى pulse by solutions، ولدي خبرة عملية في SCADA وإنترنت الأشياء الصناعي ومشروعات التحول الرقمي في مصر والسعودية. أعمل على بناء أنظمة موثوقة وقابلة للتوسع تحوّل بيانات الواقع إلى رؤى مفيدة وعمليات أكثر ذكاءً.",
-              )}
-            </p>
+            <p className="seo-about-biography" data-reveal-item="true">{biography[locale]}</p>
             <div className="name-mark" data-reveal-item="true" aria-label={t("Mohamed Ahmed Shams", "محمد أحمد شمس")}>
               <span className="name-mark-rule" aria-hidden="true" />
               <span className="name-mark-text" lang={locale}>
@@ -524,7 +528,8 @@ export default function Portfolio() {
           <div className="section-heading">
             <div data-reveal-group="true">
               <Eyebrow>{t("Featured projects", "مشاريع مختارة")}</Eyebrow>
-              <h2 data-reveal-item="true">{t("Selected Work", "أعمال مختارة")}</h2>
+              <h2 data-reveal-item="true">{t("Industrial SCADA & IoT Projects", "مشاريع سكادا وإنترنت الأشياء الصناعي")}</h2>
+              <p className="seo-subtitle">{t("Selected Work — documented case studies", "أعمال مختارة من دراسات الحالة الموثقة")}</p>
               <p data-reveal-item="true">
                 {t(
                   "A selection of industrial and government projects I’ve contributed to.",
@@ -607,7 +612,7 @@ export default function Portfolio() {
           <div className="tech-panel">
             <div data-reveal-group="true">
             <Eyebrow>{t("Technical expertise", "الخبرات التقنية")}</Eyebrow>
-            <h2 data-reveal-item="true">{t("Tools & Technologies", "الأدوات والتقنيات")}</h2>
+            <h2 data-reveal-item="true">{t("Industrial IoT Skills & Technologies", "مهارات سكادا وإنترنت الأشياء الصناعي")}</h2>
             <p data-reveal-item="true">
               {t(
                 "The technologies and tools I work with to build industrial and digital solutions.",
@@ -680,7 +685,7 @@ export default function Portfolio() {
                 ...skills.filter((s) => s[0] === "Industrial IoT"),
               ]
                 .filter((s) => category === "All" || s[3] === category)
-                .map((s, i) => (
+              .map((s, i) => (
                   /* The umbrella capability is already sorted last; letting it span
                      two columns makes 15 tools fill a 2- or 4-column grid exactly
                      instead of leaving a dangling cell. */
@@ -701,6 +706,16 @@ export default function Portfolio() {
                     </div>
                   </div>
                 ))}
+            </div>
+          </div>
+          <div className="seo-skill-links">
+            <h3>{t("Skills applied in published projects", "تطبيق المهارات في المشروعات المنشورة")}</h3>
+            <div className="seo-related-links">
+              {projects.filter(item => item.tags.includes("Ignition")).slice(0, 4).map(item =>
+                <Link key={item.slug} href={`/${locale}/projects/${item.slug}`}>
+                  {item.title[locale]}
+                </Link>
+              )}
             </div>
           </div>
         </section>
@@ -878,6 +893,26 @@ export default function Portfolio() {
               ))}
             </div>
           </details>
+          <div className="seo-skill-links">
+            <h3>{t("Where these industrial technologies appear", "مشروعات تستخدم هذه التقنيات")}</h3>
+            <div className="seo-related-links">
+              <Link href={`/${locale}/projects/dohler-cloudy-line`}>{t("Ignition SCADA in food production", "نظام سكادا لخط إنتاج الأغذية")}</Link>
+              <Link href={`/${locale}/projects/ground-water`}>{t("Ignition groundwater monitoring", "مراقبة المياه الجوفية بمنصة Ignition")}</Link>
+              <Link href={`/${locale}/projects/ncec-air-quality`}>{t("IIoT air-quality monitoring", "مراقبة جودة الهواء بمنصة إنترنت الأشياء")}</Link>
+            </div>
+          </div>
+        </section>
+        <section id="faq" className="section seo-faq">
+          <Eyebrow>{t("Frequently asked questions", "أسئلة شائعة")}</Eyebrow>
+          <h2>{t("Ignition SCADA & Industrial IoT — FAQ", "أسئلة عن سكادا وإنترنت الأشياء الصناعي")}</h2>
+          <div className="seo-faq-list">
+            {faqs[locale].map(item => (
+              <details key={item.question}>
+                <summary>{item.question}</summary>
+                <p>{item.answer}</p>
+              </details>
+            ))}
+          </div>
         </section>
         <section id="contact" className="section contact">
           <div className="contact-copy" data-reveal-group="true">
@@ -961,6 +996,13 @@ export function CaseStudy({ slug }: { slug: string }) {
       <Header />
       <RevealManager />
       <main id="main" className="case section">
+        <nav className="seo-breadcrumbs" aria-label={t("Breadcrumb", "مسار الصفحة")}>
+          <Link href={`/${locale}`}>{t("Home", "الرئيسية")}</Link>
+          <span aria-hidden="true">/</span>
+          <Link href={`/${locale}#projects`}>{t("Industrial Projects", "المشروعات الصناعية")}</Link>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{p.title[locale]}</span>
+        </nav>
         <Link className="back-link" href={`/${locale}#projects`}>
           {ar ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
           {t("Back to Projects", "العودة للمشاريع")}
@@ -968,7 +1010,7 @@ export function CaseStudy({ slug }: { slug: string }) {
         <div className="case-heading" data-reveal="up">
           <div>
             <Eyebrow>{t("Project case study", "دراسة حالة")}</Eyebrow>
-            <h1>{p.title[locale]}</h1>
+            <h1>{p.title[locale]} <span className="seo-case-keyword">— {projectKeywords[p.slug as SeoProjectSlug][locale].primary}</span></h1>
             <div className="tags">
               {p.tags.map((tag) => (
                 <span key={tag}>{tag}</span>
@@ -980,6 +1022,11 @@ export function CaseStudy({ slug }: { slug: string }) {
             <span>{p.sector[locale]}</span>
           </p>
         </div>
+
+        <section className="seo-case-intro">
+          <h2>{t("Project Context & Engineering Scope", "خلفية المشروع ونطاق العمل الفني")}</h2>
+          <p>{projectIntros[p.slug as SeoProjectSlug][locale]}</p>
+        </section>
 
         {/* Gallery — shared cover photograph first, followed by the three
             original vector plates (site scene, architecture path, operations
@@ -1190,6 +1237,20 @@ export function CaseStudy({ slug }: { slug: string }) {
           <p className="arch-note">{p.architecture.note[locale]}</p>
         </section>
 
+        <section className="seo-related-projects">
+          <h2>{t("Related Industrial Engineering Projects", "مشروعات هندسية ذات صلة")}</h2>
+          <div className="seo-related-links">
+            {projects.filter(other => other.slug !== p.slug &&
+              (other.sector.en.split(" | ")[0] === p.sector.en.split(" | ")[0]
+                || other.tags.some(tag => p.tags.includes(tag)))).slice(0, 3)
+              .map(other => (
+                <Link key={other.slug} href={`/${locale}/projects/${other.slug}`}>
+                  {other.title[locale]} <ArrowRight size={14} aria-hidden="true" />
+                </Link>
+              ))}
+            <Link href={`/${locale}#skills`}>{t("Explore SCADA and Industrial IoT skills", "تعرّف على مهارات سكادا وإنترنت الأشياء الصناعي")}</Link>
+          </div>
+        </section>
         <div className="next-project" data-reveal="up" data-reveal-delay="1">
           <Link className="text-link" href={`/${locale}/projects/${next.slug}`}>
             {t("Next project", "المشروع التالي")}

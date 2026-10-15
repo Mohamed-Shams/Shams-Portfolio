@@ -4,14 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0",
-    "build": "opennextjs-cloudflare build",
-    "build:next": "next build",
+    "build": "opennextjs-cloudflare build && npm run seo:check",
+    "build:next": "next build && npm run seo:check",
     "build:worker": "opennextjs-cloudflare build --skipNextBuild",
     "build:cloudflare": "npm run build",
     "preview:cloudflare": "npm run build && opennextjs-cloudflare preview",
     "deploy": "npm run build && opennextjs-cloudflare deploy",
     "start": "next start --hostname 0.0.0.0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src seo mdx-components.tsx",
+    "seo:check": "node scripts/seo-check.cjs",
+    "seo:og": "node scripts/generate-og.cjs"
   },
   "dependencies": {
     "d3-geo": "^3.1.1",
@@ -24,6 +27,8 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@mdx-js/react": "^3.1.1",
+    "@next/mdx": "^15.5.27",
     "@opennextjs/cloudflare": "^1.20.10",
     "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "^4.1.0",
@@ -31,6 +36,10 @@
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.27",
+    "lighthouse": "^12.8.2",
+    "parse5": "^8.0.1",
     "tailwindcss": "^4.1.0",
     "typescript": "^5.9.0",
     "wrangler": "^4.150.0"
